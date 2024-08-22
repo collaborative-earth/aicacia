@@ -1,0 +1,3 @@
+#!/bin/bash
+# @description Creates a new versioned alembic DB migration
+pipenv run alembic --config alembic.ini revision --autogenerate -m "$1"
