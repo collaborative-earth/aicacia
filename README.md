@@ -3,11 +3,13 @@
 ### Prerequisite
 1. python3.10
 2. pipenv
-For mac -
+3. Docker
+
+Pipenv Installation -
 ```
 brew install pipenv
 ```
-For others -
+or
 ```
 pip install pipenv --user
 ```
