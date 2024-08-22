@@ -1,6 +1,6 @@
-## Setting up server
+## Setting up API server in local
 
-### Prerequisite.
+### Prerequisite
 1. python3.10
 2. pipenv
 For mac -
@@ -18,9 +18,9 @@ pip install pipenv --user
 ```
 
 ### Run server
-1. add .env at the top level and add.
-POSTGRES_PASSWORD=aicacia
-2.
+Add `.env` at the top level and add the following
+`POSTGRES_PASSWORD=aicacia`
+
 ```
 ./develop/run_dev_server
 ```
