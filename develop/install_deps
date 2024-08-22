@@ -1,0 +1,6 @@
+#!/bin/bash
+
+REPO_ROOT=`git rev-parse --show-toplevel`
+
+pipenv -q sync --dev || exit 1
+pipenv -q clean || exit 1

@@ -1,0 +1,19 @@
+services:
+  aicacia-api:
+    build: .
+    ports:
+      - "8000:8000"
+
+  aicacia-postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: aicacia_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - aicacia_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  aicacia_postgres_data:
