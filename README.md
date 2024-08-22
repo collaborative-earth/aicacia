@@ -27,6 +27,14 @@ Add `.env` at the top level and add the following
 ./develop/run_dev_server
 ```
 
+### To Add or update python dependency
+
+Run the following and commit the `pipfile` and `pipfile.lock` changes.
+```
+pipenv upgrade <package_name>
+```
+
+
 ### To change database schema
 1. Change the model in models.py.
 2. Create a migration.
