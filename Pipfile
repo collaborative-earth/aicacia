@@ -12,6 +12,7 @@ alembic = "*"
 psycopg2-binary = "*"
 sqlmodel = "*"
 fastapi = "*"
+fastapi-utils = "*"
 pydantic = "*"
 uvicorn = "*"
 
