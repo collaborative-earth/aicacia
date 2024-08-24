@@ -1,1 +1,15 @@
+export IMAGE_NAME=aicacia-aicacia-api
+CONTAINER_ID=`docker ps -aqf ancestor=$IMAGE_NAME`
+echo "IMAGE_NAME: $IMAGE_NAME"
+echo "CONTAINER_ID: $CONTAINER_ID"
+
+if [ -z "$CONTAINER_ID" ]; then
+  echo "Container not found, creating new..."
+else
+  echo "Container found, recreating..."
+  docker kill $CONTAINER_ID
+  docker rm $CONTAINER_ID
+  docker image rm $IMAGE_NAME
+fi
+
 docker compose up -d
