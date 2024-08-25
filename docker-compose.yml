@@ -3,6 +3,9 @@ services:
     build: .
     ports:
       - "8000:8000"
+    depends_on:
+      - aicacia-postgres
+
 
   aicacia-postgres:
     image: postgres:latest
@@ -11,7 +14,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: aicacia_db
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - aicacia_postgres_data:/var/lib/postgresql/data
 
