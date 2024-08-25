@@ -1,0 +1,1 @@
+docker ps -aqf ancestor=aicacia-aicacia-api | xargs docker logs --follow
