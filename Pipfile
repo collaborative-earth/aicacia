@@ -13,8 +13,11 @@ psycopg2-binary = "*"
 sqlmodel = "*"
 fastapi = "*"
 fastapi-utils = "*"
+typing-inspect = "*"
 pydantic = "*"
 uvicorn = "*"
+pydantic-settings = "*"
+python-dotenv = "*"
 
 [requires]
 python_version = "3.10"
