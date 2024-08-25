@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
+from pydantic import BaseModel
 from sqlalchemy import Column
 from sqlmodel import JSON, Field, Relationship, SQLModel
 
@@ -30,11 +31,16 @@ class User(Base, table=True):
     __tablename__ = "users"
     user_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     email: str = Field(nullable=False)
-    # TODO: Add structure to the json field.
+    # TODO: Figure out a way to enforce the structure of the json field.
     user_json: dict = Field(sa_column=Column(JSON))
 
     queries: List["Query"] = Relationship(back_populates="user")
     feedbacks: List["Feedback"] = Relationship(back_populates="user")
+
+
+class Reference(BaseModel):
+    title: str
+    url: str
 
 
 class Query(Base, table=True):
@@ -42,11 +48,16 @@ class Query(Base, table=True):
     query_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="users.user_id", nullable=False)
     question: str
-    references: dict = Field(sa_column=Column(JSON))
+    references: list[dict] = Field(sa_column=Column(JSON))
     summary: Optional[str] = Field()
 
     user: "User" = Relationship(back_populates="queries")
     feedbacks: List["Feedback"] = Relationship(back_populates="query")
+
+
+class FeedbackJSON(BaseModel):
+    helpful: bool
+    feedback: str
 
 
 class Feedback(Base, table=True):
@@ -54,7 +65,7 @@ class Feedback(Base, table=True):
     feedback_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     query_id: uuid.UUID = Field(foreign_key="queries.query_id", nullable=False)
     user_id: uuid.UUID = Field(foreign_key="users.user_id", nullable=False)
-    # TODO: Add structure to the json field.
+    # TODO: Figure out a way to enforce the structure of the json field.
     feedback_json: dict = Field(sa_column=Column(JSON))
 
     user: "User" = Relationship(back_populates="feedbacks")

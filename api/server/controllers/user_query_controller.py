@@ -12,7 +12,7 @@ class UserQueryPostRequest(BaseModel):
 
 class UserQueryPostResponse(BaseModel):
     query_id: str
-    references: list[str]
+    references: list[models.Reference]
     summary: str
 
 
@@ -27,7 +27,7 @@ class UserQueryController(AicaciaAPI):
         query = models.Query(
             query_id=query_id,
             question=request.question,
-            references=["test"],
+            references=[models.Reference(title="test", url="test").model_dump()],
             summary="test summary",
             user_id="6eaa9bcd-a5dd-4e22-aa6a-0029ed0c2737",
         )
