@@ -1,4 +1,4 @@
-# Aicacia
+# Aicacia API
 
 ## Setting up API server in local
 
