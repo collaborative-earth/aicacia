@@ -22,7 +22,7 @@ pip install pipenv --user
 ```
 
 ### Run server
-Add `.env` at the top level and add the following
+Add `.env` inside `server` and add the following
 `POSTGRES_PASSWORD=aicacia`
 
 ```
