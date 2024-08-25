@@ -1,4 +1,4 @@
-export IMAGE_NAME=aicacia-aicacia-api
+export IMAGE_NAME=api-aicacia-api
 CONTAINER_ID=`docker ps -aqf ancestor=$IMAGE_NAME`
 echo "IMAGE_NAME: $IMAGE_NAME"
 echo "CONTAINER_ID: $CONTAINER_ID"

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from sqlalchemy import Column
@@ -7,7 +7,7 @@ from sqlmodel import JSON, Field, Relationship, SQLModel
 
 
 def utcnow() -> datetime:
-    return datetime.utc(datetime.UTC)
+    return datetime.now(timezone.utc)
 
 
 class Base(SQLModel):
