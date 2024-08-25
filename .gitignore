@@ -1,1 +1,8 @@
-.env
+# MacOS
+.DS_Store
+
+# Python
+*.egg-info
+.pytest_cache
+__pycache__
+venv
