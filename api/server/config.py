@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "postgres"
     POSTGRES_DB: str = "aicacia_db"
     POSTGRES_PASSWORD: str
+    SECRET_KEY: str = "aicacia_secret_key"
 
     model_config = SettingsConfigDict(env_file=".env")
 
