@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 
 from pydantic import BaseModel
-from sqlalchemy import Column
+from sqlalchemy import Column, null
 from sqlmodel import JSON, Field, Relationship, SQLModel
 
 
@@ -31,6 +31,8 @@ class User(Base, table=True):
     __tablename__ = "users"
     user_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     email: str = Field(nullable=False)
+    password: str = Field(nullable=True)
+    is_verified: bool = Field(nullable=True)
     # TODO: Figure out a way to enforce the structure of the json field.
     user_json: dict = Field(sa_column=Column(JSON))
 
