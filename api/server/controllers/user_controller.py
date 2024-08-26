@@ -1,20 +1,12 @@
 import uuid
 
-import bcrypt
 import models
 from controllers.base_controller import AicaciaAPI
 from fastapi import HTTPException
 from fastapi_utils import set_responses
+from library import auth
 from pydantic import BaseModel
 from sqlmodel import select
-
-
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-
-def verfiy_password(password: str, hashed_password: str) -> bool:
-    return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 class UserPostRequest(BaseModel):
@@ -43,7 +35,7 @@ class UserController(AicaciaAPI):
                 status_code=400, detail="User with this email already exists"
             )
 
-        hashed_password = hash_password(request.password)
+        hashed_password = auth.hash_password(request.password)
 
         user = models.User(
             user_id=str(uuid.uuid4()),
@@ -83,7 +75,9 @@ class UserLoginController(AicaciaAPI):
         if not user:
             raise HTTPException(status_code=400, detail="User not found")
 
-        if not verfiy_password(request.password, user.password):
+        if not auth.verfiy_password(request.password, user.password):
             raise HTTPException(status_code=400, detail="Incorrect password")
 
-        return UserLoginResponse(token="test_token")
+        token = auth.create_auth_token(user)
+
+        return UserLoginResponse(token=token)

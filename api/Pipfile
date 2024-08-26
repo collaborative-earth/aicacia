@@ -19,6 +19,7 @@ pydantic = "*"
 uvicorn = "*"
 pydantic-settings = "*"
 python-dotenv = "*"
+pyjwt = "*"
 
 [requires]
 python_version = "3.10"
