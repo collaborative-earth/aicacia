@@ -9,6 +9,7 @@ flake8 = "*"
 [packages]
 arrow = "*"
 alembic = "*"
+bcrypt = "*"
 psycopg2-binary = "*"
 sqlmodel = "*"
 fastapi = "*"
