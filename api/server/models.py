@@ -30,7 +30,7 @@ class Base(SQLModel):
 class User(Base, table=True):
     __tablename__ = "users"
     user_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    email: str = Field(nullable=False)
+    email: str = Field(nullable=False, unique=True, index=True)
     password: str = Field(nullable=True)
     is_verified: bool = Field(nullable=True)
     # TODO: Figure out a way to enforce the structure of the json field.
