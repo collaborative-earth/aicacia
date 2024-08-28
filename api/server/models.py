@@ -58,7 +58,7 @@ class Query(Base, table=True):
 
 
 class FeedbackJSON(BaseModel):
-    helpful: bool
+    references_feedback: list[bool]
     feedback: str
 
 
