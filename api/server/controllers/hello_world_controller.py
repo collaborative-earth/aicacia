@@ -1,9 +1,16 @@
 import models
-from controllers.base_controller import AicaciaAPI
+from controllers.base_controller import AicaciaProtectedAPI
+from fastapi_utils.cbv import cbv
+from fastapi_utils.inferring_router import InferringRouter
 from sqlmodel import Session, select
 
+hello_router = InferringRouter()
 
-class HelloworldController(AicaciaAPI):
+
+@cbv(hello_router)
+class HelloworldController(AicaciaProtectedAPI):
+
+    @hello_router.get("/")
     def get(self) -> str:
         session: Session = self.get_db_session()
 

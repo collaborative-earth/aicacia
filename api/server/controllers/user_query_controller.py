@@ -1,9 +1,12 @@
 import uuid
 
 import models
-from controllers.base_controller import AicaciaAPI
-from fastapi_utils import set_responses
+from controllers.base_controller import AicaciaProtectedAPI
+from fastapi_utils.cbv import cbv
+from fastapi_utils.inferring_router import InferringRouter
 from pydantic import BaseModel
+
+user_query_router = InferringRouter()
 
 
 class UserQueryPostRequest(BaseModel):
@@ -16,20 +19,20 @@ class UserQueryPostResponse(BaseModel):
     summary: str
 
 
-class UserQueryController(AicaciaAPI):
+@cbv(user_query_router)
+class UserQueryController(AicaciaProtectedAPI):
 
-    @set_responses(UserQueryPostResponse, 200)
-    def post(self, request: UserQueryPostRequest) -> str:
+    @user_query_router.post("/")
+    def post(self, request: UserQueryPostRequest) -> UserQueryPostResponse:
         # TODO: query vector db for references and summary
 
-        # TODO: user_id should be taken from the token
         query_id = str(uuid.uuid4())
         query = models.Query(
             query_id=query_id,
             question=request.question,
             references=[models.Reference(title="test", url="test").model_dump()],
             summary="test summary",
-            user_id="6eaa9bcd-a5dd-4e22-aa6a-0029ed0c2737",
+            user_id=self.user.user_id,
         )
 
         session = self.get_db_session()

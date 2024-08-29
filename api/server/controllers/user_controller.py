@@ -1,12 +1,15 @@
 import uuid
 
 import models
-from controllers.base_controller import AicaciaAPI
+from controllers.base_controller import AicaciaPublicAPI
 from fastapi import HTTPException
-from fastapi_utils import set_responses
+from fastapi_utils.cbv import cbv
+from fastapi_utils.inferring_router import InferringRouter
 from library import auth
 from pydantic import BaseModel
 from sqlmodel import select
+
+user_router = InferringRouter()
 
 
 class UserPostRequest(BaseModel):
@@ -18,10 +21,20 @@ class UserPostResponse(BaseModel):
     pass
 
 
-class UserController(AicaciaAPI):
+class UserLoginRequest(BaseModel):
+    email: str
+    password: str
 
-    @set_responses(UserPostResponse, 200)
-    def post(self, request: UserPostRequest) -> str:
+
+class UserLoginResponse(BaseModel):
+    token: str
+
+
+@cbv(user_router)
+class UserController(AicaciaPublicAPI):
+
+    @user_router.post("/")
+    def post(self, request: UserPostRequest) -> UserPostResponse:
         session = self.get_db_session()
 
         email = request.email.lower()
@@ -50,20 +63,8 @@ class UserController(AicaciaAPI):
 
         return UserPostResponse()
 
-
-class UserLoginRequest(BaseModel):
-    email: str
-    password: str
-
-
-class UserLoginResponse(BaseModel):
-    token: str
-
-
-class UserLoginController(AicaciaAPI):
-
-    @set_responses(UserLoginResponse, 200)
-    def post(self, request: UserLoginRequest) -> str:
+    @user_router.post("/login")
+    def login(self, request: UserLoginRequest) -> UserLoginResponse:
         session = self.get_db_session()
 
         email = request.email.lower()

@@ -1,11 +1,14 @@
 import uuid
 
 import models
-from controllers.base_controller import AicaciaAPI
+from controllers.base_controller import AicaciaProtectedAPI
 from fastapi import HTTPException
-from fastapi_utils import set_responses
+from fastapi_utils.cbv import cbv
+from fastapi_utils.inferring_router import InferringRouter
 from pydantic import BaseModel
 from sqlalchemy import select
+
+feedback_router = InferringRouter()
 
 
 class FeedbackPostRequest(BaseModel):
@@ -18,11 +21,11 @@ class FeedbackPostResponse(BaseModel):
     pass
 
 
-class FeedbackController(AicaciaAPI):
+@cbv(feedback_router)
+class FeedbackController(AicaciaProtectedAPI):
 
-    @set_responses(FeedbackPostResponse, 200)
-    def post(self, request: FeedbackPostRequest) -> str:
-        # TODO: user_id should be taken from the token
+    @feedback_router.post("/")
+    def post(self, request: FeedbackPostRequest) -> FeedbackPostResponse:
 
         query = (
             self.get_db_session()
@@ -45,7 +48,7 @@ class FeedbackController(AicaciaAPI):
         feedback = models.Feedback(
             feedback_id=feedback_id,
             query_id=request.query_id,
-            user_id="6eaa9bcd-a5dd-4e22-aa6a-0029ed0c2737",
+            user_id=self.user.user_id,
             feedback_json=models.FeedbackJSON(
                 references_feedback=request.references_feedback,
                 feedback=request.feedback,
