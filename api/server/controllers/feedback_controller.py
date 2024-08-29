@@ -13,7 +13,7 @@ feedback_router = InferringRouter()
 
 class FeedbackPostRequest(BaseModel):
     query_id: str
-    references_feedback: list[bool]
+    references_feedback: list[int]
     feedback: str
 
 
