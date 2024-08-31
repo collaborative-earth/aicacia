@@ -25,6 +25,12 @@ pip install pipenv --user
 Add `.env` inside `server` and add the following
 `POSTGRES_PASSWORD=aicacia`
 
+Create tables
+```
+pipenv run alembic upgrade head
+```
+
+Run server
 ```
 ./develop/run_dev_server
 ```
