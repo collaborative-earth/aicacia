@@ -22,18 +22,19 @@ pip install pipenv --user
 ```
 
 ### Run server
-Add `.env` inside `server` and add the following
+Add `.env` inside `api` and add the following
 `POSTGRES_PASSWORD=aicacia`
-
-Create tables
-```
-pipenv run alembic upgrade head
-```
 
 Run server
 ```
 ./develop/run_dev_server
 ```
+
+Create tables for the first time.
+```
+pipenv run alembic upgrade head
+```
+
 
 ### To Add or update python dependency
 
