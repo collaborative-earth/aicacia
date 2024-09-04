@@ -1,7 +1,7 @@
 
 /* Login page styles */
 .login-page {
-    background-color: #f4f9f4; /* Soft green background to reflect nature */
+    background-color: #f4f9f4; /* Light green background */
     min-height: 100vh;
     display: flex;
     flex-direction: column;
