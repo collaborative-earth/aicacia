@@ -55,3 +55,41 @@ button {
 button:hover {
   background-color: #3e8e41; /* Lighter green on hover */
 }
+
+/* Login page styles */
+.login-page {
+  background-color: #f4f9f4; /* Soft green background to reflect nature */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+  /* Auth container styles */
+.auth-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #ffffff; /* White background for contrast */
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+
+input {
+  width: calc(100% - 20px);
+  margin: 10px auto;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Button group to align buttons */
+.button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
