@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { setToken } from '../utils/tokens';
 import { loginUser, registerUser } from '../utils/api';
 import TopBar from './TopBar';
+import '../styles/Login.css';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');

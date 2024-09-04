@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import logo from '../assets/aicacia_logo.png';
 import { getToken, removeToken } from '../utils/tokens';
+import '../styles/TopBar.css';
 
 const TopBar: React.FC = () => {
   const navigate = useNavigate();
