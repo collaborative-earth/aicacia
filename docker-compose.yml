@@ -1,3 +1,4 @@
 include:
   - "api/compose.yml"
   - "extraction/compose.yml"
+  - "notebooks/compose.yml"
