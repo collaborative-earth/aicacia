@@ -1,0 +1,15 @@
+services:
+  grobid:
+    platform: linux/amd64
+    image: grobid/grobid:0.8.0
+    ports:
+      - "8070:8070"
+    volumes:
+      - "./grobid/grobid.yaml:/opt/grobid/grobid-home/config/grobid.yaml:ro"
+  grobid-crf:
+    platform: linux/amd64
+    image: lfoppiano/grobid:0.8.0
+    ports:
+      - "8070:8070"
+    volumes:
+      - "./grobid/grobid.yaml:/opt/grobid/grobid-home/config/grobid.yaml:ro"

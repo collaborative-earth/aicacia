@@ -1,0 +1,11 @@
+services:
+  jupyter:
+    environment:
+      GROBID_SERVICE_URL: "http://host.docker.internal:8070"
+    image: jupyter/minimal-notebook
+    ports:
+      - "8888:8888"
+    volumes:
+      - "./data:/home/jovyan/data"
+      - "./extraction:/home/jovyan/extraction"
+      - "../extraction:/home/jovyan/aicacia/extraction"
