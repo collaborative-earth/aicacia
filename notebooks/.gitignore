@@ -1,0 +1,5 @@
+# Directory used for data a notebook may use that need not be under source control
+data/*
+
+# IPython
+.ipynb_checkpoints

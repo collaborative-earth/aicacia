@@ -1,0 +1,35 @@
+repos:
+  - repo: https://github.com/nbQA-dev/nbQA
+    rev: 1.8.5
+    hooks:
+      - id: nbqa-black
+      - id: nbqa-flake8
+      - id: nbqa-isort
+      - id: nbqa-pyupgrade
+        args: [--py37-plus]
+  - repo: https://github.com/kynan/nbstripout
+    rev: c6c106713d403865b2d5bc22ed0d8faa3d7b0f0e
+    hooks:
+      - id: nbstripout
+        args: [
+          --extra-keys,
+          "metadata.interpreter metadata.language_info.codemirror_mode
+          metadata.language_info.file_extension metadata.language_info.mimetype
+          metadata.language_info.nbconvert_exporter metadata.language_info.pygments_lexer
+          metadata.language_info.version metadata.kernelspec",
+        ]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-json
+        exclude: ".vscode/launch.json"
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
