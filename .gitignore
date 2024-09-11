@@ -6,3 +6,16 @@
 .pytest_cache
 __pycache__
 venv
+
+*.pyc
+*.o
+
+eval/ann-benchmarks/data/*
+*.class
+
+*.log
+
+eval/ann-benchmarks/results/*
+!eval/ann-benchmarks/results/*.png
+
+.idea
