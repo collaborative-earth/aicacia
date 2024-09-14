@@ -11,8 +11,13 @@ class TEIDocument:
 
     @property
     def authors(self) -> list[str]:
-        title_stmt = self.soup.find("titleStmt")
-        return title_stmt.title.text
+        def full_name(author):
+            pers_name = author.persName
+            return f"{pers_name.forename.text} {pers_name.surname.text}"
+
+        source_desc = self.soup.find("sourceDesc")
+        authors = source_desc.find_all("author")
+        return [full_name(author) for author in authors if author.persName is not None]
 
     @property
     def title(self) -> str:
