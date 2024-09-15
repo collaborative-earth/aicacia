@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Optional
 
 
-# https://github.com/kermitt2/grobid/blob/a95d2533f1019e900b49ea5c39a5afe355dbb4a3/grobid-core/src/main/java/org/grobid/core/document/TEIFormatter.java#L738
+# https://github.com/kermitt2/grobid/blob/master/grobid-core/src/main/java/org/grobid/core/document/TEIFormatter.java
 class IDNOType(Enum):
     ark = "ark"
     arXiv = "arXiv"
