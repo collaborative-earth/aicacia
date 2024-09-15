@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from .idno import IDNO, IDNOType
 
 
 class TEIDocument:
@@ -18,6 +19,12 @@ class TEIDocument:
         source_desc = self.soup.find("sourceDesc")
         authors = source_desc.find_all("author")
         return [full_name(author) for author in authors if author.persName is not None]
+
+    @property
+    def idno(self) -> IDNO:
+        source_desc = self.soup.find("sourceDesc")
+        idno = source_desc.find("idno")
+        return IDNO(IDNOType(idno.get("type")), idno.text)
 
     @property
     def title(self) -> str:
