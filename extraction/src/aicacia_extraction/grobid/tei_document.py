@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 from typing import Optional
+from .figure import Figure
 from .idno import IDNO, IDNOType
+from .section import Section
 
 
 class TEIDocument:
@@ -9,9 +11,8 @@ class TEIDocument:
             self.soup = BeautifulSoup(f, "lxml-xml")
 
     @property
-    def abstract(self) -> list[str]:
-        paragraphs = self.soup.abstract.find_all("p")
-        return [paragraph.text for paragraph in paragraphs]
+    def abstract(self) -> str:
+        return self.soup.abstract.text.strip()
 
     @property
     def authors(self) -> list[str]:
@@ -36,23 +37,28 @@ class TEIDocument:
             return IDNO(IDNOType(idno.get("type")), idno.text)
 
     @property
+    def sections(self) -> list[Section]:
+        def map_section(div):
+            title = div.head and div.head.text
+            text = " ".join([p.text for p in div.find_all("p")])
+            return Section(title, text)
+
+        divs = self.soup.body.find_all("div")
+        return [map_section(div) for div in divs]
+
+    @property
     def title(self) -> Optional[str]:
         title = self.soup.titleStmt.title
         if title:
             return title.text
 
-    def extract_text(self) -> list[str]:
-        extracted = []
-        divs = self.soup.body.find_all("div")
-        for div in divs:
-            head = div.head.text
-            if head:
-                extracted.append(head)
-            for paragraph in div.find_all("p"):
-                extracted.append(paragraph.text)
-        return extracted
+    @property
+    def figures(self) -> list[Figure]:
+        def map_figure(figure):
+            title = figure.head and figure.head.text
+            label = figure.label and figure.label.text
+            description = figure.figDesc and figure.figDesc.text
+            return Figure(title, label, description)
 
-
-    def extract_figure_descriptions(self) -> list[str]:
-        figure_descriptions = self.soup.body.find_all("figDesc")
-        return [figure_description.text for figure_description in figure_descriptions]
+        figures = self.soup.body.find_all("figure")
+        return [map_figure(figure) for figure in figures]

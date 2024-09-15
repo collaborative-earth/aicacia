@@ -16,10 +16,7 @@ class TestGROBIDTEIDocument(unittest.TestCase):
 
         # Then
         self.assertEqual(
-            [
-                "We describe in this paper a new method for building an efficient algorithm for scheduling jobs in a cluster. Jobs are considered as parallel tasks (PT) which can be scheduled on any number of processors. The main feature is to consider two criteria that are optimized together. These criteria are the makespan and the weighted minimal average completion time (minsum). They are chosen for their complementarity, to be able to represent both user-oriented objectives and system administrator objectives.",
-                "We propose an algorithm based on a batch policy with increasing batch sizes, with a smart selection of jobs in each batch. This algorithm is assessed by intensive simulation results, compared to a new lower bound (obtained by a relaxation of ILP) of the optimal schedules for both criteria separately. It is currently implemented in an actual real-size cluster platform."
-            ],
+            "We describe in this paper a new method for building an efficient algorithm for scheduling jobs in a cluster. Jobs are considered as parallel tasks (PT) which can be scheduled on any number of processors. The main feature is to consider two criteria that are optimized together. These criteria are the makespan and the weighted minimal average completion time (minsum). They are chosen for their complementarity, to be able to represent both user-oriented objectives and system administrator objectives.We propose an algorithm based on a batch policy with increasing batch sizes, with a smart selection of jobs in each batch. This algorithm is assessed by intensive simulation results, compared to a new lower bound (obtained by a relaxation of ILP) of the optimal schedules for both criteria separately. It is currently implemented in an actual real-size cluster platform.",
             tei_document.abstract
         )
         self.assertEqual(["Lionel Eyraud", "Gr Égory Mouni", "Denis Trystram"], tei_document.authors)
