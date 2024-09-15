@@ -1,27 +1,27 @@
 from bs4 import BeautifulSoup
-from typing import Optional
+from typing import Optional, TextIO
 from .figure import Figure
 from .idno import IDNO, IDNOType
 from .section import Section
 
 
 class TEIDocument:
-    def __init__(self, path: str):
-        with open(path) as f:
-            self.soup = BeautifulSoup(f, "lxml-xml")
-
     @property
     def abstract(self) -> str:
         return self.soup.abstract.text.strip()
 
     @property
     def authors(self) -> list[str]:
-        def full_name(author):
-            pers_name = author.persName
-            return f"{pers_name.forename.text} {pers_name.surname.text}"
+        def full_name(persname):
+            if not persname:
+                return
+
+            names = [name.text for name in [persname.forename, persname.surname] if name is not None]
+            return " ".join(names)
 
         authors = self.soup.sourceDesc.find_all("author")
-        return [full_name(author) for author in authors if author.persName is not None]
+        full_names = [full_name(author.persName) for author in authors]
+        return [full_name for full_name in full_names if full_name]
 
     @property
     def keywords(self) -> Optional[list[str]]:
@@ -62,3 +62,11 @@ class TEIDocument:
 
         figures = self.soup.body.find_all("figure")
         return [map_figure(figure) for figure in figures]
+
+    def __init__(self, file: TextIO):
+        self.soup = BeautifulSoup(file, "lxml-xml")
+
+    @classmethod
+    def from_path(cls, path: str):
+        with open(path) as f:
+            return cls(f)

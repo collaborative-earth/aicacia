@@ -1,7 +1,8 @@
+import io
 import os
 import unittest
 
-from aicacia_extraction.grobid import IDNO, IDNOType, TEIDocument
+from aicacia_extraction.grobid import IDNOType, TEIDocument
 from pathlib import Path
 
 
@@ -12,7 +13,7 @@ class TestGROBIDTEIDocument(unittest.TestCase):
         tei_path = tests_path / "../example/grobid/sample.grobid.tei.xml"
 
         # When
-        tei_document = TEIDocument(tei_path)
+        tei_document = TEIDocument.from_path(tei_path)
 
         # Then
         self.assertEqual(
@@ -36,6 +37,28 @@ class TestGROBIDTEIDocument(unittest.TestCase):
         self.assertEqual(IDNOType.MD5, tei_document.idno.type)
         self.assertEqual("5F0BE4D19AC38AC86BE01245CF0BEAF4", tei_document.idno.value)
         self.assertEqual("Bi-criteria Algorithm for Scheduling Jobs on Cluster Platforms", tei_document.title)
+
+    def test_tei_document_with_empty_author_forenames(self):
+        # Given
+        f = io.StringIO("""
+        <sourceDesc>
+            <author></author>
+            <author><persName/></author>
+            <author><persName><forename>John</forename></persName></author>
+            <author><persName><surname>Doe</surname></persName></author>
+            <author><persName><forename>John</forename><surname>Doe</surname></persName>></author>
+        </sourceDesc>
+        """)
+
+        # When
+        tei_document = TEIDocument(f)
+
+        # Then
+        self.assertEqual(["John", "Doe", "John Doe"], tei_document.authors)
+
+        # Cleanup
+        f.close()
+
 
 
 if __name__ == '__main__':
