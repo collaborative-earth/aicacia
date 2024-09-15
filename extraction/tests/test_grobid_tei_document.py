@@ -6,7 +6,6 @@ from pathlib import Path
 
 
 class TestGROBIDTEIDocument(unittest.TestCase):
-
     def test_tei_document(self):
         # Given
         tests_path = Path(os.path.dirname(__file__))

@@ -36,11 +36,24 @@ class TEIDocument:
             return IDNO(IDNOType(idno.get("type")), idno.text)
 
     @property
-    def body(self):
-        pass
-
-    @property
     def title(self) -> Optional[str]:
         title = self.soup.titleStmt.title
         if title:
             return title.text
+
+    def extract_text(self) -> list[str]:
+        extracted = []
+        divs = self.soup.body.find_all("div")
+        for div in divs:
+            head = div.head.text
+            if head:
+                extracted.append(head)
+            for paragraph in div.find_all("p"):
+                extracted.append(paragraph.text)
+        return extracted
+
+
+    def extract_figure_desc(self) -> list[str]:
+        extracted = []
+        figure_descs = self.soup.body.find_all("figDesc")
+        return [figure_desc.text for figure_desc in figure_descs]
