@@ -53,7 +53,6 @@ class TEIDocument:
         return extracted
 
 
-    def extract_figure_desc(self) -> list[str]:
-        extracted = []
-        figure_descs = self.soup.body.find_all("figDesc")
-        return [figure_desc.text for figure_desc in figure_descs]
+    def extract_figure_descriptions(self) -> list[str]:
+        figure_descriptions = self.soup.body.find_all("figDesc")
+        return [figure_description.text for figure_description in figure_descriptions]
