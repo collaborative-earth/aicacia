@@ -9,3 +9,16 @@ venv
 
 # VS Code
 *.vscode
+
+*.pyc
+*.o
+
+eval/ann-benchmarks/data/*
+*.class
+
+*.log
+
+eval/ann-benchmarks/results/*
+!eval/ann-benchmarks/results/*.png
+
+.idea
