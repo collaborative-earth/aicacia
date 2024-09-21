@@ -25,6 +25,12 @@ class TEIDocument:
         return [full_name for full_name in full_names if full_name]
 
     @cached_property
+    def doi(self) -> Optional[str]:
+        for idno in self.idnos:
+            if idno.type == IDNOType.DOI:
+                return idno.value
+
+    @cached_property
     def keywords(self) -> Optional[list[str]]:
         keywords = self.soup.keywords
         if keywords:

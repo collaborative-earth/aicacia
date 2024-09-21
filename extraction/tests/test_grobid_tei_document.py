@@ -82,6 +82,7 @@ class TestGROBIDTEIDocument(unittest.TestCase):
             ],
             tei_document.idnos
         )
+        self.assertEqual("10.1371/journal.pone.0170706", tei_document.doi)
 
         # Cleanup
         f.close()
