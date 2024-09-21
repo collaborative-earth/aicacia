@@ -5,14 +5,14 @@ from typing import Optional
 
 # https://github.com/kermitt2/grobid/blob/master/grobid-core/src/main/java/org/grobid/core/document/TEIFormatter.java
 class IDNOType(Enum):
-    ark = "ark"
-    arXiv = "arXiv"
+    ARK = "ark"
+    ARXIV = "arXiv"
     DOI = "DOI"
-    eISSN = "eISSN"
-    halId = "halId"
+    EISSN = "eISSN"
+    HALID = "halId"
     ISBN = "ISBN"
     ISSN = "ISSN"
-    istexId = "istexId"
+    ISTEXID = "istexId"
     MD5 = "MD5"
     PII = "PII"
     PMCID = "PMCID"

@@ -2,7 +2,7 @@ import io
 import os
 import unittest
 
-from aicacia_extraction.grobid import IDNOType, TEIDocument
+from aicacia_extraction.grobid import IDNO, IDNOType, TEIDocument
 from pathlib import Path
 
 
@@ -34,19 +34,22 @@ class TestGROBIDTEIDocument(unittest.TestCase):
             ],
             tei_document.keywords
         )
-        self.assertEqual(IDNOType.MD5, tei_document.idno.type)
-        self.assertEqual("5F0BE4D19AC38AC86BE01245CF0BEAF4", tei_document.idno.value)
+        self.assertEqual([IDNO(IDNOType.MD5, "5F0BE4D19AC38AC86BE01245CF0BEAF4")], tei_document.idnos)
         self.assertEqual("Bi-criteria Algorithm for Scheduling Jobs on Cluster Platforms", tei_document.title)
 
-    def test_tei_document_with_empty_author_forenames(self):
+    def test_tei_document_authors(self):
         # Given
         f = io.StringIO("""
         <sourceDesc>
-            <author></author>
-            <author><persName/></author>
-            <author><persName><forename>John</forename></persName></author>
-            <author><persName><surname>Doe</surname></persName></author>
-            <author><persName><forename>John</forename><surname>Doe</surname></persName>></author>
+            <biblStruct>
+                <analytic>
+                    <author></author>
+                    <author><persName/></author>
+                    <author><persName><forename>John</forename></persName></author>
+                    <author><persName><surname>Doe</surname></persName></author>
+                    <author><persName><forename>John</forename><surname>Doe</surname></persName>></author>
+                </analytic>
+            </biblStruct>
         </sourceDesc>
         """)
 
@@ -59,6 +62,30 @@ class TestGROBIDTEIDocument(unittest.TestCase):
         # Cleanup
         f.close()
 
+    def test_tei_document_idnos(self):
+        # Given
+        f = io.StringIO("""
+        <sourceDesc>
+            <idno type="MD5">4F10689DEB84756CE82C8015951A22E5</idno>
+            <idno type="DOI">10.1371/journal.pone.0170706</idno>
+        </sourceDesc>
+        """)
+
+        # When
+        tei_document = TEIDocument(f)
+
+        # Then
+        self.assertEqual(
+            [
+                IDNO(IDNOType.MD5, "4F10689DEB84756CE82C8015951A22E5"),
+                IDNO(IDNOType.DOI, "10.1371/journal.pone.0170706"),
+            ],
+            tei_document.idnos
+        )
+        self.assertEqual("10.1371/journal.pone.0170706", tei_document.doi)
+
+        # Cleanup
+        f.close()
 
 
 if __name__ == '__main__':
