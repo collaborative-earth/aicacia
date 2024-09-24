@@ -103,11 +103,10 @@ class TEINodeParser(NodeParser):
             elif isinstance(tei_property, list):
                 for sec in tei_property:
                     tag_text = sec.text
-                    
                     last_tag = sec.title if sec.title else "Unnamed Section"
                     tei_nodes.append(
                         self._build_node_from_split(
-                            tag_text.strip(), node, {"tag": sec.title}
+                            tag_text.strip(), node, {"tag": last_tag}
                         )
                     )
                 
