@@ -1,28 +1,33 @@
 from playwright.sync_api import sync_playwright
 
-# Path to store browser context files (session, cookies)
-USER_DATA_DIR = "playwright_user_data"
-
 
 def scrape_funding_opportunities():
     with sync_playwright() as p:
-        # Launch browser with persistent context to store session data
-        browser = p.chromium.launch_persistent_context(
-            USER_DATA_DIR,
-            headless=False,  # Use False to see the browser and log in manually the first time
-            args=["--start-maximized"],  # Start the browser maximized
-        )
+        # Launch the browser in non-headless mode
+        browser = p.chromium.launch(headless=False)
+        context = browser.new_context()  # Create a new browser context
+        page = context.new_page()
 
-        # Open a new page in the persistent context
-        page = browser.new_page()
+        page.goto("https://restor.eco/login")
 
-        # Check if already logged in by navigating directly to the funding opportunities
+        with page.expect_popup() as popup_info:
+            page.click('text="Log in with Google"')
+
+        popup = popup_info.value
+
+        popup.wait_for_selector('input[type="email"]', timeout=10000)
+
+        popup.wait_for_timeout(60000)  # Wait for 60 seconds
+
+        popup.wait_for_load_state("networkidle")
+
+        popup.close()
+
+        page.bring_to_front()
+
         page.goto("https://restor.eco/platform/funding-opportunities/?page=1")
 
-        page.wait_for_timeout(60000)
-
-        # Wait for the funding cards to load on the page
-        page.wait_for_selector('[data-gtm-loc="funding-opportunities"]', timeout=10000)
+        page.wait_for_selector('[data-gtm-loc="funding-opportunities"]')
 
         # Get all funding cards
         funding_cards = page.query_selector_all(
