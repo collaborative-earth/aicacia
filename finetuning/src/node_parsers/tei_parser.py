@@ -1,4 +1,3 @@
-# TEI Node Parser
 from typing import TYPE_CHECKING, Any, List, Optional, Sequence
 
 from llama_index.core.bridge.pydantic import Field
