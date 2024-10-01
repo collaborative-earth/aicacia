@@ -1,5 +1,4 @@
 from typing import List, Optional
-
 from llama_index.core.schema import TransformComponent, NodeWithScore, MetadataMode
 from llama_index.core.bridge.pydantic import Field
 
@@ -42,4 +41,3 @@ class TEINodeFilter(TransformComponent):
         ]
         
         return filtered_nodes
-# %%

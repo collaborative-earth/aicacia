@@ -22,3 +22,6 @@ eval/ann-benchmarks/results/*
 !eval/ann-benchmarks/results/*.png
 
 .idea
+
+# Grobid output
+*.xml
