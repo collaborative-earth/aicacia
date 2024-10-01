@@ -1,0 +1,14 @@
+{
+    "queries": {
+        "ef0406c1-f2b3-4452-9438-517eeff84d8c": "How do soil bulk density (\u03c1b) measurements vary with increasing age of reclaimed coal mine soil sites ranging from less than a year to over twelve years old, particularly within southeastern United States landscapes?"
+    },
+    "corpus": {
+        "3ce7997c-b814-4113-b837-4cd44ef0970d": "Surface mining drastically disturbs landscapes and soil properties. Reclamation can restore and improve soil quality and biomass productivity. Time required for soil reclamation to restore soil quality to premined conditions in southeastern United States is unclear. The objective of this study was to evaluate chronosequence effects on restoration quality indicators in reclaimed coal mine soil from different land use landscapes and agroecosystems in Mississippi. Study sites in 0-to 3-, 5to 7-, and 10-to 12-year-old reclaimed soils were compared with adjacent undisturbed sites. Soil samples collected at the 0-to 15-cm and the 15-to 30-cm depths within a grid in a radius of 3 m were mixed to produce composite samples and kept frozen until analyzed. Soil bulk density (\u03c1b) was the highest (1.48 g cm -3 ) in the youngest (<1 year) site and decreased with increasing age to the oldest (12-year) site (1.07 g cm -3 ). Soil quality indicators (aggregate stability, total C, organic C, and microbial biomass C) increased with increasing reclamation age in forest and grass ecosystems. Concentrations of C were greater at the summit than at shoulder and foot-slope positions. Soil pH, Ca, Mg, Cu, and Zn were higher in newly reclaimed soil than in soils reclaimed 12 years earlier possibly because of reclamation liming practices, which buffer pH to greater than 7.0 in newly reclaimed sites. Reclamation practices improved soil quality over time. Soil quality indicators reached levels similar to those of undisturbed soil within 7 to 12 years after reclamation, indicating successful reestablishment of healthy and sustainable soils in the postmining ecosystems."
+    },
+    "relevant_docs": {
+        "ef0406c1-f2b3-4452-9438-517eeff84d8c": [
+            "3ce7997c-b814-4113-b837-4cd44ef0970d"
+        ]
+    },
+    "mode": "text"
+}
