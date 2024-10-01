@@ -16,7 +16,6 @@ from llama_index.llms.ollama import Ollama
 from finetuning.src.node_parsers.tei_parser import TEINodeParser
 from finetuning.src.node_parsers.node_filters import TEINodeFilter
 
-
 #%%
 def load_config(config_path: str) -> dict:
     with open(config_path, 'r') as file:
@@ -34,17 +33,6 @@ def create_nodes_from_tei_path(tei_path: str, chunk_size: int, chunk_overlap: in
     nodes = pipeline.run(documents=documents)
     
     return nodes
-
-# Function to generate QA pairs and save them to output_path
-def generate_qa_dataset(llm, nodes, prompt_template: str, num_questions: int, output_path: str):
-    qa = generate_qa_embedding_pairs(
-        llm=llm,
-        nodes=nodes,
-        qa_generate_prompt_tmpl=prompt_template,
-        num_questions_per_chunk=num_questions,
-        output_path=output_path
-    )
-    print(f"Question-Answer dataset created and saved to {output_path}")
     
 # Main function
 def main():
@@ -66,9 +54,17 @@ def main():
     
     # Run ingestion pipeline
     nodes = create_nodes_from_tei_path(tei_path, chunk_size, chunk_overlap)
-    
+    print(f"Generating questions from {len(nodes)} chunks." )
     # Generate QA dataset
-    generate_qa_dataset(Settings.llm, nodes, prompt_template, num_questions, output_path)
+    qa = generate_qa_embedding_pairs(
+        llm=llm,
+        nodes=nodes,
+        qa_generate_prompt_tmpl=prompt_template,
+        num_questions_per_chunk=num_questions,
+        output_path=output_path,
+        verbose = False
+    )
+    print(f"Question-Answer dataset created and saved to {output_path}")
 
 if __name__ == "__main__":
     main()
