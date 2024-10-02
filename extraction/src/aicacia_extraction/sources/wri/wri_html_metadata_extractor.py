@@ -1,3 +1,6 @@
+import json
+
+from aicacia_document_exporter.Document import Document
 from bs4 import Tag
 
 from .html_io import read_html
@@ -56,10 +59,10 @@ class WriSimpleExtractor:
                 file_type = self.__extract_file_type(downloadable_source_doc.find('span').get_text())
 
                 if file_type is not None:
-                    downloadable_sources.append({
+                    downloadable_sources.append(json.dumps({
                         'link': download_link,
                         'type': file_type
-                    })
+                    }))
 
         doi = None
         if (doi_doc := doc.find('div', class_='doi')) is not None:
@@ -68,13 +71,17 @@ class WriSimpleExtractor:
 
         authors = self.__extract_authors(doc)
 
-        return {
-            'url': article_link,
-            'title': title,
-            'doi': doi,
-            'authors': authors,
-            'downloadable_sources': downloadable_sources
-        }
+        return Document(
+            title=title,
+            sections=[],
+            doi=doi,
+            authors=authors,
+            sources=downloadable_sources,
+            corpus_name='WRI',
+            metadata={
+                'article_link': article_link
+            }
+        )
 
     @staticmethod
     def __downloadable_source_search_condition(tag: Tag):
@@ -98,4 +105,4 @@ class WriSimpleExtractor:
             content = [sub_doc.get_text() for sub_doc in authors_doc.find_all() if sub_doc.get_text() != 'Authors']
             return content
 
-        return None
+        return []
