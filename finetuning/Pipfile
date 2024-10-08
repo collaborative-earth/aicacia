@@ -9,6 +9,9 @@ llama-index-finetuning = "*"
 llama-index-llms-ollama = "*"
 beautifulsoup4 = "*"
 lxml = "*"
+path = "*"
+rank-bm25 = "*"
+einops = "*"
 
 [dev-packages]
 

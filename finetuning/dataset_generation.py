@@ -34,7 +34,7 @@ def create_nodes_from_tei_path(tei_path: str, chunk_size: int, chunk_overlap: in
     
     return nodes
     
-# Main function
+
 def main():
     # Load configurations from config.json
     config = load_config("config.json")
@@ -65,7 +65,7 @@ def main():
         verbose = False
     )
     print(f"Question-Answer dataset created and saved to {output_path}")
-
+#%%
 if __name__ == "__main__":
     main()
 # %%
