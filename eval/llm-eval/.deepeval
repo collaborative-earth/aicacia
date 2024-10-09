@@ -1,0 +1,1 @@
+{"LOCAL_MODEL_NAME": "llama3.2", "LOCAL_MODEL_BASE_URL": "http://localhost:11434/v1/", "LOCAL_MODEL_API_KEY": "ollama", "LOCAL_MODEL_FORMAT": "json", "USE_LOCAL_MODEL": "YES", "USE_AZURE_OPENAI": "NO"}
