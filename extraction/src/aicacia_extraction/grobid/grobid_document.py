@@ -3,12 +3,13 @@ from functools import cached_property
 from typing import Optional, TextIO
 from .figure import Figure
 from .idno import IDNO, IDNOType
-from .section import Section
+from ..document.document import Document
+from ..document.section import Section
 
 
-class TEIDocument:
+class GROBIDDocument(Document):
     @cached_property
-    def abstract(self) -> str:
+    def abstract(self) -> Optional[str]:
         return self.soup.abstract.text.strip()
 
     @cached_property
@@ -42,7 +43,23 @@ class TEIDocument:
         idnos = self.soup.sourceDesc.find_all("idno")
         return [IDNO(IDNOType(idno.get("type")), idno.text) for idno in idnos]
 
-    @property
+    @cached_property
+    def figures(self) -> list[Figure]:
+        def map_figure(figure):
+            title = figure.head and figure.head.text
+            label = figure.label and figure.label.text
+            description = figure.figDesc and figure.figDesc.text
+            return Figure(title, label, description)
+
+        figures = self.soup.body.find_all("figure")
+        return [map_figure(figure) for figure in figures]
+
+    @cached_property
+    def references(self) -> list[str]:
+        # TODO: Implement references. list[str] may be too limiting for GROBID as it seems to parse author, title, etc.
+        return []
+
+    @cached_property
     def sections(self) -> list[Section]:
         def map_section(div):
             title = div.head and div.head.text
@@ -57,17 +74,6 @@ class TEIDocument:
         title = self.soup.titleStmt.title
         if title:
             return title.text
-
-    @cached_property
-    def figures(self) -> list[Figure]:
-        def map_figure(figure):
-            title = figure.head and figure.head.text
-            label = figure.label and figure.label.text
-            description = figure.figDesc and figure.figDesc.text
-            return Figure(title, label, description)
-
-        figures = self.soup.body.find_all("figure")
-        return [map_figure(figure) for figure in figures]
 
     def __init__(self, file: TextIO):
         self.soup = BeautifulSoup(file, "lxml-xml")
