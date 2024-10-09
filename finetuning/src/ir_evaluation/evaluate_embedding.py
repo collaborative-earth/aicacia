@@ -1,4 +1,3 @@
-#%%
 import random
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
@@ -46,7 +45,8 @@ def main():
     qa_dataset =  EmbeddingQAFinetuneDataset.from_json(QADATASET_PATH)
     for model_name,model_id in MODEL2EVALUATE.items():
         evaluate_st(qa_dataset,model_id,model_name)
-# %%
+        
+        
 if __name__ == "__main__":
     main()
-# %%
+
