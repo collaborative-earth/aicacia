@@ -68,13 +68,17 @@ class InformationRetrievalEvaluatorBM25:
         # Score function names for CSV headers
         self.csv_file: str = "Information-Retrieval_evaluation_bm25_results.csv"
 
-        self.score_function_names = ['precision', 'recall', 'mrr', 'ndcg', 'accuracy']
+       
         self.csv_headers = ["epoch", "steps"]
-        for name in self.score_function_names:
-            for k in self.accuracy_at_k:
-                self.csv_headers.append(f"{name}@{k}")
-            for k in self.precision_recall_at_k:
-                self.csv_headers.append(f"{name}@{k}")
+        for k in self.accuracy_at_k:
+            self.csv_headers.append(f"BM25-Accuracy@{k}")
+        for k in self.precision_recall_at_k:
+            self.csv_headers.append(f"BM25-Precision@{k}")
+            self.csv_headers.append(f"BM25-Recall@{k}")
+        for k in mrr_at_k:
+            self.csv_headers.append(f"BM25-MRR@{k}")
+        for k in ndcg_at_k:
+            self.csv_headers.append(f"BM25-NDCG@{k}")
 
     def __call__(self, model: None = None, output_path: str = None, epoch: int = -1, steps: int = -1, *args, **kwargs) -> dict[str, float]:
         """Evaluate the model and write results to a CSV if required"""
