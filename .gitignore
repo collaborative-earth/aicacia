@@ -27,3 +27,4 @@ eval/ann-benchmarks/results/*
 *.xml
 
 finetuning/results
+playground.ipynb
