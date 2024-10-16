@@ -4,3 +4,4 @@ include:
   - "notebooks/compose.yml"
   - "webapp/compose.yml"
   - "vectordb/compose.yml"
+  - "webapp/compose.yml"
