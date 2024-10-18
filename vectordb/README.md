@@ -8,10 +8,10 @@ This project utilizes Qdrant as a vector database to store and manage embedding 
 
 ### Step 1: Copy Data
 
-Copy all the data you want to embed into the `data/` directory. Ensure that the files are in the correct format for embedding.
+Copy all the data you want to embed into the `../data/` directory. Ensure that the files are in the correct format for embedding.
 
 ```bash
-cp /path/to/your/data/* data/
+cp /path/to/your/data/* ../data/
 ```
 
 ### Step 2: Start the Qdrant Server
@@ -31,18 +31,12 @@ Once the server is running, you can access the Qdrant dashboard by visiting: `ht
 Go to the vectordb directory and run the main.py script using the following command to start loading the embedding vectors for the documents in the data directory into the vector store.
 
 ```bash
-cd vectordb
 python3 main.py -c <collection_name> -m <embedding_model>
 ```
 
 ### Step 5: Upload the vectors
 
 The vectors will be saved in `vectordb/qdrant_storage`. We can also resuse vectors by downloading them into this location.
-
-```bash
-cd vectordb
-python3 main.py -c <collection_name> -m <embedding_model>
-```
 
 ### Arguments for main.py
 
