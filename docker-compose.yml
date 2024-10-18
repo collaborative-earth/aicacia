@@ -1,40 +1,5 @@
-services:
-  aicacia-postgres:
-    image: postgres:17
-    container_name: aicacia-postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: aicacia_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-
-  aicacia-api:
-    image: aicacia-api:latest
-    container_name: aicacia-api
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      QDRANT_URL: ${QDRANT_URL}
-      QDRANT_API_KEY: ${QDRANT_API_KEY}
-      SECRET_KEY: ${SECRET_KEY}
-    ports:
-      - "8000:8000"
-    depends_on:
-      - aicacia-postgres
-
-  aicacia-webapp:
-    image: aicacia-webapp:latest
-    container_name: aicacia-webapp
-    ports:
-      - "3000:3000"
-
-volumes:
-  pg_data:
-    driver: local
-    driver_opts:
-      type: none
-      device: /mnt/data/postgresql
-      o: bind
+include:
+  - "api/compose.yml"
+  - "extraction/compose.yml"
+  - "notebooks/compose.yml"
+  - "vectordb/compose.yml"
