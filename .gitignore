@@ -29,3 +29,6 @@ eval/ann-benchmarks/results/*
 
 # Grobid output
 *.xml
+
+finetuning/results
+playground.ipynb

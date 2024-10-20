@@ -1,3 +1,6 @@
+import json
+
+from aicacia_document_exporter.Document import Document, DocumentSection, MediaType
 from bs4 import Tag
 
 from .html_io import read_html
@@ -12,18 +15,28 @@ class WriSimpleExtractor:
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         ]
 
-    def extract(self, start_page=1, page_limit=-1):
+    def extract(self, start_page=1, page_limit=-1, reversed_traversal=True):
         if page_limit <= 0:
-            last_page = -1
+            if not reversed_traversal:
+                last_page = -1
+            else:
+                last_page = 0
         else:
-            last_page = start_page + page_limit - 1
+            if not reversed_traversal:
+                last_page = start_page + page_limit - 1
+            else:
+                last_page = max(0, start_page - page_limit + 1)
 
-        return self.traverse_and_extract(start_page, last_page)
+        return self.traverse_and_extract(
+            start_page, last_page,
+            (lambda page: page - 1) if reversed_traversal else (lambda page: page + 1),
+            (lambda page, last: page >= last) if reversed_traversal else (lambda page, last: page <= last)
+        )
 
-    def traverse_and_extract(self, start_page, last_page):
+    def traverse_and_extract(self, start_page, last_page, next_page_func, break_condition_func):
         page = start_page
 
-        while last_page < 0 or page <= last_page:
+        while last_page < 0 or break_condition_func(page, last_page):
             projects = read_html(f'{self.base_search_url}?page={page}').find_all('div', class_='search-results-text')
             if len(projects) == 0:
                 break
@@ -33,7 +46,8 @@ class WriSimpleExtractor:
                     if (project_url_doc := project.find('a', href=True)) is not None:
                         yield self.__extract(project_url_doc['href'])
                         print(f'Extracted {i + 1} of {len(projects)}')
-                page += 1
+
+                page = next_page_func(page)
 
     def __extract(self, url):
         article_link = self.base_url + url
@@ -56,25 +70,40 @@ class WriSimpleExtractor:
                 file_type = self.__extract_file_type(downloadable_source_doc.find('span').get_text())
 
                 if file_type is not None:
-                    downloadable_sources.append({
+                    downloadable_sources.append(json.dumps({
                         'link': download_link,
                         'type': file_type
-                    })
+                    }))
 
         doi = None
         if (doi_doc := doc.find('div', class_='doi')) is not None:
             if (doi_a_doc := doi_doc.find('a')) is not None:
                 doi = doi_a_doc['href']
 
+        sections = []
+        if (abstract_doc := doc.find('div', class_='main-content')) is not None:
+            sections.append(DocumentSection(
+                content=abstract_doc.prettify(),
+                media_type=MediaType.TEXT,
+                token_offset_position=0,
+                metadata={
+                    'semantic_position': 'Abstract'
+                }
+            ))
+
         authors = self.__extract_authors(doc)
 
-        return {
-            'url': article_link,
-            'title': title,
-            'doi': doi,
-            'authors': authors,
-            'downloadable_sources': downloadable_sources
-        }
+        return Document(
+            title=title,
+            sections=sections,
+            doi=doi,
+            authors=authors,
+            sources=downloadable_sources,
+            corpus_name='WRI',
+            metadata={
+                'article_link': article_link
+            }
+        )
 
     @staticmethod
     def __downloadable_source_search_condition(tag: Tag):
@@ -98,4 +127,4 @@ class WriSimpleExtractor:
             content = [sub_doc.get_text() for sub_doc in authors_doc.find_all() if sub_doc.get_text() != 'Authors']
             return content
 
-        return None
+        return []
