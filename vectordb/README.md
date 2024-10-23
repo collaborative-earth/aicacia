@@ -16,7 +16,7 @@ cp /path/to/your/data/* ../data/
 
 ### Step 2: Start the Qdrant Server
 
-Navigate to your project root directory or the vectordb directory. Use Docker Compose to start the Qdrant server.
+Navigate to your project root directory directory. Use Docker Compose to start the Qdrant server.
 
 ```bash
 docker-compose up -d
