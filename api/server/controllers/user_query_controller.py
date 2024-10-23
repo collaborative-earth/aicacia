@@ -42,7 +42,7 @@ class UserQueryController(AicaciaProtectedAPI):
         )
         references = []
         for res in results.points:
-            references.append(models.Reference(title=res.payload['doc_name'] + ' - ' + res.payload['text'], url='test', description=res.payload['text']).model_dump())
+            references.append(models.Reference(title=res.payload['file_name'] + ' - ' + res.payload['_node_content'].split('"text":')[-1][:1000] + '...', url='test', description=res.payload['_node_content']).model_dump())
         
         query = models.Query(
             query_id=query_id,
