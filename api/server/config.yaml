@@ -1,5 +1,5 @@
 vectordb:
-    collection: aicacia
+    collection: aicacia2
     host: aicacia-qdrant-1
     port: 6333
 

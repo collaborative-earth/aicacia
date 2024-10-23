@@ -1,0 +1,18 @@
+file_extractor:
+  md: FlatReader
+  pdf: PDFReader
+  html: HTMLTagReader
+
+text-splitter:
+  SentenceSplitter:
+    chunk_size: 1024
+    chunk_overlap: 20
+  
+vectordb:
+  QdrantClient:
+    host: localhost
+    port: 6333
+
+embedding:
+  HuggingFaceEmbedding:
+    model_name: BAAI/bge-m3

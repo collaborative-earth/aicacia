@@ -31,7 +31,7 @@ Once the server is running, you can access the Qdrant dashboard by visiting: `ht
 Go to the vectordb directory and run the main.py script using the following command to start loading the embedding vectors for the documents in the data directory into the vector store.
 
 ```bash
-python3 main.py -c <collection_name> -m <embedding_model>
+python3 main.py -c <collection_name>
 ```
 
 ### Step 5: Upload the vectors
@@ -48,15 +48,9 @@ The main.py script takes in two arguments:
 -c, --collection <collection_name>
 ```
 
-- Embedding Model: Optionally specify which embedding model to use. The default is set to "mxbai-embed-large".
-
-```bash
--m, --embedding-model <embedding_model>
-```
-
 #### Example Command
 Here’s an example command that uses a custom collection name and specifies an embedding model:
 
 ```bash
-python3 main.py -c aicacia -m llama3
+python3 main.py -c aicacia
 ```
