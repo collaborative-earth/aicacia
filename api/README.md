@@ -54,3 +54,19 @@ pipenv upgrade <package_name>
 ```
 pipenv run alembic upgrade head
 ```
+
+### To upload aicacia-document-exporter sqlite result files to PostgreSQL db:
+
+Run the following Python script:
+```
+python3 develop/upload_sqlite_data.py <folder_with_db_files> --db_pass <your_postgres_password>
+```
+For full argument list use:
+```
+python3 develop/upload_sqlite_data.py --help
+```
+To test the upload of sample data to your local db:
+```
+python3 develop/upload_sqlite_data.py ./develop/sample_data --db_pass aicacia
+```
+Make sure to truncate the tables if you wish to upload same documents again. 
