@@ -1,0 +1,8 @@
+vectordb:
+    collection: aicacia
+    host: aicacia-qdrant-1
+    port: 6333
+
+embedding:
+  HuggingFaceEmbedding:
+    model_name: BAAI/bge-m3

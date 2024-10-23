@@ -43,6 +43,7 @@ class User(Base, table=True):
 class Reference(BaseModel):
     title: str
     url: str
+    description: str
 
 
 class Query(Base, table=True):
