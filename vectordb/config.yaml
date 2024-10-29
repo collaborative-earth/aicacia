@@ -1,7 +1,9 @@
 file_extractor:
   md: FlatReader
+  xml: FlatReader
   pdf: PDFReader
   html: HTMLTagReader
+  
 
 text-splitter:
   SentenceSplitter:

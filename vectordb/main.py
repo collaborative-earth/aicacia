@@ -1,11 +1,13 @@
 import argparse
 import os
 from glob import glob
-
+import sys
 import ollama
 from llama_index.core import SimpleDirectoryReader
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import HTMLNodeParser, MarkdownNodeParser
+sys.path.append("..")
+from finetuning.src.node_parsers.tei_parser import TEINodeParser
 from tqdm import tqdm
 
 from utils import *
@@ -28,9 +30,10 @@ def parse_args():
 
 if __name__ == '__main__':
     extraction_functions = {
-            '.md': MarkdownNodeParser(),
-            '.html': HTMLNodeParser(),
-            '.pdf': MarkdownNodeParser(),
+            #'.md': MarkdownNodeParser(),
+            #'.html': HTMLNodeParser(),
+            #'.pdf': MarkdownNodeParser(),
+            '.xml': TEINodeParser()
         }
         
     args = parse_args()
