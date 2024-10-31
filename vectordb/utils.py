@@ -1,36 +1,31 @@
 import os
+import sqlite3
+from glob import glob
+from typing import Dict, List
 
-import pdfplumber
+import pandas as pd
 import yaml
-from bs4 import BeautifulSoup
 from llama_index.core.node_parser import SentenceSplitter
+from llama_index.core.schema import BaseNode, TransformComponent
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.readers.file import FlatReader, HTMLTagReader, PDFReader
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 
 
-def extract_text_from_pdf(path):
-    full_text = ""
-    with pdfplumber.open(path) as pdf:
-        for page in pdf.pages:
-            full_text += page.extract_text()
-    return full_text
+class MetadataCleanupTransformation(TransformComponent):
+    """Transformation to remove unwanted metadata fields."""
+    def __init__(self):
+        super().__init__()
 
-
-def get_file_extension(file_path):
-    _, extension = os.path.splitext(file_path)
-    return extension
-
-    
-def extract_text_from_html(path):
-    full_text = ""
-    with open(path, 'r', encoding='utf-8') as file:
-        html_content = file.read()
-        soup = BeautifulSoup(html_content, 'html.parser')
-        # Extract text from all tags
-        full_text = soup.get_text()
-    return full_text
+    def __call__(self, nodes: List[BaseNode], **kwargs) -> List[BaseNode]:
+        for node in nodes:
+            # Remove any unwanted metadata keys"
+            node.metadata = {k: v for k, v in node.metadata.items() 
+                           if not k.startswith("Header_")
+                           and k != 'filename'
+                           and k != 'file_path'}
+        return nodes
 
 
 def delete_collection_if_exists(client, collection_name):
@@ -104,3 +99,14 @@ def create_file_extractor(config):
             raise ValueError(f"Unsupported extractor class: {file_type_class}")
     
     return extractors
+
+def read_db(input_dir):
+    dbs = glob(f'{input_dir}**/*.db', recursive=True)
+    df_list = []
+    for db in dbs:
+        conn = sqlite3.connect(db)
+        cur = conn.cursor()
+        df_list.append(pd.read_sql_query('SELECT * FROM docs', conn))
+        conn.close()
+    final_df = pd.concat(df_list, ignore_index=True)
+    return final_df

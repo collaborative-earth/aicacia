@@ -1,3 +1,4 @@
+import ast
 import uuid
 
 import models
@@ -42,7 +43,12 @@ class UserQueryController(AicaciaProtectedAPI):
         )
         references = []
         for res in results.points:
-            references.append(models.Reference(title=res.payload['file_name'] + ' - ' + res.payload['_node_content'].split('"text":')[-1][:1000] + '...', url='test', description=res.payload['_node_content']).model_dump())
+            sources = ast.literal_eval(res.payload['sources'].split(';{')[0])
+            references.append(models.Reference(
+                                               title=res.payload['title'] + ' - ' + res.payload['_node_content'].split('"text":')[-1][:1000] + '...', 
+                                               url=sources['link'], 
+                                               description=res.payload['_node_content'].split('"text":')[-1][:1000] + '...'
+                                              ).model_dump())
         
         query = models.Query(
             query_id=query_id,

@@ -7,7 +7,7 @@ file_extractor:
 
 text-splitter:
   SentenceSplitter:
-    chunk_size: 1024
+    chunk_size: 512
     chunk_overlap: 20
   
 vectordb:
