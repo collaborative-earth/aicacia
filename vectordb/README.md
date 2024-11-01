@@ -31,7 +31,7 @@ Once the server is running, you can access the Qdrant dashboard by visiting: `ht
 Go to the vectordb directory and run the main.py script using the following command to start loading the embedding vectors for the documents in the data directory into the vector store.
 
 ```bash
-python3 main.py -c <collection_name>
+python3 main.py -c <collection_name> -d <data_directory>
 ```
 
 ### Step 5: Upload the vectors
@@ -43,14 +43,16 @@ The vectors will be saved in `vectordb/qdrant_storage`. We can also resuse vecto
 The main.py script takes in two arguments:
 
  - Collection Name: Specify the name of the collection where you want to store the embeddings.
+ - Data Directory: Specify the location of the folder with the dataset.
 
 ```bash
 -c, --collection <collection_name>
+-d, -input-dir <data_directory>
 ```
 
 #### Example Command
 Here’s an example command that uses a custom collection name and specifies an embedding model:
 
 ```bash
-python3 main.py -c aicacia
+python3 main.py -c aicacia -d ../data/
 ```
