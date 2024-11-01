@@ -26,7 +26,12 @@ docker-compose up -d
 
 Once the server is running, you can access the Qdrant dashboard by visiting: `http://localhost:6333/dashboard#/collections`
 
-### Step 4: Load Embedding Vectors
+### Step 4: Update Config
+
+We can modify multiple different configs such as the text splitter function to use, embedding model to use, etc in the `config.yml` file in the vectordb directory. A lot of these classes are defined using their class names directly allowing lesser modification of code.
+
+
+### Step 5: Load Embedding Vectors
 
 Go to the vectordb directory and run the main.py script using the following command to start loading the embedding vectors for the documents in the data directory into the vector store.
 
@@ -34,7 +39,7 @@ Go to the vectordb directory and run the main.py script using the following comm
 python3 main.py -c <collection_name> -d <data_directory>
 ```
 
-### Step 5: Upload the vectors
+### Step 6: Upload the vectors
 
 The vectors will be saved in `vectordb/qdrant_storage`. We can also resuse vectors by downloading them into this location.
 
