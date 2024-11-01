@@ -50,7 +50,7 @@ if __name__ == '__main__':
                                            recursive=True,
                                            required_exts=[ext],
                                            file_extractor = create_file_extractor(config),
-                                           num_files_limit=10)
+                                           num_files_limit=100)
         except Exception as e:
             if 'No files found' in str(e):
                 continue
@@ -62,7 +62,10 @@ if __name__ == '__main__':
         for file_path in tqdm(input_files):
             reader.input_files = [file_path]
             file_name = str(file_path).split('/')[-1].split('.')[-2]
-            file_metadata = metadata[metadata['id'] == file_name].iloc[0].to_dict()
+            try:
+                file_metadata = metadata[metadata['id'] == file_name].iloc[0].to_dict()
+            except:
+                file_metadata = {}
 
             # Load the document with the file extractor
             loaded_docs = reader.load_data()
@@ -70,12 +73,8 @@ if __name__ == '__main__':
             # Enrich each document with metadata
             for doc in loaded_docs:
                 doc.metadata.update(file_metadata)
-                doc.excluded_llm_metadata_keys = ["file_name", "filename", "extension", 
-                                                  "file_path", "file_size", "creation_date", 
-                                                  "last_modified_date", "sources"]
-                doc.excluded_embed_metadata_keys = ["file_name", "filename", "extension", 
-                                                    "file_path", "file_size", "creation_date", 
-                                                    "last_modified_date", "sources"]
+                doc.excluded_llm_metadata_keys = list(doc.metadata.keys())
+                doc.excluded_embed_metadata_keys = list(doc.metadata.keys())
             docs.extend(loaded_docs)
 
 
