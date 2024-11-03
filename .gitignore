@@ -14,6 +14,10 @@ venv
 *.o
 
 eval/ann-benchmarks/data/*
+data/*
+!data/.gitkeep
+vectordb/qdrant_storage/*
+!vectordb/qdrant_storage/.gitkeep
 *.class
 
 *.log
