@@ -76,3 +76,13 @@ export const submitFeedback = async (
         throw new Error('Failed to submit feedback');
     }
 }
+
+export const chatApiCall = async (message: string, thread_id?: string) => {
+    try {
+        const response = await api.post('/chat', { message, thread_id: thread_id });
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw new Error('Failed to send chat message');
+    }
+}

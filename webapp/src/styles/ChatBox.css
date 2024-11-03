@@ -1,0 +1,60 @@
+/* ChatBox.css */
+
+.chatbox {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #fdfdfd;
+  border: 1px solid #dedede;
+  border-radius: 8px;
+  margin-top: 20px; /* Added margin to separate from toggle button */
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Increased gap between messages */
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 12px 18px;
+  border-radius: 15px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.message-bubble.user {
+  background-color: #c8e6c9; /* Brighter green */
+  color: #2e7d32;
+  align-self: flex-end;
+  border: 1px solid #a5d6a7;
+}
+
+.message-bubble.bot {
+  background-color: #e0e0e0; /* Brighter gray */
+  color: #424242;
+  align-self: flex-start;
+  border: 1px solid #bdbdbd;
+}
+
+.input-bar {
+  display: flex;
+  padding: 12px;
+  border-top: 1px solid #dedede;
+  background-color: #ffffff;
+}
+
+.input-field {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #a0a0a0;
+  border-radius: 20px;
+  outline: none;
+  font-size: 14px;
+  background-color: #f9f9f9;
+}
