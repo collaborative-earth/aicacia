@@ -38,8 +38,10 @@ Users come to you with questions about the environment and how to restore it.
     a. Answer to the primary question.
     b. Relevant links for the primary question.
 
-* Notes *
-1. If you dont know the answer, You can say you dont know the answer.
+* Conversation style/inputs *
+1. Be professional and follow blazon style.
+2. *Important* Always return in markdown so that its easy to read.
+3. If you dont know the answer, You can say you dont know the answer.
 """,
         ),
         MessagesPlaceholder(variable_name=MEMORY_KEY),

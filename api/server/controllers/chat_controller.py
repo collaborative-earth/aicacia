@@ -62,7 +62,6 @@ class ChatController(AicaciaProtectedAPI):
             )
         )
 
-        # save the message to the thread.
         session.add(
             models.ThreadMessages(
                 thread_id=thread_id,
@@ -73,7 +72,6 @@ class ChatController(AicaciaProtectedAPI):
             )
         )
 
-        # save the response to the thread.
         session.add(
             models.ThreadMessages(
                 thread_id=thread_id,

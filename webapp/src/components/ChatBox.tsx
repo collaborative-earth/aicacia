@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/ChatBox.css';
 import { chatApiCall } from '../utils/api';
+import ReactMarkdown from 'react-markdown';
 
 const ChatBox: React.FC = () => {
   const [messages, setMessages] = useState<{ sender: 'user' | 'bot', text: string }[]>([]);
@@ -40,7 +41,7 @@ const ChatBox: React.FC = () => {
       <div className="chat-messages">
         {messages.map((message, index) => (
           <div key={index} className={`message-bubble ${message.sender}`}>
-            {message.text}
+             <ReactMarkdown>{message.text}</ReactMarkdown>
           </div>
         ))}
       </div>
