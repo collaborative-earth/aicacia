@@ -19,6 +19,7 @@ def create_app():
 
     app.include_router(hello_router, prefix="/hello", tags=["hello"])
     app.include_router(user_query_router, prefix="/user_query", tags=["user_query"])
+    app.include_router(user_query_router, prefix="/chat", tags=["chat"])
     app.include_router(feedback_router, prefix="/feedback", tags=["feedback"])
     app.include_router(user_router, prefix="/user", tags=["user"])
 

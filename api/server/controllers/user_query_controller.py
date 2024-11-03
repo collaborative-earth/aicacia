@@ -5,8 +5,11 @@ import models
 from controllers.base_controller import AicaciaProtectedAPI
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
-from library.vectordb_utils import (create_embedding_class,
-                                    create_vectordb_client, load_config)
+from library.vectordb_utils import (
+    create_embedding_class,
+    create_vectordb_client,
+    load_config,
+)
 from pydantic import BaseModel
 
 user_query_router = InferringRouter()
@@ -31,10 +34,10 @@ class UserQueryController(AicaciaProtectedAPI):
     @user_query_router.post("/")
     def post(self, request: UserQueryPostRequest) -> UserQueryPostResponse:
         query_id = str(uuid.uuid4())
-        
+
         # Embed query
         query_embedding = embed_model.get_text_embedding(request.question)
-        
+
         # Search in vector store
         results = client.query_points(
             collection_name=config['vectordb']['collection'],
@@ -44,12 +47,18 @@ class UserQueryController(AicaciaProtectedAPI):
         references = []
         for res in results.points:
             sources = ast.literal_eval(res.payload['sources'].split(';{')[0])
-            references.append(models.Reference(
-                                               title=res.payload['title'] + ' - ' + res.payload['_node_content'].split('"text":')[-1][:1000] + '...', 
-                                               url=sources['link'], 
-                                               description=res.payload['_node_content'].split('"text":')[-1][:1000] + '...'
-                                              ).model_dump())
-        
+            references.append(
+                models.Reference(
+                    title=res.payload["title"]
+                    + " - "
+                    + res.payload["_node_content"].split('"text":')[-1][:1000]
+                    + "...",
+                    url=sources["link"],
+                    description=res.payload["_node_content"].split('"text":')[-1][:1000]
+                    + "...",
+                ).model_dump()
+            )
+
         query = models.Query(
             query_id=query_id,
             question=request.question,
