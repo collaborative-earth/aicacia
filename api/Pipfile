@@ -20,6 +20,10 @@ uvicorn = "*"
 pydantic-settings = "*"
 python-dotenv = "*"
 pyjwt = "*"
+qdrant_client = "*"
+llama_index = '*'
+llama-index-embeddings-huggingface = '*'
+llama-index-vector-stores-qdrant = '*'
 
 [requires]
 python_version = "3.10"

@@ -1,0 +1,15 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - "${PWD}/vectordb/qdrant_storage:/qdrant/storage"
+    networks:
+      - qdrant_network
+
+networks:
+  qdrant_network:
+    name: qdrant_network
+    driver: bridge

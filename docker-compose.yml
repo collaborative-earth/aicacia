@@ -3,3 +3,4 @@ include:
   - "extraction/compose.yml"
   - "notebooks/compose.yml"
   - "webapp/compose.yml"
+  - "vectordb/compose.yml"
