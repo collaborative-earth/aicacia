@@ -2,10 +2,9 @@ import argparse
 import os
 from glob import glob
 
-import ollama
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
+from llama_index.core import SimpleDirectoryReader
+from llama_index.core.ingestion import IngestionPipeline
+from llama_index.core.node_parser import HTMLNodeParser, MarkdownNodeParser
 from tqdm import tqdm
 
 from utils import *
