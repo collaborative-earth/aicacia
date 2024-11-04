@@ -38,6 +38,7 @@ const ChatBox: React.FC = () => {
 
   return (
     <div className="chatbox">
+      <h2> Restoration Projects Chat!</h2>
       <div className="chat-messages">
         {messages.map((message, index) => (
           <div key={index} className={`message-bubble ${message.sender}`}>
