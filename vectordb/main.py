@@ -3,7 +3,6 @@ import os
 import sys
 from glob import glob
 
-import ollama
 from llama_index.core import SimpleDirectoryReader
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import HTMLNodeParser, MarkdownNodeParser
