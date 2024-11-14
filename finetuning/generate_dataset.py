@@ -1,10 +1,9 @@
 #%%
 import os
 import sys
-sys.path.append("..")
-
 import json
 from pathlib import Path
+sys.path.append("..")
 from llama_index.core import SimpleDirectoryReader
 from llama_index.core import Settings
 from llama_index.core.node_parser import SentenceSplitter
@@ -13,8 +12,23 @@ from llama_index.core.evaluation import EmbeddingQAFinetuneDataset
 from llama_index.finetuning import generate_qa_embedding_pairs
 from llama_index.llms.ollama import Ollama
 
-from finetuning.src.node_parsers.tei_parser import TEINodeParser
-from finetuning.src.node_parsers.node_filters import TEINodeFilter
+from src.tei_parser import TEINodeParser
+from src.node_filters import TEINodeFilter
+from src.qa_generation_marcos_T5 import generate_qa_embedding_pairs_fromT5
+
+"""
+This script processes TEI documents to generate a Question-Answer (QA) dataset.
+It reads TEI files from a specified directory, applies various transformations to parse and filter the content, 
+and splits the text into manageable chunks. For each chunk, the script generates QA pairs using either 
+an LLM or a custom T5 model. The resulting QA dataset is saved to a specified file.
+
+Main Steps:
+1. Load configuration settings from a JSON file.
+2. Ingest and process TEI documents to create document chunks (nodes).
+3. Generate and save  QA pairs for each chunk using a specified method.
+
+Usage: Configure paths and parameters in `config.json` and run the script.
+"""
 
 #%%
 def load_config(config_path: str) -> dict:
@@ -22,6 +36,7 @@ def load_config(config_path: str) -> dict:
         return json.load(file)
     
 def create_nodes_from_tei_path(tei_path: str, chunk_size: int, chunk_overlap: int):
+    """Ingest and process TEI documents, returning parsed chunks (nodes)."""
     reader = SimpleDirectoryReader(input_dir=tei_path)
     documents = reader.load_data()
 
@@ -36,10 +51,9 @@ def create_nodes_from_tei_path(tei_path: str, chunk_size: int, chunk_overlap: in
     
 
 def main():
-    # Load configurations from config.json
+    """Main function to configure and run the ingestion and QA generation pipeline."""
     config = load_config("config.json")
     
-    # Set the LLM model and timeout
     llm = Ollama(model="phi3", request_timeout=140.0)
     
     # Ingestion pipeline settings
@@ -48,6 +62,7 @@ def main():
     chunk_overlap = config["ingestion_pipeline"]["chunk_overlap"]
     
     # QA generation settings
+    method = config["qa_generation"]["method"]
     prompt_template = config["qa_generation"]["prompt_template"]
     num_questions = config["qa_generation"]["num_questions_per_chunk"]
     output_path = config["paths"]["output_dataset"]
@@ -56,14 +71,23 @@ def main():
     nodes = create_nodes_from_tei_path(tei_path, chunk_size, chunk_overlap)
     print(f"Generating questions from {len(nodes)} chunks." )
     # Generate QA dataset
-    qa = generate_qa_embedding_pairs(
-        llm=llm,
-        nodes=nodes,
-        qa_generate_prompt_tmpl=prompt_template,
-        num_questions_per_chunk=num_questions,
-        output_path=output_path,
-        verbose = False
-    )
+    if method == "llm":
+        qa = generate_qa_embedding_pairs(
+            llm=llm,
+            nodes=nodes,
+            qa_generate_prompt_tmpl=prompt_template,
+            num_questions_per_chunk=num_questions,
+            output_path=output_path,
+            verbose = False
+        )
+    elif method == "MarcosT5":
+        qa = generate_qa_embedding_pairs_fromT5(
+            nodes=nodes,
+            num_questions_per_chunk=num_questions,
+            output_path=output_path,
+            verbose = False
+        )
+        
     print(f"Question-Answer dataset created and saved to {output_path}")
 #%%
 if __name__ == "__main__":
