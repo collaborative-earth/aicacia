@@ -1,13 +1,14 @@
 import random
+import os
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.evaluation import InformationRetrievalEvaluator
-from src.ir_evaluation.bm25evaluator import InformationRetrievalEvaluatorBM25
+from src.bm25evaluator import InformationRetrievalEvaluatorBM25
 from llama_index.core.evaluation import EmbeddingQAFinetuneDataset
 
 BASE_DIR = Path(__file__).resolve().parents[0]  
-
-QADATASET_PATH = BASE_DIR / "data" / "qa_dataset" / "qa_finetune_dataset_marcosT5.json"
+QADATASET_FILE = "qa_finetune_dataset2.json"
+QADATASET_PATH = BASE_DIR / "qa_dataset" / QADATASET_FILE
 
 MODEL2EVALUATE = { "BM25" : "BM25",
                   "jinav3" : "jinaai/jina-embeddings-v3",
@@ -36,7 +37,7 @@ def evaluate_st(
             show_progress_bar=True
         )
         model = SentenceTransformer(model_id,trust_remote_code=True)
-    output_path = BASE_DIR / "results"
+    output_path = BASE_DIR / "ir_results" / os.path.splitext(QADATASET_FILE)[0]
     Path(output_path).mkdir(exist_ok=True, parents=True)
     return evaluator(model, output_path=output_path)
 
