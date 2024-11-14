@@ -1,7 +1,13 @@
 import re
+import random
 import torch
+import uuid
+import json
+from tqdm import tqdm
 from typing import Dict, List, Tuple
 from llama_index.finetuning import EmbeddingQAFinetuneDataset
+from llama_index.core.schema import MetadataMode, TextNode
+from llama_index.finetuning.embeddings.common import load_existing_data
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 
 def generate_qa_embedding_pairs_fromT5(
