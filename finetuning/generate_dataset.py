@@ -3,6 +3,7 @@ import os
 import sys
 import json
 from pathlib import Path
+sys.path.append(".")
 sys.path.append("..")
 from llama_index.core import SimpleDirectoryReader
 from llama_index.core import Settings
@@ -12,9 +13,9 @@ from llama_index.core.evaluation import EmbeddingQAFinetuneDataset
 from llama_index.finetuning import generate_qa_embedding_pairs
 from llama_index.llms.ollama import Ollama
 
-from src.tei_parser import TEINodeParser
-from src.node_filters import TEINodeFilter
-from src.qa_generation_marcos_T5 import generate_qa_embedding_pairs_fromT5
+from finetuning.src.tei_parser import TEINodeParser
+from finetuning.src.node_filters import TEINodeFilter
+from finetuning.src.qa_generation_marcos_T5 import generate_qa_embedding_pairs_fromT5
 
 """
 This script processes TEI documents to generate a Question-Answer (QA) dataset.
