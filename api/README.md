@@ -23,7 +23,10 @@ pip install pipenv --user
 
 ### Run server
 Add `.env` inside `api` and add the following
+
 `POSTGRES_PASSWORD=aicacia`
+
+`OPENAI_API_KEY=<openai key>`
 
 Run server
 ```
