@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import logo from '../assets/aicacia_logo.png';
-import { getToken, removeToken } from '../utils/tokens';
+import { removeToken } from '../utils/tokens';
 import '../styles/TopBar.css';
+import { getUserInfo } from '../utils/api';
 
 const TopBar: React.FC = () => {
   const navigate = useNavigate();
@@ -15,10 +16,14 @@ const TopBar: React.FC = () => {
   };
 
   useEffect(() => {
-    const token = getToken();
-    if (token) {
-      setLoggedIn(true);
+
+    const fetchUser = async () => {
+      const user = await getUserInfo();
+      if (user) {
+        setLoggedIn(true);
+      }
     }
+    fetchUser();
   }, []);
 
   return (

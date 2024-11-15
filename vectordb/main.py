@@ -7,7 +7,6 @@ from llama_index.core import SimpleDirectoryReader
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import HTMLNodeParser, MarkdownNodeParser
 from tqdm import tqdm
-
 from utils import *
 
 sys.path.append("..")
