@@ -34,6 +34,16 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
     setQueryId(res.query_id);
   };
 
+  const askForNewQuestion = async () => {
+    setQuery('');
+    setQueryId('');
+    setReferences([]);
+    setReferencesFeedback([]);
+    setSummary('');
+    setOverallFeedback('');
+    setSummaryFeedback(DONT_KNOW_FEEDBACK);
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSearch(e);
@@ -57,6 +67,8 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
       summary_feedback: summaryFeedback,
       feedback: overallFeedback,
     });
+    alert('Feedback submitted successfully');
+    askForNewQuestion();
   };
 
   return (
