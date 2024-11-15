@@ -98,7 +98,7 @@ class ThreadMessages(Base, table=True):
     thread_message_json: dict = Field(sa_column=Column(JSON))
 
     user: "User" = Relationship(back_populates="thread_messages")
-    
+
 
 class Document(Base, table=True):
     __tablename__ = "documents"

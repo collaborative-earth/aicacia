@@ -24,7 +24,6 @@ qdrant_client = "*"
 llama_index = '*'
 llama-index-embeddings-huggingface = '*'
 llama-index-vector-stores-qdrant = '*'
-ollama = '*'
 langchain = "*"
 langchain-openai = "*"
 langchain-community = "*"
