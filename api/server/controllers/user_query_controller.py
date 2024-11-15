@@ -5,6 +5,7 @@ import models
 from controllers.base_controller import AicaciaProtectedAPI
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
+from library.ai_summary_utils import generate_summary
 from library.vectordb_utils import (
     create_embedding_class,
     create_vectordb_client,
@@ -44,6 +45,7 @@ class UserQueryController(AicaciaProtectedAPI):
             query=query_embedding,
             limit=3,
         )
+
         references = []
         for res in results.points:
             sources = ast.literal_eval(res.payload['sources'].split(';{')[0])
@@ -59,11 +61,13 @@ class UserQueryController(AicaciaProtectedAPI):
                 ).model_dump()
             )
 
+        summary = generate_summary(request.question, "Add context from the vectordb")
+
         query = models.Query(
             query_id=query_id,
             question=request.question,
             references=references,
-            summary="test summary",
+            summary=summary,
             user_id=self.user.user_id,
         )
 

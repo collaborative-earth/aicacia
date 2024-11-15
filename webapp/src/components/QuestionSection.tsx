@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/QuestionSection.css';
 import { askQuestion, submitFeedback } from '../utils/api';
+import ReactMarkdown from 'react-markdown';
 
 interface Reference {
   url: string;
@@ -25,6 +26,8 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
+    setReferences([]);
+    setSummary('');
     const res = await askQuestion(query);
 
     setReferences(res.references);
@@ -34,7 +37,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
     setQueryId(res.query_id);
   };
 
-  const askForNewQuestion = async () => {
+  const askForNewQuestion = () => {
     setQuery('');
     setQueryId('');
     setReferences([]);
@@ -92,7 +95,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
         <div className="summary-section">
           <h3>Summary</h3>
           <div className="summary-output">
-            <p className="summary-text">{summary}</p>
+            <ReactMarkdown>{summary}</ReactMarkdown>
 
             <div className="feedback-divider"></div>
               <div className="feedback-options">

@@ -9,7 +9,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=1, api_key=settings.OPENAI_API_KEY)
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=1, api_key=settings.OPENAI_API_KEY)
 
 
 @tool
