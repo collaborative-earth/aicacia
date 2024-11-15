@@ -1,6 +1,4 @@
 include:
-  - "api/compose.yml"
-  - "extraction/compose.yml"
-  - "notebooks/compose.yml"
-  - "webapp/compose.yml"
   - "vectordb/compose.yml"
+  - "api/compose.yml"
+  - "webapp/compose.yml"

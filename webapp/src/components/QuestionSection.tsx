@@ -7,6 +7,10 @@ interface Reference {
   title: string;
 }
 
+const USEFUL_FEEDBACK = 10;
+const NOT_USEFUL_FEEDBACK = 0;
+const DONT_KNOW_FEEDBACK = -1;
+
 interface QuestionSectionProps {}
 
 const QuestionSection: React.FC<QuestionSectionProps> = () => {
@@ -16,13 +20,16 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
   const [summary, setSummary] = useState<string>('');
   const [referencesFeedback, setReferencesFeedback] = useState<number[]>([]);
   const [overallFeedback, setOverallFeedback] = useState<string>('');
+  const [summaryFeedback, setSummaryFeedback] = useState<number>(DONT_KNOW_FEEDBACK);
+
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const res = await askQuestion(query);
 
     setReferences(res.references);
-    setReferencesFeedback(res.references.map(() => 10));
+    setReferencesFeedback(res.references.map(() => DONT_KNOW_FEEDBACK));
+    setSummaryFeedback(DONT_KNOW_FEEDBACK);
     setSummary(res.summary);
     setQueryId(res.query_id);
   };
@@ -33,9 +40,9 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
     }
   };
 
-  const handleFeedbackChange = (index: number, useful: boolean) => {
+  const handleFeedbackChange = (index: number, feedback: number) => {
     const updatedReferencesFeedback = [...referencesFeedback];
-    updatedReferencesFeedback[index] = useful ? 10 : 0;
+    updatedReferencesFeedback[index] = feedback;
     setReferencesFeedback(updatedReferencesFeedback);
   };
 
@@ -47,6 +54,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
     await submitFeedback({
       query_id: queryId,
       references_feedback: referencesFeedback,
+      summary_feedback: summaryFeedback,
       feedback: overallFeedback,
     });
   };
@@ -71,7 +79,43 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
       {summary && (
         <div className="summary-section">
           <h3>Summary</h3>
-          <p>{summary}</p>
+          <div className="summary-output">
+            <p className="summary-text">{summary}</p>
+
+            <div className="feedback-divider"></div>
+              <div className="feedback-options">
+                <label>
+                  <input
+                    type="radio"
+                    name="summary-feedback"
+                    value="useful"
+                    checked={summaryFeedback === USEFUL_FEEDBACK}
+                    onChange={() => setSummaryFeedback(USEFUL_FEEDBACK)}
+                  />
+                  Useful
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="summary-feedback"
+                    value="not-useful"
+                    checked={summaryFeedback === NOT_USEFUL_FEEDBACK}
+                    onChange={() => setSummaryFeedback(NOT_USEFUL_FEEDBACK)}
+                  />
+                  Not Useful
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="summary-feedback"
+                    value="dont-know"
+                    checked={summaryFeedback === DONT_KNOW_FEEDBACK}
+                    onChange={() => setSummaryFeedback(DONT_KNOW_FEEDBACK)}
+                  />
+                  Don't Know
+                </label>
+              </div>
+            </div>
         </div>
       )}
 
@@ -90,8 +134,8 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
                       type="radio"
                       name={`feedback-${index}`}
                       value="useful"
-                      checked={referencesFeedback[index] === 10}
-                      onChange={() => handleFeedbackChange(index, true)}
+                      checked={referencesFeedback[index] === USEFUL_FEEDBACK}
+                      onChange={() => handleFeedbackChange(index, USEFUL_FEEDBACK)}
                     />
                     Useful
                   </label>
@@ -100,10 +144,20 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
                       type="radio"
                       name={`feedback-${index}`}
                       value="not-useful"
-                      checked={referencesFeedback[index] === 0}
-                      onChange={() => handleFeedbackChange(index, false)}
+                      checked={referencesFeedback[index] === NOT_USEFUL_FEEDBACK}
+                      onChange={() => handleFeedbackChange(index, NOT_USEFUL_FEEDBACK)}
                     />
                     Not Useful
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name={`feedback-${index}`}
+                      value="not-useful"
+                      checked={referencesFeedback[index] === DONT_KNOW_FEEDBACK}
+                      onChange={() => handleFeedbackChange(index, DONT_KNOW_FEEDBACK)}
+                    />
+                    Don't Know
                   </label>
                 </div>
               </li>

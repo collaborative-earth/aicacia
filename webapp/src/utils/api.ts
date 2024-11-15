@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getToken } from './tokens';
+import { getToken, removeToken } from './tokens';
 
 // Base URL for the API
 const API_URL = 'http://localhost:8000';
@@ -16,10 +16,8 @@ api.interceptors.request.use(
   (config) => {
     const token = getToken();
 
-    // Define routes that should not include the token
     const unprotectedRoutes = ['/user/login', '/user'];
 
-    // Check if the request URL is not in the list of unprotected routes
     if (token && !unprotectedRoutes.includes(config.url || '')) {
       config.headers['aicacia-api-token'] = token;
     }
@@ -27,6 +25,19 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      removeToken();
+    }
+
     return Promise.reject(error);
   }
 );
@@ -66,7 +77,7 @@ export const askQuestion = async (question: string) => {
 
 
 export const submitFeedback = async (
-  feedback: { query_id: string; references_feedback: number[]; feedback: string }
+  feedback: { query_id: string; summary_feedback: number; references_feedback: number[]; feedback: string }
 ) => {
     try {
         const response = await api.post('/feedback', feedback);
@@ -84,5 +95,15 @@ export const chatApiCall = async (message: string, thread_id?: string) => {
     } catch (error) {
         console.log(error);
         throw new Error('Failed to send chat message');
+    }
+}
+
+export const getUserInfo = async () => {
+    try {
+        const response = await api.get('/user_info/');
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw new Error('Failed to get user');
     }
 }

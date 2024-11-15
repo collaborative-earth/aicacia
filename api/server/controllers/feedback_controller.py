@@ -14,6 +14,7 @@ feedback_router = InferringRouter()
 class FeedbackPostRequest(BaseModel):
     query_id: str
     references_feedback: list[int]
+    summary_feedback: int
     feedback: str
 
 
@@ -52,6 +53,7 @@ class FeedbackController(AicaciaProtectedAPI):
             feedback_json=models.FeedbackJSON(
                 references_feedback=request.references_feedback,
                 feedback=request.feedback,
+                summary_feedback=request.summary_feedback,
             ).model_dump(),
         )
 

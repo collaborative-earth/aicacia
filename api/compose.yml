@@ -4,7 +4,7 @@ services:
     ports:
       - "8000:8000"
     networks:
-      - qdrant_network
+      - qdrant_network_ext
       - postgres_network
     depends_on:
       - aicacia-postgres
@@ -26,7 +26,7 @@ volumes:
   aicacia_postgres_data:
 
 networks:
-  qdrant_network:
+  qdrant_network_ext:
     name: qdrant_network
     external: true  # Use existing network created by Qdrant compose
   postgres_network:

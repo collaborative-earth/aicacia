@@ -63,6 +63,7 @@ class Query(Base, table=True):
 class FeedbackJSON(BaseModel):
     references_feedback: list[int]
     feedback: str
+    summary_feedback: int
 
 
 class Feedback(Base, table=True):
