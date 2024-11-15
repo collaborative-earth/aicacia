@@ -1,10 +1,11 @@
+import enum
 import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
 from pydantic import BaseModel
 from sqlalchemy import Column, PrimaryKeyConstraint
-from sqlmodel import JSON, Field, Relationship, SQLModel, LargeBinary
+from sqlmodel import JSON, Field, LargeBinary, Relationship, SQLModel
 
 
 def utcnow() -> datetime:
@@ -38,6 +39,7 @@ class User(Base, table=True):
 
     queries: List["Query"] = Relationship(back_populates="user")
     feedbacks: List["Feedback"] = Relationship(back_populates="user")
+    thread_messages: List["ThreadMessages"] = Relationship(back_populates="user")
 
 
 class Reference(BaseModel):
@@ -61,6 +63,7 @@ class Query(Base, table=True):
 class FeedbackJSON(BaseModel):
     references_feedback: list[int]
     feedback: str
+    summary_feedback: int
 
 
 class Feedback(Base, table=True):
@@ -73,6 +76,28 @@ class Feedback(Base, table=True):
 
     user: "User" = Relationship(back_populates="feedbacks")
     query: "Query" = Relationship(back_populates="feedbacks")
+
+
+class Actor(enum.Enum):
+    USER = "user"
+    AGENT = "agent"
+
+
+class ChatMessage(BaseModel):
+    message: str
+    message_from: Actor
+
+
+class ThreadMessages(Base, table=True):
+    __tablename__ = "thread_messages"
+    thread_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    message_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="users.user_id", nullable=False)
+    message_from: str = Field(nullable=False)
+    message: str = Field(nullable=False)
+    thread_message_json: dict = Field(sa_column=Column(JSON))
+
+    user: "User" = Relationship(back_populates="thread_messages")
 
 
 class Document(Base, table=True):

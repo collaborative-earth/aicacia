@@ -34,14 +34,20 @@ def create_auth_token(user: models.User) -> str:
 
 
 def authenticate(aicacia_api_token: str = Header(None)) -> str:
+    print(f"user_id {aicacia_api_token}")
+
     if not aicacia_api_token:
         raise HTTPException(status_code=401, detail="Unauthorized: Token missing")
 
     user_id = verify_jwt_token(aicacia_api_token)
 
+    print(f"user_id {user_id}")
+
     session = get_db_session()
 
-    user = session.exec(select(models.User).filter(models.User.user_id == user_id)).first()
+    user = session.exec(
+        select(models.User).filter(models.User.user_id == user_id)
+    ).first()
 
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized: User not found")
