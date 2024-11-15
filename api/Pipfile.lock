@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7cdada0348a0e9dd395f3398f53f23a1a91324d08fe978d43d01ead237dd0242"
+            "sha256": "0c95c3be1faa9c1e3a902f9ce2d844a4d60266d729b9c3a1a5f9c11173108a72"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -118,7 +118,10 @@
                 "sha256:fe2fb38c2ed905a2582948e2de560675e9dfbee94c6d5ccdb1301c6d0a5bf092",
                 "sha256:ffe595f10566f8276b76dc3a11ae4bb7eba1aac8ddd75811736a15b0d5311414"
             ],
+<<<<<<< HEAD
             "markers": "python_version >= '3.8'",
+=======
+>>>>>>> main
             "version": "==3.10.10"
         },
         "aiosignal": {
@@ -761,6 +764,7 @@
             "markers": "python_version >= '3.8'",
             "version": "==0.27.2"
         },
+<<<<<<< HEAD
         "httpx-sse": {
             "hashes": [
                 "sha256:1e81a3a3070ce322add1d3529ed42eb5f70817f45ed6ec915ab753f961139721",
@@ -769,6 +773,8 @@
             "markers": "python_version >= '3.8'",
             "version": "==0.4.0"
         },
+=======
+>>>>>>> main
         "huggingface-hub": {
             "extras": [
                 "inference"
@@ -1938,7 +1944,7 @@
                 "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3",
                 "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2'",
             "version": "==2.9.0.post0"
         },
         "python-dotenv": {
@@ -2349,7 +2355,7 @@
                 "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926",
                 "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2'",
             "version": "==1.16.0"
         },
         "sniffio": {

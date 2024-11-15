@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 from typing import List, Optional
 
 from pydantic import BaseModel
-from sqlalchemy import Column, null
-from sqlmodel import JSON, Field, Relationship, SQLModel
+from sqlalchemy import Column, PrimaryKeyConstraint
+from sqlmodel import JSON, Field, LargeBinary, Relationship, SQLModel
 
 
 def utcnow() -> datetime:
@@ -98,3 +98,50 @@ class ThreadMessages(Base, table=True):
     thread_message_json: dict = Field(sa_column=Column(JSON))
 
     user: "User" = Relationship(back_populates="thread_messages")
+    
+
+class Document(Base, table=True):
+    __tablename__ = "documents"
+    doc_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    title: str = Field(nullable=False)
+    raw_content: Optional[bytes] = Field(sa_column=Column(LargeBinary))
+    authors: list[str] = Field(sa_column=Column(JSON))
+    doi: Optional[str] = Field()
+    link: Optional[str] = Field()
+    content_hash: Optional[int] = Field()
+    corpus_name: Optional[str] = Field()
+    sources: list[str] = Field(sa_column=Column(JSON))
+    location: Optional[str] = Field()
+    sourced_date: Optional[datetime] = Field()
+    revision_date: Optional[datetime] = Field()
+    references: list[str] = Field(sa_column=Column(JSON))
+    generated_metadata: dict = Field(sa_column=Column(JSON))
+
+    chunks: List["DocumentChunk"] = Relationship(back_populates="document")
+    tags: List["DocumentTag"] = Relationship(back_populates="document")
+
+
+class DocumentChunk(Base, table=True):
+    __tablename__ = "document_chunks"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    doc_id: uuid.UUID = Field(foreign_key="documents.doc_id", nullable=False)
+    sequence_number: Optional[int] = Field()
+    content: bytes = Field(sa_column=Column(LargeBinary))
+    media_type: str = Field(nullable=False)
+    token_offset_position: Optional[int] = Field()
+    generated_metadata: dict = Field(sa_column=Column(JSON))
+
+    document: "Document" = Relationship(back_populates="chunks")
+
+
+class DocumentTag(Base, table=True):
+    __tablename__ = "document_tags"
+    value: str = Field(primary_key=False, nullable=False)
+    doc_id: uuid.UUID = Field(foreign_key="documents.doc_id", nullable=False)
+    generated: bool = Field(primary_key=False, nullable=False)
+
+    document: "Document" = Relationship(back_populates="tags")
+
+    __table_args__ = (
+        PrimaryKeyConstraint("doc_id", "value", "generated"),
+    )

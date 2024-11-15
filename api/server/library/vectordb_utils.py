@@ -13,7 +13,7 @@ def create_vectordb_client(config):
     try:
         return QdrantClient(**params)
     except:
-        raise ValueError("Unsupported vectordb client")
+        raise ValueError(f"Unsupported vectordb client")
 
 
 def create_embedding_class(config):
@@ -25,7 +25,7 @@ def create_embedding_class(config):
 
     try:
         return globals()[embedding_class](**params)
-    except:
+    except Exception:
         raise ValueError(f"Unsupported embedding class: {embedding_class}")
 
 
