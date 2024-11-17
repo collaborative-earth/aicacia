@@ -1,4 +1,4 @@
-from .html_io import read_xml_file
+from aicacia_extraction.sources.io_utils import read_local_xml
 
 
 def __parse_references(doc):
@@ -75,7 +75,7 @@ def __parse_text(doc):
 
 
 def parse_grobid(path):
-    doc = read_xml_file(path)
+    doc = read_local_xml(path)
 
     return {
         'refs': list(__parse_references(doc)),
