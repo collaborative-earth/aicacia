@@ -1,9 +1,9 @@
 import json
 
-from aicacia_document_exporter.Document import Document, DocumentSection, MediaType
+from aicacia_document_exporter.Document import Document, DocumentChunk, MediaType
 from bs4 import Tag
 
-from .html_io import read_html
+from aicacia_extraction.sources.io_utils import read_html
 
 
 class WriSimpleExtractor:
@@ -80,10 +80,11 @@ class WriSimpleExtractor:
             if (doi_a_doc := doi_doc.find('a')) is not None:
                 doi = doi_a_doc['href']
 
-        sections = []
+        chunks = []
         if (abstract_doc := doc.find('div', class_='main-content')) is not None:
-            sections.append(DocumentSection(
+            chunks.append(DocumentChunk(
                 content=abstract_doc.prettify(),
+                sequence_number=len(chunks),
                 media_type=MediaType.TEXT,
                 token_offset_position=0,
                 metadata={
@@ -95,7 +96,7 @@ class WriSimpleExtractor:
 
         return Document(
             title=title,
-            sections=sections,
+            chunks=chunks,
             doi=doi,
             authors=authors,
             sources=downloadable_sources,
