@@ -38,6 +38,8 @@ def get_restoration_context_for_message(country: str, message: str) -> int:
         limit=3,
     )
 
+    print(results)
+
     references = []
     for res in results.points:
         sources = ast.literal_eval(res.payload["sources"].split(";{")[0])
