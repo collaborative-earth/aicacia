@@ -20,7 +20,7 @@ from library.vectordb_utils import (
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=1, api_key=settings.OPENAI_API_KEY)
 
 
-config = load_config("/config.yaml")
+config = load_config("config.yaml")
 client = create_vectordb_client(config)
 embed_model = create_embedding_class(config)
 
@@ -38,23 +38,18 @@ def get_restoration_context_for_message(country: str, message: str) -> int:
         limit=3,
     )
 
-    print(results)
-
-    references = []
+    points = []
     for res in results.points:
         sources = ast.literal_eval(res.payload["sources"].split(";{")[0])
-        references.append(
-            models.Reference(
-                title=res.payload["title"]
-                + " - "
-                + res.payload["_node_content"].split('"text":')[-1][:1000]
-                + "...",
-                url=sources["link"],
-                description=res.payload["_node_content"].split('"text":')[-1][:1000]
-                + "...",
-            ).model_dump()
+        points.append(
+            {
+                "title": res.payload["title"],
+                "url": sources["link"],
+                "text": json.loads(res.payload["_node_content"])["text"],
+            }
         )
-    return json.dumps(references)
+
+    return json.dumps(points)
 
 
 MEMORY_KEY = "chat_history"

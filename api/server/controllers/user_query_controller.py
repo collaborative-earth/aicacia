@@ -1,4 +1,5 @@
 import ast
+import json
 import uuid
 
 import models
@@ -47,21 +48,33 @@ class UserQueryController(AicaciaProtectedAPI):
         )
 
         references = []
+        rag_context = []
         for res in results.points:
             sources = ast.literal_eval(res.payload['sources'].split(';{')[0])
+
+            if res.payload["title"] in [ref["title"] for ref in references]:
+                rag_context.append(
+                    {
+                        "title": res.payload["title"],
+                        "url": sources["link"],
+                        "text": json.loads(res.payload["_node_content"])["text"],
+                    }
+                )
+                print(f"Skipping duplicate reference: {res.payload['title']}")
+                continue
+
             references.append(
                 models.Reference(
-                    title=res.payload["title"]
-                    + " - "
-                    + res.payload["_node_content"].split('"text":')[-1][:1000]
-                    + "...",
+                    title=res.payload["title"],
                     url=sources["link"],
                     description=res.payload["_node_content"].split('"text":')[-1][:1000]
                     + "...",
                 ).model_dump()
             )
 
-        summary = generate_summary(request.question, "Add context from the vectordb")
+        print(f"RAG Context: {json.dumps(rag_context, indent=2)}")
+
+        summary = generate_summary(request.question, json.dumps(rag_context))
 
         query = models.Query(
             query_id=query_id,
