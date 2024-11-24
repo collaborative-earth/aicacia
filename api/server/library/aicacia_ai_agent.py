@@ -38,10 +38,10 @@ def get_restoration_context_for_message(country: str, message: str) -> int:
         limit=3,
     )
 
-    points = []
+    rag_context = []
     for res in results.points:
         sources = ast.literal_eval(res.payload["sources"].split(";{")[0])
-        points.append(
+        rag_context.append(
             {
                 "title": res.payload["title"],
                 "url": sources["link"],
@@ -49,7 +49,8 @@ def get_restoration_context_for_message(country: str, message: str) -> int:
             }
         )
 
-    return json.dumps(points)
+    print(f"RAG Context: {json.dumps(rag_context, indent=2)}")
+    return json.dumps(rag_context)
 
 
 MEMORY_KEY = "chat_history"
