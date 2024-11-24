@@ -32,6 +32,11 @@
     background-color: #3e8e41;
 }
 
+.search-button:disabled {
+  opacity: 0.5;
+  pointer-events: none; /* Ensures no interaction */
+}
+
 
 .summary-section,
 .references-section,

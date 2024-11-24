@@ -19,17 +19,25 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
   const [queryId, setQueryId] = useState('');
   const [references, setReferences] = useState<Reference[]>([]);
   const [summary, setSummary] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   const [referencesFeedback, setReferencesFeedback] = useState<number[]>([]);
   const [overallFeedback, setOverallFeedback] = useState<string>('');
   const [summaryFeedback, setSummaryFeedback] = useState<number>(DONT_KNOW_FEEDBACK);
 
 
   const handleSearch = async (e: React.FormEvent) => {
+    if (!query) {
+      return;
+    }
+
     e.preventDefault();
     setReferences([]);
     setSummary('');
+    setLoading(true);
+
     const res = await askQuestion(query);
 
+    setLoading(false);
     setReferences(res.references);
     setReferencesFeedback(res.references.map(() => DONT_KNOW_FEEDBACK));
     setSummaryFeedback(DONT_KNOW_FEEDBACK);
@@ -86,8 +94,8 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
           onKeyDown={handleKeyDown}
           className="search-input"
         />
-        <button type="submit" className="search-button">
-          Search
+        <button type="submit" className="search-button"  disabled={loading}>
+          {loading ? 'Loading...' : 'Search'}
         </button>
       </form>
 

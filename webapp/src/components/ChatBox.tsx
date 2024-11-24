@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 
 const ChatBox: React.FC = () => {
   const [messages, setMessages] = useState<{ sender: 'user' | 'bot', text: string }[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [input, setInput] = useState('');
   const [threadId, setThreadId] = useState<string | undefined>(undefined);
 
@@ -16,11 +17,15 @@ const ChatBox: React.FC = () => {
     setMessages(messages_with_user_message);
     setInput('');
 
+    setLoading(true);
+
     console.log(messages);
 
     const res = await chatApiCall(userMessage.text, threadId);
 
     setThreadId(res.thread_id);
+
+    setLoading(false);
 
     const botResponse: { sender: 'user' | 'bot', text: string } = { 
       sender: 'bot', 
@@ -55,6 +60,9 @@ const ChatBox: React.FC = () => {
           onKeyPress={handleInputKeyPress}
           className="input-field"
         />
+      </div>
+      <div className={`loader-container ${loading ? 'show' : ''}`}>
+        <span className="loader-text">AI is thinking...</span>
       </div>
     </div>
   );
