@@ -107,3 +107,19 @@ export const getUserInfo = async () => {
         throw new Error('Failed to get user');
     }
 }
+
+export const sendFeedbackApiCall = async ({ message_id, feedback, thread_id }: { message_id: string, feedback: 'up' | 'down', thread_id: string }) => {
+
+  try {
+    const response = await api.post('/chat_feedback', { 
+      thread_id,
+      message_id,
+      feedback: feedback === 'up' ? 1 : 0, 
+      feedback_message: "" });
+    return response.data;
+  } catch (error) {
+      console.log(error);
+      throw new Error('Failed to send chat feedback');
+  }
+  
+};

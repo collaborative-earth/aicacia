@@ -39,6 +39,7 @@ class ChatController(AicaciaProtectedAPI):
             models.ChatMessage(
                 message=thread_message.message,
                 message_from=thread_message.message_from,
+                message_id=str(thread_message.message_id),
             )
             for thread_message in thread_messages
         ]
@@ -83,6 +84,21 @@ class ChatController(AicaciaProtectedAPI):
         )
 
         session.commit()
+
+        thread_messages = (
+            session.query(models.ThreadMessages).filter_by(thread_id=thread_id).all()
+        )
+
+        print(thread_messages)
+
+        chat_history = [
+            models.ChatMessage(
+                message=thread_message.message,
+                message_from=thread_message.message_from,
+                message_id=str(thread_message.message_id),
+            )
+            for thread_message in thread_messages
+        ]
 
         return ChatResponse(
             chat_messages=chat_history,

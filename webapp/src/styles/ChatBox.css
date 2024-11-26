@@ -18,6 +18,7 @@
   display: flex;
   flex-direction: column;
   gap: 15px; /* Increased gap between messages */
+  position: relative;
 }
 
 .message-bubble {
@@ -26,6 +27,7 @@
   border-radius: 15px;
   font-size: 15px;
   line-height: 1.5;
+  position: relative;
 }
 
 .message-bubble.user {
@@ -83,4 +85,43 @@
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   font-family: 'Arial', sans-serif;
   letter-spacing: 0.5px;
+}
+
+.feedback-buttons {
+  display: flex;
+  gap: 10px; /* Space between buttons */
+  margin-left: auto; /* Push buttons to the right */
+  align-items: center; /* Center vertically */
+}
+
+.thumb-button {
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.thumb-button:hover {
+  background-color: #f0f0f0; /* Subtle hover effect */
+  transform: scale(1.1);
+}
+
+.thumb-button.selected {
+  background-color: #d4edda; /* Light green for thumbs up */
+  border-color: #c3e6cb;
+  color: #155724; /* Darker green */
+}
+
+.thumb-button.selected:nth-child(2) {
+  background-color: #f8d7da; /* Light red for thumbs down */
+  border-color: #f5c6cb;
+  color: #721c24; /* Darker red */
 }
