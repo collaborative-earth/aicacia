@@ -52,14 +52,15 @@ class UserQueryController(AicaciaProtectedAPI):
         for res in results.points:
             sources = ast.literal_eval(res.payload['sources'].split(';{')[0])
 
+            rag_context.append(
+                {
+                    "title": res.payload["title"],
+                    "url": sources["link"],
+                    "text": json.loads(res.payload["_node_content"])["text"],
+                }
+            )
+
             if res.payload["title"] in [ref["title"] for ref in references]:
-                rag_context.append(
-                    {
-                        "title": res.payload["title"],
-                        "url": sources["link"],
-                        "text": json.loads(res.payload["_node_content"])["text"],
-                    }
-                )
                 print(f"Skipping duplicate reference: {res.payload['title']}")
                 continue
 
