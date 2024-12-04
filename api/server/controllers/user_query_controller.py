@@ -42,9 +42,10 @@ class UserQueryController(AicaciaProtectedAPI):
 
         # Search in vector store
         results = client.query_points(
-            collection_name=config['vectordb']['collection'],
+            collection_name=config["vectordb"]["collection"],
             query=query_embedding,
             limit=3,
+            score_threshold=0.5,
         )
 
         references = []
