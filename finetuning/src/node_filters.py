@@ -36,7 +36,7 @@ class TEINodeFilter(TransformComponent):
         """
         filtered_nodes = [
             node for node in nodes 
-            if (node.metadata.get('tag', '').strip().lower() in self.valid_tags
+            if (    strip().lower() in self.valid_tags
                 and node.get_content(metadata_mode=MetadataMode.NONE).strip())
         ]
         

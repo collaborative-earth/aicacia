@@ -1,0 +1,94 @@
+{
+    "queries": {
+        "7f458528-31fe-424f-b0e5-80abc266287b": "soils of reclaimed coal",
+        "fb932b4a-62ac-427a-b121-2346ee1e1400": "how long does soil reclamation take",
+        "991104fb-3df9-40bf-af28-20a0f5d4ce7b": "how long does soil regeneration take in mississippi",
+        "63c962bc-b67b-4e83-99cc-ddf9c823e192": "how does soil quality change after reclamation",
+        "c5de5f14-763f-4e60-b1c5-1af3c53259c2": "what landforms are considered a remediated degraded forest",
+        "6eb82246-112b-43ba-b00d-ca2932074208": "how do slopes influence tree growth",
+        "53bdb166-8b40-42f8-aa36-48fcf5bedc1a": "what is the average soil fertility of a degraded rainforest in ghana?",
+        "844efb67-ed95-4a5e-813b-8671e8f77d25": "which planting strategy focuses primarily on using trees as carbon sinks?",
+        "edb15bff-2c87-45b7-ac9c-7bd977e32c09": "how mining affects forest biodiversity",
+        "2f2dcb6a-dd3f-4bb6-900c-738e43e22ce9": "why is it important to revegetate disturbed lands",
+        "2b059474-0859-467c-83fc-d0af660dfc2e": "what kind of trees are grown for ghana",
+        "23704748-d4aa-4666-bb2d-65109f31ebc6": "what is the primary soil feature of ghana",
+        "88468b4a-f05c-4ab2-aeec-2585c2a72c90": "what characteristics of a land slope affect tree growth",
+        "0c47181e-062e-4872-a53f-5f10fe7080d3": "what factors impact tree growth",
+        "9e6ed83d-6d89-44e1-8f8b-b97cf15f72c4": "what impact does soil fertility have on tree growth",
+        "4cc7684e-8cef-4dff-8f5c-fa450b34c3cf": "what kind of trees grow on steep slopes",
+        "4bd13337-ea7f-4746-aa4d-5faaa3814dfb": "what soil quality does coal dug have?",
+        "a5a1ad5e-a139-4059-844b-3605a25c4bd9": "how much carbon is sequestered by revegetation",
+        "100068db-a4fa-4302-bbc7-324c97710184": "what are the plants at coal dumps",
+        "35ae1a6e-0478-4dfa-8870-7b1e2e32bf73": "where is coal degraded"
+    },
+    "corpus": {
+        "0fa1a5ff-1b77-4e41-9f08-ec0a9dfda01d": "Surface mining drastically disturbs landscapes and soil properties. Reclamation can restore and improve soil quality and biomass productivity. Time required for soil reclamation to restore soil quality to premined conditions in southeastern United States is unclear. The objective of this study was to evaluate chronosequence effects on restoration quality indicators in reclaimed coal mine soil from different land use landscapes and agroecosystems in Mississippi. Study sites in 0-to 3-, 5to 7-, and 10-to 12-year-old reclaimed soils were compared with adjacent undisturbed sites. Soil samples collected at the 0-to 15-cm and the 15-to 30-cm depths within a grid in a radius of 3 m were mixed to produce composite samples and kept frozen until analyzed. Soil bulk density (\u03c1b) was the highest (1.48 g cm -3 ) in the youngest (<1 year) site and decreased with increasing age to the oldest (12-year) site (1.07 g cm -3 ). Soil quality indicators (aggregate stability, total C, organic C, and microbial biomass C) increased with increasing reclamation age in forest and grass ecosystems. Concentrations of C were greater at the summit than at shoulder and foot-slope positions. Soil pH, Ca, Mg, Cu, and Zn were higher in newly reclaimed soil than in soils reclaimed 12 years earlier possibly because of reclamation liming practices, which buffer pH to greater than 7.0 in newly reclaimed sites. Reclamation practices improved soil quality over time. Soil quality indicators reached levels similar to those of undisturbed soil within 7 to 12 years after reclamation, indicating successful reestablishment of healthy and sustainable soils in the postmining ecosystems.",
+        "58d89447-6df8-47d4-bd56-717fbbb734cd": "Reforestation of degraded forest lands has always involved the use of multipurpose tree species. However, understanding the relations between tree growth and soil fertility attributes along slopes of degraded mine sites by reforestation is limited, especially in Ghana. Therefore, a study was carried out at a rehabilitated degraded land to determine the influence of slope on soil fertility attributes and growth performance of trees. Plots were laid in the upslope, midslope and downslope, with an adjacent undisturbed forest as a control for sampling purposes. Soil samples were collected (0-15 and 15-30 cm depth) from the various sampling locations to determine soil properties, as well as tree growth parameters (e.g., height, basal area, and biomass). Slope positions impacted on tree growth (above and below ground biomass, and basal area) and soil properties. Highest soil organic carbon (1.80%), total N (0.22%), available P (6.92 mg kg -1 ), exchangeable K (0.20 cmol c kg -1 ), and NO 3 --N (19.03 mg N kg -1 ) were observed at the midslope position, whilst the upslope recorded the least values. The results also revealed that the midslope position recorded the highest tree growth characteristics. Aboveground biomass ranged from 17.67 to 21.73 mg ha -1 , indicating the trees' potential as carbon sinks. Furthermore, principal component analysis revealed that 3 components had their eigenvalues > 1, and accounted for 79.50% of the total variance. These results clearly demonstrate that spatial variations in soil properties are influenced by slope, and gives reference for future rehabilitation processes by reforestation.",
+        "790ecd3c-c073-476f-85ca-a98fbd0e25a9": "Mining in Ghana over the years has contributed immensely to the development of the nation as a source of foreign exchange, employment to the populace, and provision of schools, hospitals and other amenities in catchment communities [4] . However, mining activities ultimately lead to land degradation which has substantial effect on forest resources and ecosystem biodiversity [41] . Mining is currently the leading cause of loss of forest vegetation in Ghana [47] . Surface mining has been reported to have depleted over 15% of Ghana's remaining 240,0 0 0 km 2 forest vegetation cover [3] . It is also estimated that, about 4 million and 1.25 million hectares of lands have been destroyed by surface mining in China and USA respectively [10] . To curb the negative effects of such activities on the environment, the Environmental Protection Agency (EPA) of Ghana goes into a rehabilitation bond with mining companies towards the rehabilitation of disturbed land [3] . As a means to restore disturbed forest covers, mining companies use revegetation as a reclamation tool [40] . Revegetation and restoration as a tool for rehabilitating mined lands has been studied by many researchers and incorporates certain multipurpose trees to enhance regeneration of indigenous tree species on rehabilitated sites [29] . However, growth performance of such important tree species during rehabilitation is impacted by topographic (e.g. slope, aspect) attributes, soil fertility (e.g., N, P, K, CEC, etc), water, and clay mineralogy [29] . Soil as a medium for tree growth is influenced by soil-forming factors which includes topography, climatic variations, parent material, living organisms, and time. Of all these soil-forming factors, relief (e.g., aspect, slope position and gradient) has been recognized as an important abiotic factor that influences changes in soil properties and localized microclimates (e.g., light, temperature, humidity) within tree stands [36] .",
+        "5b5feb6c-f3c0-4c83-8112-1a731c676c35": "Therefore, topography as a soil-forming factor may impact on tree growth by influencing spatial changes in soil attributes [27] . Clemens et al. [14] and Baribault et al. [6] also found negative relations of slope angle on soil fertility parameters under forests in Vietnam and Costa Rica respectively. Carroll et al. [11] noted that the highest form of soil disturbance along slope inclination is soil erosion processes, thereby impacting on the spatial variability of soil properties. The influence of slope and nutrient variability on plant growth has basically been extensively studied under grass and agricultural land systems, as well as some forest ecosystems [ 28 , 29 ]. However, few studies have been done on the interrelations between slope gradients, tree growth, and soil fertility attributes in the area of reclaiming degraded mine sites, especially in Ghana. Also, understanding the impact of slope gradients on soil fertility and its resultant influence on tree growth is limited. This study was therefore carried out to examine whether slope positions will impact on tree growth characteristics (tree height, diameter, volume, and biomass) by causing spatial variation in soil properties including soil organic carbon, microbial biomass, nitrogen, and water content in a sloped terrain of a reclaimed land in a tropical region, Ghana. Disregarding the aspect of slope position of inclined vegetations may lead to over or under estimation of soil properties in relation to tree growth. Relevant data from this study will help in the on-going discussions and better understanding between mining companies, forestry commission, and the EPA on the management and relationships between tree growth and soil fertility attributes along slopes of a land for reclamation practices by reforestation.",
+        "d28d26cf-d9be-44ce-ba70-fa6ec4e574ac": "Development of secondary forest as post-mining land use in the surface coal mining degraded sites is of high research interest due to its potential to sequester atmospheric carbon (C). The objectives of this study were to assess the improvement in mine soil quality and C sequestration potential of the post emining reclaimed land with time. Hence, this study was conducted in reclaimed chronosequence sites (young, intermediate and old) of a large open cast coal project (Central Coal Fields Limited, Jharkhand, India) and results were compared to a reference forest site (Sal forest, Shorea robusta). Mine soil quality was assessed in terms of accretion of soil organic carbon (SOC), available nitrogen (N) and soil CO 2 flux along with the age of revegetation. After 14 years of revegetation, SOC and N concentrations increased three and five-fold, respectively and found equivalent to the reference site. Accretion of SOC stock was estimated to be 1.9 Mg C ha \u00c01 year \u00c01 . Total ecosystem C sequestered after 2e14 years of revegetation increased from 8 Mg C ha \u00c01 to 90 Mg C ha \u00c01 (30e333 Mg CO 2 ha \u00c01 ) with an average rate of 6.4 Mg C ha \u00c01 year \u00c01 . Above ground biomass contributes maximum C sequestrate (50%) in revegetated site. CO 2 flux increased with age of revegetation and found 11, 33 and 42 Mg CO 2 ha \u00c01 year \u00c01 in younger, intermediate and older dumps, respectively. Soil respiration in revegetated site is more influenced by the temperature than soil moisture. Results of the study also showed that trees like, Dalbergia sissoo and Heterophragma adenophyllum should be preferred for revegetation of mine degraded sites."
+    },
+    "relevant_docs": {
+        "7f458528-31fe-424f-b0e5-80abc266287b": [
+            "0fa1a5ff-1b77-4e41-9f08-ec0a9dfda01d"
+        ],
+        "fb932b4a-62ac-427a-b121-2346ee1e1400": [
+            "0fa1a5ff-1b77-4e41-9f08-ec0a9dfda01d"
+        ],
+        "991104fb-3df9-40bf-af28-20a0f5d4ce7b": [
+            "0fa1a5ff-1b77-4e41-9f08-ec0a9dfda01d"
+        ],
+        "63c962bc-b67b-4e83-99cc-ddf9c823e192": [
+            "0fa1a5ff-1b77-4e41-9f08-ec0a9dfda01d"
+        ],
+        "c5de5f14-763f-4e60-b1c5-1af3c53259c2": [
+            "58d89447-6df8-47d4-bd56-717fbbb734cd"
+        ],
+        "6eb82246-112b-43ba-b00d-ca2932074208": [
+            "58d89447-6df8-47d4-bd56-717fbbb734cd"
+        ],
+        "53bdb166-8b40-42f8-aa36-48fcf5bedc1a": [
+            "58d89447-6df8-47d4-bd56-717fbbb734cd"
+        ],
+        "844efb67-ed95-4a5e-813b-8671e8f77d25": [
+            "58d89447-6df8-47d4-bd56-717fbbb734cd"
+        ],
+        "edb15bff-2c87-45b7-ac9c-7bd977e32c09": [
+            "790ecd3c-c073-476f-85ca-a98fbd0e25a9"
+        ],
+        "2f2dcb6a-dd3f-4bb6-900c-738e43e22ce9": [
+            "790ecd3c-c073-476f-85ca-a98fbd0e25a9"
+        ],
+        "2b059474-0859-467c-83fc-d0af660dfc2e": [
+            "790ecd3c-c073-476f-85ca-a98fbd0e25a9"
+        ],
+        "23704748-d4aa-4666-bb2d-65109f31ebc6": [
+            "790ecd3c-c073-476f-85ca-a98fbd0e25a9"
+        ],
+        "88468b4a-f05c-4ab2-aeec-2585c2a72c90": [
+            "5b5feb6c-f3c0-4c83-8112-1a731c676c35"
+        ],
+        "0c47181e-062e-4872-a53f-5f10fe7080d3": [
+            "5b5feb6c-f3c0-4c83-8112-1a731c676c35"
+        ],
+        "9e6ed83d-6d89-44e1-8f8b-b97cf15f72c4": [
+            "5b5feb6c-f3c0-4c83-8112-1a731c676c35"
+        ],
+        "4cc7684e-8cef-4dff-8f5c-fa450b34c3cf": [
+            "5b5feb6c-f3c0-4c83-8112-1a731c676c35"
+        ],
+        "4bd13337-ea7f-4746-aa4d-5faaa3814dfb": [
+            "d28d26cf-d9be-44ce-ba70-fa6ec4e574ac"
+        ],
+        "a5a1ad5e-a139-4059-844b-3605a25c4bd9": [
+            "d28d26cf-d9be-44ce-ba70-fa6ec4e574ac"
+        ],
+        "100068db-a4fa-4302-bbc7-324c97710184": [
+            "d28d26cf-d9be-44ce-ba70-fa6ec4e574ac"
+        ],
+        "35ae1a6e-0478-4dfa-8870-7b1e2e32bf73": [
+            "d28d26cf-d9be-44ce-ba70-fa6ec4e574ac"
+        ]
+    },
+    "mode": "text"
+}
