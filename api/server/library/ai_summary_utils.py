@@ -14,15 +14,15 @@ def generate_summary(user_query: str, rag_context: str) -> str:
 You are an environment restoration expert. Users come to you with questions about the environment \
 and how to restore it.
 Using the context provided answer the users question
-if no context is provided, answer the question as best as you can.
 
 Output should be in markdown format.
 
 Output format:
-#### Answer
-Answer to the primary question.
-#### Explanation
-Summary of how you arrived at the answer
+#### Answer with context
+Answer to the primary question only using the context provided,
+dont answer anything without using the context provided.
+#### Answer without using context.
+Answer to the primary question without using the context provided.
 
 context: {rag_context}
 """,
