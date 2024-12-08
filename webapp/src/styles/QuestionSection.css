@@ -51,17 +51,66 @@
 
 .reference-item {
   margin: 10px 0;
-  padding: 10px;
+  padding: 15px;
   background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid #c7e1c0; /* Greenish border */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reference-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 8px;
+}
+
+.score-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  background-color: #4caf50; /* Professional green tone */
+  color: white;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.score-label {
+  margin-right: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.reference-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #31708e; /* Professional muted green-blue */
+  text-decoration: none;
+}
+
+.reference-title:hover {
+  text-decoration: underline;
+}
+
+.reference-chunk {
+  margin: 10px 0;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+  background-color: #f1f5f1; /* Slightly lighter green */
+  padding: 10px;
+  border-radius: 6px;
 }
 
 .feedback-options {
   display: flex;
-  gap: 10px;
-  margin-top: 5px;
+  gap: 15px;
+  margin-top: 10px;
 }
+
 
 .overall-feedback-input {
   width: 100%;
