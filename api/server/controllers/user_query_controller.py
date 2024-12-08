@@ -42,7 +42,7 @@ class UserQueryController(AicaciaProtectedAPI):
 
         # Search in vector store
         results = client.query_points(
-            collection_name=config['vectordb']['collection'],
+            collection_name=config["vectordb"]["collection"],
             query=query_embedding,
             limit=3,
         )
@@ -60,16 +60,12 @@ class UserQueryController(AicaciaProtectedAPI):
                 }
             )
 
-            if res.payload["title"] in [ref["title"] for ref in references]:
-                print(f"Skipping duplicate reference: {res.payload['title']}")
-                continue
-
             references.append(
                 models.Reference(
                     title=res.payload["title"],
                     url=sources["link"],
-                    description=res.payload["_node_content"].split('"text":')[-1][:1000]
-                    + "...",
+                    score=res.score,
+                    chunk=json.loads(res.payload["_node_content"])["text"],
                 ).model_dump()
             )
 

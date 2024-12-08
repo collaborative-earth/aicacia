@@ -6,6 +6,8 @@ import ReactMarkdown from 'react-markdown';
 interface Reference {
   url: string;
   title: string;
+  score: number;
+  chunk: string;
 }
 
 const USEFUL_FEEDBACK = 10;
@@ -148,9 +150,15 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
           <ul>
             {references.map((ref, index) => (
               <li key={index} className="reference-item">
-                <a href={ref.url} target="_blank" rel="noopener noreferrer">
-                  {ref.title}
-                </a>
+              <div className="reference-header">
+                  <div className="score-badge">
+                    <span className="score-label">Score:</span> {ref.score.toFixed(2)}
+                  </div>
+                  <a href={ref.url} target="_blank" rel="noopener noreferrer" className="reference-title">
+                    {ref.title}
+                  </a>
+                </div>
+                <div className="reference-chunk">{ref.chunk}</div>
                 <div className="feedback-options">
                   <label>
                     <input

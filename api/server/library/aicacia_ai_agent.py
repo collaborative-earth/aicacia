@@ -45,6 +45,7 @@ def get_restoration_context_for_message(country: str, message: str) -> int:
             {
                 "title": res.payload["title"],
                 "url": sources["link"],
+                "score": res.score,
                 "text": json.loads(res.payload["_node_content"])["text"],
             }
         )
@@ -67,17 +68,22 @@ Users come to you with questions about the environment and how to restore it.
 1. Understand the following details -
     a. country,city, or region where the restoration is needed.
     b. ecosystem type (e.g. forest, wetland, grassland, etc.)
-    c. type of restoration needed (e.g. reforestation, wetland restoration, etc.)
-    d. The primary problem they are facing.
+    c. The primary problem they are facing.
+2. Fetch the restoration context for the message once you have all the details.
 2. Provide a response that includes -
-    a. Answer to the primary question.
-    b. Relevant links for the primary question.
+    a. Answer to the primary question in 2 sections -
+        i. Answer with context.
+        ii. Answer without using context.
+    b. Show the context of the restoration in a professional markdown format that includes
+        i. Score.
+        ii. Link.
+        iii. Text from source.
 
 * Conversation style/inputs *
 1. Be professional and follow blazon style.
 2. *Important* Always return in markdown so that its easy to read.
 3. Include relevant links only from the restoration context.
-3. If you dont know the answer, You can say you dont know the answer.
+4. If you dont know the answer, You can say you dont know the answer.
 """,
         ),
         MessagesPlaceholder(variable_name=MEMORY_KEY),
