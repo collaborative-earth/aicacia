@@ -52,7 +52,11 @@ def split_dataset(dataset: EmbeddingQAFinetuneDataset, train_ratio: float = 0.8)
     return train_dataset, val_dataset
 
 
+<<<<<<< HEAD
 def create_nodes_from_tei_path(tei_path: str, chunk_size: int, chunk_overlap: int, apply_filter: bool = True, valid_tags: list = None, reverse: bool = False):
+=======
+def create_nodes_from_tei_path(tei_path: str, chunk_size: int, chunk_overlap: int, apply_filter: bool = True, valid_tags: list = None):
+>>>>>>> 420ac43 (Generate dataset from tei and save metadata)
     """Ingest and process TEI documents, returning parsed chunks (nodes).
     
     Args:
