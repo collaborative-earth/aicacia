@@ -10,6 +10,7 @@
   },
   "paths": {
     "tei_directory": "../data/tei_all_afr_carbon_2",
-    "output_dataset": "./qa_dataset/qa_finetune_dataset2.json"
-  }
+    "output_dataset": "./qa_dataset/qa_finetune_dataset.json"
+  },
+  "save_metadata": true
 }
