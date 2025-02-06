@@ -33,3 +33,4 @@ eval/ann-benchmarks/results/*
 finetuning/ir_results
 #finetuning/qa_dataset
 playground.ipynb
+finetuning/**/*.json
