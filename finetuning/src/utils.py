@@ -52,7 +52,7 @@ def split_dataset(dataset: EmbeddingQAFinetuneDataset, train_ratio: float = 0.8)
     return train_dataset, val_dataset
 
 
-def create_nodes_from_tei_path(tei_path: str, chunk_size: int, chunk_overlap: int, apply_filter: bool = True, valid_tags: list = None):
+def create_nodes_from_tei_path(tei_path: str, chunk_size: int, chunk_overlap: int, apply_filter: bool = True, valid_tags: list = None, reverse: bool = False):
     """Ingest and process TEI documents, returning parsed chunks (nodes).
     
     Args:
@@ -73,7 +73,7 @@ def create_nodes_from_tei_path(tei_path: str, chunk_size: int, chunk_overlap: in
     sentence_parser = SentenceSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
 
     # Apply filtering only if specified
-    node_filter = TEINodeFilter(valid_tags=valid_tags) if apply_filter else None
+    node_filter = TEINodeFilter(valid_tags=valid_tags, reverse=reverse) if apply_filter else None
 
     # Define transformation steps
     transformations = [file_parser]
@@ -85,3 +85,4 @@ def create_nodes_from_tei_path(tei_path: str, chunk_size: int, chunk_overlap: in
     nodes = pipeline.run(documents=documents)
     
     return nodes
+
