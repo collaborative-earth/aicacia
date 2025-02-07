@@ -72,7 +72,7 @@ def main():
         )
         
     print(f"Question-Answer dataset created and saved to {output_path}")
-    if save_metadata:
+    if config["save_metadata"]:
         metadata = {
             "creation_time": datetime.datetime.now().isoformat(),
             "tei_directory": config["paths"]["tei_directory"],

@@ -34,3 +34,4 @@ finetuning/ir_results
 #finetuning/qa_dataset
 playground.ipynb
 finetuning/**/*.json
+!finetuning/config.json
