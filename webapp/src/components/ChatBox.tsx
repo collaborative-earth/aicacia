@@ -12,7 +12,8 @@ const ChatBox: React.FC = () => {
   const handleSendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMessage = { sender: 'user', text: input };
+    const sender = 'user' as 'user' | 'bot';
+    const userMessage = { sender, text: input };
     let messages_with_user_message = [...messages, userMessage];
     setMessages(messages_with_user_message);
     setInput('');
@@ -25,7 +26,7 @@ const ChatBox: React.FC = () => {
     setLoading(false);
 
     const botResponse = { 
-      sender: 'bot', 
+      sender: 'bot' as 'user' | 'bot',
       text: res.chat_messages[res.chat_messages.length - 1].message,
       message_id: res.chat_messages[res.chat_messages.length - 1].message_id,
     };
@@ -46,8 +47,8 @@ const ChatBox: React.FC = () => {
 
     // API call for feedback
     await sendFeedbackApiCall({
-      message_id: messages[index].message_id,
-      thread_id: threadId,
+      message_id: messages[index].message_id!,
+      thread_id: threadId!,
       feedback,
     });
   };
