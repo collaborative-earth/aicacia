@@ -13,7 +13,12 @@ def create_app():
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173", "http://localhost:3000"],
+        allow_origins=[
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://3.139.238.118:3000",
+            "http://3.139.238.118:5173",
+        ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
