@@ -2,7 +2,7 @@ import os
 import sqlite3
 from glob import glob
 from typing import Dict, List
-
+import json
 import pandas as pd
 import yaml
 from llama_index.core.node_parser import SentenceSplitter
@@ -110,3 +110,9 @@ def read_db(input_dir):
         conn.close()
     final_df = pd.concat(df_list, ignore_index=True)
     return final_df
+
+def extract_file_name(json_str):
+    try:
+        return json.loads(json_str).get("file_name")
+    except (json.JSONDecodeError, TypeError):
+        return None
