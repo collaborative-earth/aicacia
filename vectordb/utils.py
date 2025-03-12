@@ -1,7 +1,16 @@
 import os
-
-import pdfplumber
-from bs4 import BeautifulSoup
+import sqlite3
+from glob import glob
+from typing import Dict, List
+import json
+import pandas as pd
+import yaml
+from llama_index.core.node_parser import SentenceSplitter
+from llama_index.core.schema import BaseNode, TransformComponent
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.readers.file import FlatReader, HTMLTagReader, PDFReader
+from llama_index.vector_stores.qdrant import QdrantVectorStore
+from qdrant_client import QdrantClient
 
 
 def extract_text_from_pdf(path):
@@ -113,3 +122,9 @@ def read_db(input_dir):
 =======
         print(f"Collection '{collection_name}' does not exist.")
 >>>>>>> 4f44f68 (Initial commit for qdrant vectordb)
+
+def extract_file_name(json_str):
+    try:
+        return json.loads(json_str).get("file_name")
+    except (json.JSONDecodeError, TypeError):
+        return None

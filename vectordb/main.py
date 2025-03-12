@@ -6,16 +6,12 @@ from llama_index.core import SimpleDirectoryReader
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import HTMLNodeParser, MarkdownNodeParser
 from tqdm import tqdm
-
+sys.path.append("..")
 from utils import *
-
-
-def extract_text_from_pdf(pdf_path):
-    full_text = ""
-    with pdfplumber.open(pdf_path) as pdf:
-        for page in pdf.pages:
-            full_text += page.extract_text()
-    return full_text
+from custom_parsers import *
+from qdrant_client import QdrantClient
+sys.path.append("..")
+#from finetuning.src.node_parsers.tei_parser import TEINodeParser
 
 
 def parse_args():
@@ -29,22 +25,43 @@ def parse_args():
 if __name__ == '__main__':
     # Dictionary mapping file extensions to their respective functions
     extraction_functions = {
-        '.html': extract_text_from_html,
-        '.pdf': extract_text_from_pdf,
-    }
-
+            '.md': MarkdownNodeParser(),
+            '.html': HTMLNodeParser(),
+            #'.pdf': MarkdownNodeParser(),
+            '.xml': TEINodeParser(),
+            '.json': MyJSONNodeParser()
+        }
+        
     args = parse_args()
     collection_name = args.collection
     file_paths = glob('../data/**/*', recursive=True)
     file_paths = [file_path for file_path in file_paths if os.path.isfile(file_path)]
 
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=512,
-        chunk_overlap=50,
-        length_function=len,
-        separators=["\n\n", "\n", " ", ""]
-    )
-    client = QdrantClient("localhost", port=6333)
+    config = load_config('config.yaml')
+    text_splitter = create_text_splitter(config)
+    embed_model = create_embedding_class(config)
+    #client = QdrantClient( location=":memory:")
+    #vector_store = QdrantVectorStore(client=client, collection_name="aicacia")
+    vector_store = create_vectordb_client(config, collection_name)
+    metadata_df = read_db(input_dir)[['id', 'title', 'doi', 'authors',
+                                   'corpus_name', 'sources', 'location', 
+                                   'sourced_date', 'revision_date',
+                                   'provided_tags', 'generated_tags','metadata']]
+    metadata_df["extracted_file_name"] = metadata_df["metadata"].apply(extract_file_name)
+    
+    for ext, file_parser in extraction_functions.items():
+        
+        try:
+            reader = SimpleDirectoryReader(input_dir=input_dir,
+                                           recursive=True,
+                                           required_exts=[ext],
+                                           file_extractor = create_file_extractor(config),
+                                           num_files_limit=100)
+        except Exception as e:
+            if 'No files found' in str(e):
+                continue
+            else:
+                raise Exception(e)
         
     delete_collection_if_exists(client, collection_name)
     client.create_collection(
@@ -64,16 +81,5 @@ if __name__ == '__main__':
         chunks = text_splitter.split_text(text)
         points = []
 
-        for chunk_id, chunk in enumerate(chunks):
-            response = ollama.embeddings(
-                model=args.embedding_model,
-                prompt=chunk,
-            )
-            chunk_embedding = response["embedding"]
-
-            metadata = {"doc_id": doc_id, "chunk_id": chunk_id, "doc_name": file_name, "text": chunk}
-            client.upsert(collection_name=collection_name,
-                                 points=[PointStruct(id=unique_id, payload=metadata, vector=chunk_embedding)])
-            unique_id += 1
-
-        client.upload_points(collection_name, points)
+        pipeline = IngestionPipeline(transformations=[file_parser, text_splitter, MetadataCleanupTransformation(),embed_model], vector_store=vector_store)
+        nodes = pipeline.run(documents=docs, show_progress=True)
