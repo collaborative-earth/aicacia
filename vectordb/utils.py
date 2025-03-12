@@ -2,7 +2,7 @@ import os
 import sqlite3
 from glob import glob
 from typing import Dict, List
-
+import json
 import pandas as pd
 import yaml
 from llama_index.core.node_parser import SentenceSplitter
@@ -114,3 +114,9 @@ def read_db(input_dir):
 =======
         print(f"Collection '{collection_name}' does not exist.")
 >>>>>>> 4f44f68 (Initial commit for qdrant vectordb)
+
+def extract_file_name(json_str):
+    try:
+        return json.loads(json_str).get("file_name")
+    except (json.JSONDecodeError, TypeError):
+        return None
