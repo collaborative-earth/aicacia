@@ -25,7 +25,7 @@ def parse_args():
 if __name__ == '__main__':
     # Dictionary mapping file extensions to their respective functions
     extraction_functions = {
-            '.md': MarkdownNodeParser(),
+            #'.md': MarkdownNodeParser(),
             '.html': HTMLNodeParser(),
             #'.pdf': MarkdownNodeParser(),
             '.xml': TEINodeParser(),
