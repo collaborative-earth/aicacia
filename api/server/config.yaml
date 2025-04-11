@@ -1,7 +1,8 @@
 vectordb:
-    collection: aicacia
-    host: aicacia-qdrant-1
+    collection: aicacia_test
+    host: 87290d58-c438-456c-a6cc-3a1ebd4cac63.us-east-1-0.aws.cloud.qdrant.io
     port: 6333
+    api_key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOlt7ImNvbGxlY3Rpb24iOiJhaWNhY2lhX3Rlc3QiLCJhY2Nlc3MiOiJydyJ9XX0.P7j3Ymr59Sums-3jHurIsWlAvik9-f-Xm1EIi72hUy8
 
 embedding:
   HuggingFaceEmbedding:

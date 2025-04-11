@@ -49,21 +49,25 @@ class UserQueryController(AicaciaProtectedAPI):
 
         references = []
         rag_context = []
+        print("results")
+        print(results)
         for res in results.points:
-            sources = ast.literal_eval(res.payload['sources'].split(';{')[0])
+            print("res")
+            print(res)
+            file_name = res.payload["file_name"]
 
             rag_context.append(
                 {
-                    "title": res.payload["title"],
-                    "url": sources["link"],
+                    "title": file_name,
+                    "url": file_name,
                     "text": json.loads(res.payload["_node_content"])["text"],
                 }
             )
 
             references.append(
                 models.Reference(
-                    title=res.payload["title"],
-                    url=sources["link"],
+                    title=file_name,
+                    url=file_name,
                     score=res.score,
                     chunk=json.loads(res.payload["_node_content"])["text"],
                 ).model_dump()
