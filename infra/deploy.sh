@@ -4,13 +4,9 @@ set -e
 
 POSTGRES_PASSWORD=$(aws ssm get-parameter --name "/aicacia-app/postgres-password" --with-decryption --query "Parameter.Value" --output text)
 
-echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" > ./api/.env
+export POSTGRES_PASSWORD
 
-echo "Building and starting services..."
+echo "Starting services..."
 docker compose down
-
 docker compose pull aicacia-postgres
-docker compose build aicacia-api
-docker compose build aicacia-webapp
-
 docker compose up -d

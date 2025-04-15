@@ -12,18 +12,35 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - name: SSH to EC2 and deploy
+      - name: Build docker images
+        run: |
+          docker build -t aicacia-api:latest ./api
+          docker build -t aicacia-webapp:latest ./webapp
+
+      - name: Save images to tar files
+        run: |
+          docker save -o aicacia-api.tar aicacia-api:latest
+          docker save -o aicacia-webapp.tar aicacia-webapp:latest
+
+      - name: Copy images and deployment script to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          source: "aicacia-api.tar,aicacia-webapp.tar,infra/deploy.sh"
+          target: "/home/ec2-user"
+
+      - name: SSH to EC2, load images and run deployment script
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.EC2_PUBLIC_IP }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            cd /home/ec2-user/aicacia
-            echo "Checking out branch: ${{ github.ref_name }}"
-            git fetch origin
-            git checkout "${{ github.ref_name }}"
-            git pull origin "${{ github.ref_name }}"  
+            docker load -i /home/ec2-user/aicacia-api.tar
+            docker load -i /home/ec2-user/aicacia-webapp.tar
+            rm /home/ec2-user/*.tar
             
-            chmod +x ./infra/deploy.sh
-            ./infra/deploy.sh
+            chmod +x /home/ec2-user/deploy.sh
+            /home/ec2-user/deploy.sh

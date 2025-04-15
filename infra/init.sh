@@ -45,30 +45,3 @@ fi
 mount -a
 
 echo "Postgresql volume setup completed successfully!"
-
-# Set up github auth
-dnf install -y awscli
-dnf install -y git
-
-GITHUB_KEY=$(aws ssm get-parameter --name "/aicacia-app/gh-key" --with-decryption --query "Parameter.Value" --output text)
-
-echo "$GITHUB_KEY" > /home/ec2-user/.ssh/id_github
-chmod 600 /home/ec2-user/.ssh/id_github
-chown ec2-user:ec2-user /home/ec2-user/.ssh/id_github
-
-cat <<EOF >> /home/ec2-user/.ssh/config
-Host github.com
-  HostName github.com
-  User git
-  IdentityFile /home/ec2-user/.ssh/id_github
-  StrictHostKeyChecking no
-EOF
-
-chmod 600 /home/ec2-user/.ssh/config
-chown ec2-user:ec2-user /home/ec2-user/.ssh/config
-
-echo "Github setup completed successfully!"
-
-mkdir /home/ec2-user/aicacia
-
-echo "Init completed successfully!"
