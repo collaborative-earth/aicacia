@@ -19,7 +19,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            pwd /home/ec2-user/aicacia
+            cd /home/ec2-user/aicacia
             echo "Checking out branch: ${{ github.ref_name }}"
             git fetch origin
             git checkout "${{ github.ref_name }}"
