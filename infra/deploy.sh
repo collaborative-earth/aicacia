@@ -13,7 +13,7 @@ git fetch origin
 git checkout "$BRANCH"
 git pull origin "$BRANCH"
 
-echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" > .env
+echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" > ./api/.env
 
 echo "Building and starting services..."
 docker compose down
