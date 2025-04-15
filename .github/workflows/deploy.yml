@@ -15,7 +15,17 @@ jobs:
       - name: Build docker images
         run: |
           docker build -t aicacia-api:latest ./api
+          
+          df -h
+          docker system df  
+          
+          
           docker save -o aicacia-api.tar aicacia-api:latest
+          
+          df -h
+          docker system df  
+          
+          
           docker rmi -f aicacia-api:latest
           docker builder prune -af
           
