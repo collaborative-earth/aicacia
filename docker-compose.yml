@@ -1,6 +1,36 @@
-include:
-  - "vectordb/compose.yml"
-  - "api/compose.yml"
-  # - "extraction/compose.yml"
-  # - "notebooks/compose.yml"
-  - "webapp/compose.yml"
+version: "3.8"
+
+services:
+  aicacia-postgres:
+    image: postgres:17
+    container_name: aicacia-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: aicacia_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  aicacia-api:
+    build: api
+    container_name: aicacia-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - aicacia-postgres
+
+  aicacia-webapp:
+    build: webapp
+    container_name: aicacia-webapp
+    ports:
+      - "3000:3000"
+
+volumes:
+  pg_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /mnt/data/postgresql
+      o: bind

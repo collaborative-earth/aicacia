@@ -8,7 +8,11 @@ def create_vectordb_client(config):
     params = {
         "host": vectordb_config["host"],
         "port": vectordb_config["port"],
+        "api_key": vectordb_config.get("api_key"),
+        "https": True,
     }
+
+    print(params)
 
     try:
         return QdrantClient(**params)
