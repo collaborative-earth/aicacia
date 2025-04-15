@@ -7,6 +7,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout the branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
       - name: SSH to EC2 and deploy
         uses: appleboy/ssh-action@v1.2.2
         with:
@@ -14,4 +19,10 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            /home/ec2-user/aicacia/infra/deploy.sh ${{ github.ref_name }}
+            pwd /home/ec2-user/aicacia
+            echo "Checking out branch: ${{ github.ref_name }}"
+            git fetch origin
+            git checkout "${{ github.ref_name }}"
+            git pull origin "${{ github.ref_name }}"  
+            
+            ./infra/deploy.sh
