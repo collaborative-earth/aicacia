@@ -8,5 +8,9 @@ echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" > ./api/.env
 
 echo "Building and starting services..."
 docker compose down
-docker compose pull
-docker compose up -d --build
+
+docker compose pull aicacia-postgres
+docker compose build aicacia-api
+docker compose build aicacia-webapp
+
+docker compose up -d

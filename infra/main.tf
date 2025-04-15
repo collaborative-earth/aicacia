@@ -56,7 +56,7 @@ resource "aws_instance" "app_server" {
 
   root_block_device {
     volume_type = "gp3"
-    volume_size = 10
+    volume_size = 20
   }
 
   user_data = file("./init.sh")

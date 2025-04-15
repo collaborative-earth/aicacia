@@ -69,8 +69,6 @@ chown ec2-user:ec2-user /home/ec2-user/.ssh/config
 
 echo "Github setup completed successfully!"
 
-# Fetch repo for the first time and make deploy.sh executable
-runuser -l ec2-user -c "git clone git@github.com:collaborative-earth/aicacia.git"
-chmod +x /home/ec2-user/aicacia/infra/deploy.sh
+mkdir /home/ec2-user/aicacia
 
 echo "Init completed successfully!"
