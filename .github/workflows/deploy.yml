@@ -15,12 +15,14 @@ jobs:
       - name: Build docker images
         run: |
           docker build -t aicacia-api:latest ./api
-          docker build -t aicacia-webapp:latest ./webapp
-
-      - name: Save images to tar files
-        run: |
           docker save -o aicacia-api.tar aicacia-api:latest
+          docker rmi -f aicacia-api:latest
+          docker builder prune -af
+          
+          docker build -t aicacia-webapp:latest ./webapp
           docker save -o aicacia-webapp.tar aicacia-webapp:latest
+          docker rmi -f aicacia-webapp:latest
+          docker builder prune -af
 
       - name: Copy images and deployment script to EC2
         uses: appleboy/scp-action@v0.1.7
@@ -38,6 +40,9 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
+            docker rmi -f aicacia-api:latest || true
+            docker rmi -f aicacia-webapp:latest || true  
+  
             docker load -i /home/ec2-user/aicacia-api.tar
             docker load -i /home/ec2-user/aicacia-webapp.tar
             rm /home/ec2-user/*.tar
