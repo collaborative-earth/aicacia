@@ -14,25 +14,20 @@ jobs:
 
       - name: Build docker images
         run: |
-          docker build -t aicacia-api:latest ./api
+          docker images list
+          docker system df
           
-          df -h
+          docker buildx create --use
+          
+          docker buildx build --output type=docker,dest=./aicacia-api.tar -t aicacia-api:latest ./api
+          
+          docker images list
           docker system df  
           
+          docker buildx build --output type=docker,dest=./aicacia-webapp.tar -t aicacia-webapp:latest ./webapp
           
-          docker save -o aicacia-api.tar aicacia-api:latest
-          
-          df -h
-          docker system df  
-          
-          
-          docker rmi -f aicacia-api:latest
-          docker builder prune -af
-          
-          docker build -t aicacia-webapp:latest ./webapp
-          docker save -o aicacia-webapp.tar aicacia-webapp:latest
-          docker rmi -f aicacia-webapp:latest
-          docker builder prune -af
+          docker images list
+          docker system df 
 
       - name: Copy images and deployment script to EC2
         uses: appleboy/scp-action@v0.1.7
