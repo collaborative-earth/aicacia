@@ -4,6 +4,7 @@ from controllers.feedback_controller import feedback_router
 from controllers.hello_world_controller import hello_router
 from controllers.user_controller import user_info_router, user_router
 from controllers.user_query_controller import user_query_router
+from controllers.my_new_controller import my_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -32,6 +33,7 @@ def create_app():
     app.include_router(feedback_router, prefix="/feedback", tags=["feedback"])
     app.include_router(user_router, prefix="/user", tags=["user"])
     app.include_router(user_info_router, prefix="/user_info", tags=["user_info"])
+    app.include_router(my_router, prefix="/my", tags=["my"])
     app.include_router(
         chat_feedback_router, prefix="/chat_feedback", tags=["chat_feedback"]
     )
