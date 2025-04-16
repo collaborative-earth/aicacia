@@ -31,9 +31,10 @@ jobs:
           python-version: '3.13'
           cache: 'pip'
 
-      - name: Install Alembic
+      - name: Install deps
         run: |
           pip install alembic
+          pip install pydantic
 
       - name: Run migrations
         run: |
