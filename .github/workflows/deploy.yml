@@ -25,7 +25,7 @@ jobs:
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
           docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
 
-      - name: Build & Push aicacia-api via buildx
+      - name: Build & Push aicacia-api
         run: |
           docker buildx build \
           --output type=registry \
@@ -34,7 +34,7 @@ jobs:
           --tag ${{ secrets.ECR_REGISTRY }}/aicacia-api:latest \
           ./api
 
-      - name: Build & Push aicacia-webapp via buildx
+      - name: Build & Push aicacia-webapp
         run: |
           docker buildx build \
             --output type=registry \
@@ -42,3 +42,22 @@ jobs:
             --platform linux/amd64 \
             --tag ${{ secrets.ECR_REGISTRY }}/aicacia-webapp:latest \
             ./webapp
+
+      - name: Upload docker-compose.yml and deploy.sh to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          source: "infra/deploy.sh,docker-compose.yml"
+          target: "/home/ec2-user"
+
+      - name: Run deployment script on EC2
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: |
+            chmod +x /home/ec2-user/deploy.sh
+            /home/ec2-user/deploy.sh

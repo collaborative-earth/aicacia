@@ -12,7 +12,7 @@ services:
       - pg_data:/var/lib/postgresql/data
 
   aicacia-api:
-    build: api
+    image: aicacia-api:latest
     container_name: aicacia-api
     ports:
       - "8000:8000"
@@ -20,7 +20,7 @@ services:
       - aicacia-postgres
 
   aicacia-webapp:
-    build: webapp
+    image: aicacia-webapp:latest
     container_name: aicacia-webapp
     ports:
       - "3000:3000"
