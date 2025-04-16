@@ -25,6 +25,16 @@ jobs:
           POSTGRES_PASSWORD=$(aws ssm get-parameter --name "/aicacia-app/postgres-password" --with-decryption --query "Parameter.Value" --output text)
           echo "pass=$POSTGRES_PASSWORD" >> $GITHUB_OUTPUT
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install Alembic
+        run: |
+          pip install alembic
+
       - name: Run migrations
         run: |
           cd ./api
