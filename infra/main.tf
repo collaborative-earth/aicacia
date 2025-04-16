@@ -120,8 +120,18 @@ resource "aws_ssm_parameter" "postgres_password" {
   value = var.postgres_password
 }
 
-resource "aws_ssm_parameter" "gh_key" {
-  name  = "/aicacia-app/gh-key"
-  type  = "SecureString"
-  value = file("~/.ssh/deploy_key")
+resource "aws_ecr_repository" "aicacia_api" {
+  name                 = "aicacia-api"
+  image_tag_mutability = "MUTABLE"
+  tags = {
+    Project = "aicacia"
+  }
+}
+
+resource "aws_ecr_repository" "aicacia_webapp" {
+  name = "aicacia-webapp"
+  image_tag_mutability = "MUTABLE"
+  tags = {
+    Project = "aicacia"
+  }
 }

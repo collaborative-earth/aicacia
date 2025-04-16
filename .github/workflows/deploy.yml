@@ -12,45 +12,21 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
+          docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+
       - name: Build docker images
         run: |
-          docker images list
-          docker system df
-          
           docker buildx create --use
-          
-          docker buildx build --output type=docker,dest=./aicacia-api.tar -t aicacia-api:latest ./api
-          
-          docker images list
-          docker system df  
-          
-          docker buildx build --output type=docker,dest=./aicacia-webapp.tar -t aicacia-webapp:latest ./webapp
-          
-          docker images list
-          docker system df 
-
-      - name: Copy images and deployment script to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_PUBLIC_IP }}
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          source: "aicacia-api.tar,aicacia-webapp.tar,infra/deploy.sh"
-          target: "/home/ec2-user"
-
-      - name: SSH to EC2, load images and run deployment script
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.EC2_PUBLIC_IP }}
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          script: |
-            docker rmi -f aicacia-api:latest || true
-            docker rmi -f aicacia-webapp:latest || true  
-  
-            docker load -i /home/ec2-user/aicacia-api.tar
-            docker load -i /home/ec2-user/aicacia-webapp.tar
-            rm /home/ec2-user/*.tar
-            
-            chmod +x /home/ec2-user/deploy.sh
-            /home/ec2-user/deploy.sh
+          docker buildx build --push --tag $ECR_REGISTRY/aicacia-api:latest --platform linux/amd64 --output type=registry ./api
+          docker buildx build --push --tag $ECR_REGISTRY/aicacia-webapp:latest --platform linux/amd64 --output type=registry ./webapp
