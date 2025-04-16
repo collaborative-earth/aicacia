@@ -43,6 +43,34 @@ jobs:
             --tag ${{ secrets.ECR_REGISTRY }}/aicacia-webapp:latest \
             ./webapp
 
+      - name: Delete untagged images
+        run: |
+          REPOSITORIES=("aicacia-api" "aicacia-webapp")
+          
+          for repo in "${REPOSITORIES[@]}"; do
+            echo "Getting untagged image digests for $repo..."
+          
+            DIGESTS=$(aws ecr list-images \
+              --repository-name $repo \
+              --filter "tagStatus=UNTAGGED" \
+              --query 'imageIds[*].imageDigest' \
+              --output text \
+              --region ${{ secrets.AWS_REGION }})
+
+            if [ -z "$DIGESTS" ]; then
+              echo "No untagged images found in $repo."
+            else
+              echo "Deleting untagged images from $repo..."
+          
+              for digest in $DIGESTS; do
+                aws ecr batch-delete-image \
+                  --repository-name $repo \
+                  --image-ids imageDigest=$digest \
+                  --region ${{ secrets.AWS_REGION }}
+              done
+            fi
+          done
+
       - name: Upload docker-compose.yml and deploy.sh to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -59,5 +87,5 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            chmod +x /home/ec2-user/deploy.sh
-            /home/ec2-user/deploy.sh
+            chmod +x /home/ec2-user/infra/deploy.sh
+            /home/ec2-user/infra/deploy.sh
