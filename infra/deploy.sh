@@ -16,7 +16,14 @@ echo "Logging in to ECR..."
 aws ecr get-login-password --region $REGION | \
   docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
-echo "Pulling images..."
+echo "Stopping services..."
+docker compose down
+
+echo "Removing local images..."
+docker images --format "{{.Repository}}:{{.Tag}}" | grep "aicacia-api" | xargs docker rmi
+docker images --format "{{.Repository}}:{{.Tag}}" | grep "aicacia-webapp" | xargs docker rmi
+
+echo "Pulling ECR images..."
 docker pull postgres:17
 docker pull $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/aicacia-api:latest
 docker pull $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/aicacia-webapp:latest
@@ -25,11 +32,5 @@ echo "Tagging ECR images..."
 docker tag $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/aicacia-api:latest aicacia-api:latest
 docker tag $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/aicacia-webapp:latest aicacia-webapp:latest
 
-echo "Stopping services..."
-docker compose down
-
 echo "Starting services..."
 docker compose up -d
-
-echo "Cleaning up unused images"
-docker image prune -f
