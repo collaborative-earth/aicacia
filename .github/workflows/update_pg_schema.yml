@@ -36,6 +36,7 @@ jobs:
           pip install alembic
           pip install pydantic
           pip install sqlmodel
+          pip install psycopg2
 
       - name: Run migrations
         run: |
