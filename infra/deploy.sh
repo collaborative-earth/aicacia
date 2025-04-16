@@ -20,8 +20,8 @@ echo "Stopping services..."
 docker compose down
 
 echo "Removing local images..."
-docker images --format "{{.Repository}}:{{.Tag}}" | grep "aicacia-api" | xargs docker rmi
-docker images --format "{{.Repository}}:{{.Tag}}" | grep "aicacia-webapp" | xargs docker rmi
+docker images --format "{{.Repository}}:{{.Tag}}" | grep "aicacia-api" | xargs --no-run-if-empty docker rmi
+docker images --format "{{.Repository}}:{{.Tag}}" | grep "aicacia-webapp" | xargs --no-run-if-empty docker rmi
 
 echo "Pulling ECR images..."
 docker pull postgres:17
