@@ -56,7 +56,7 @@ resource "aws_instance" "app_server" {
 
   root_block_device {
     volume_type = "gp3"
-    volume_size = 20
+    volume_size = 30
   }
 
   user_data = file("./init.sh")
@@ -118,6 +118,12 @@ resource "aws_ssm_parameter" "postgres_password" {
   name  = "/aicacia-app/postgres-password"
   type  = "SecureString"
   value = var.postgres_password
+}
+
+resource "aws_ssm_parameter" "openai_api_key" {
+  name  = "/aicacia-app/openai-api-key"
+  type  = "SecureString"
+  value = var.openai_api_key
 }
 
 resource "aws_ecr_repository" "aicacia_api" {

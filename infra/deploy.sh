@@ -7,8 +7,10 @@ ACCOUNT_ID="771589226584"
 
 echo "Pulling secrets..."
 POSTGRES_PASSWORD=$(aws ssm get-parameter --name "/aicacia-app/postgres-password" --with-decryption --query "Parameter.Value" --output text)
+OPENAI_API_KEY=$(aws ssm get-parameter --name "/aicacia-app/openai-api-key" --with-decryption --query "Parameter.Value" --output text)
 
 export POSTGRES_PASSWORD
+export OPENAI_API_KEY
 
 echo "Logging in to ECR..."
 aws ecr get-login-password --region $REGION | \
