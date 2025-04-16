@@ -18,6 +18,8 @@ def create_app():
             "http://localhost:3000",
             "http://3.139.238.118:3000",
             "http://3.139.238.118:5173",
+            "http://3.137.35.87:3000",
+            "http://3.137.35.87:5173",
         ],
         allow_credentials=True,
         allow_methods=["*"],

@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   aicacia-postgres:
     image: postgres:17
@@ -14,15 +12,18 @@ services:
       - pg_data:/var/lib/postgresql/data
 
   aicacia-api:
-    build: api
+    image: aicacia-api:latest
     container_name: aicacia-api
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     ports:
       - "8000:8000"
     depends_on:
       - aicacia-postgres
 
   aicacia-webapp:
-    build: webapp
+    image: aicacia-webapp:latest
     container_name: aicacia-webapp
     ports:
       - "3000:3000"

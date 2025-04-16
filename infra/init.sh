@@ -46,31 +46,10 @@ mount -a
 
 echo "Postgresql volume setup completed successfully!"
 
-# Set up github auth
-dnf install -y awscli
-dnf install -y git
+# Add swap file
+fallocate -l 4G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
 
-GITHUB_KEY=$(aws ssm get-parameter --name "/aicacia-app/gh-key" --with-decryption --query "Parameter.Value" --output text)
-
-echo "$GITHUB_KEY" > /home/ec2-user/.ssh/id_github
-chmod 600 /home/ec2-user/.ssh/id_github
-chown ec2-user:ec2-user /home/ec2-user/.ssh/id_github
-
-cat <<EOF >> /home/ec2-user/.ssh/config
-Host github.com
-  HostName github.com
-  User git
-  IdentityFile /home/ec2-user/.ssh/id_github
-  StrictHostKeyChecking no
-EOF
-
-chmod 600 /home/ec2-user/.ssh/config
-chown ec2-user:ec2-user /home/ec2-user/.ssh/config
-
-echo "Github setup completed successfully!"
-
-# Fetch repo for the first time and make deploy.sh executable
-runuser -l ec2-user -c "git clone git@github.com:collaborative-earth/aicacia.git"
-chmod +x /home/ec2-user/aicacia/infra/deploy.sh
-
-echo "Init completed successfully!"
+echo "Swap file was added successfully!"

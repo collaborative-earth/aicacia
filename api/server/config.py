@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     SECRET_KEY: str = "aicacia_secret_key"
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict()
 
 
 settings = Settings()
