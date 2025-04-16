@@ -12,8 +12,6 @@ def create_vectordb_client(config):
         "https": True,
     }
 
-    print(params)
-
     try:
         return QdrantClient(**params)
     except:

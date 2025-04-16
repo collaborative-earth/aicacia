@@ -45,3 +45,11 @@ fi
 mount -a
 
 echo "Postgresql volume setup completed successfully!"
+
+# Add swap file
+fallocate -l 4G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+
+echo "Swap file was added successfully!"
