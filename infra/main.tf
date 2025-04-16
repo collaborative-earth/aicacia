@@ -19,8 +19,16 @@ resource "aws_vpc_security_group_ingress_rule" "allow_tls_ipv4" {
 resource "aws_vpc_security_group_ingress_rule" "allow_http_ipv4" {
   security_group_id = aws_security_group.app_sg.id
   cidr_ipv4         = "0.0.0.0/0"
-  from_port         = 80
-  to_port           = 80
+  from_port         = 8000
+  to_port           = 8000
+  ip_protocol       = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_pg_ipv4" {
+  security_group_id = aws_security_group.app_sg.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 5432
+  to_port           = 5432
   ip_protocol       = "tcp"
 }
 
@@ -135,7 +143,7 @@ resource "aws_ecr_repository" "aicacia_api" {
 }
 
 resource "aws_ecr_repository" "aicacia_webapp" {
-  name = "aicacia-webapp"
+  name                 = "aicacia-webapp"
   image_tag_mutability = "MUTABLE"
   tags = {
     Project = "aicacia"

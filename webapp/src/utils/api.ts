@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getToken, removeToken } from './tokens';
 
 // Base URL for the API
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://3.137.35.87:8000';
 
 // Axios instance with default settings
 const api = axios.create({
