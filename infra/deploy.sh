@@ -19,6 +19,10 @@ docker pull postgres:17
 docker pull $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/aicacia-api:latest
 docker pull $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/aicacia-webapp:latest
 
+echo "Tagging ECR images..."
+docker tag $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/aicacia-api:latest aicacia-api:latest
+docker tag $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/aicacia-webapp:latest aicacia-webapp:latest
+
 echo "Stopping services..."
 docker compose down
 
