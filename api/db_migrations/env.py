@@ -20,6 +20,11 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 target_metadata = models.Base.metadata
 
+cmd_opts = context.get_x_argument(as_dictionary=True)
+
+if "db_url" in cmd_opts:
+    config.set_main_option("sqlalchemy.url", cmd_opts["db_url"])
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

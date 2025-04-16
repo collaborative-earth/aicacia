@@ -1,0 +1,32 @@
+name: Update Postgres schema
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Fetch db password from AWS SSM
+        id: get-pass
+        run: |
+          POSTGRES_PASSWORD=$(aws ssm get-parameter --name "/aicacia-app/postgres-password" --with-decryption --query "Parameter.Value" --output text)
+          echo "pass=$POSTGRES_PASSWORD" >> $GITHUB_OUTPUT
+
+      - name: Run migrations
+        run: |
+          cd ./api
+          alembic -x db_url=postgresql://postgres:${{ steps.get-pass.outputs.pass }}@${{ secrets.EC2_PUBLIC_IP }}:5432/aicacia_db upgrade head
+
