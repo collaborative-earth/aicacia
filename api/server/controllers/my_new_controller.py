@@ -8,6 +8,6 @@ my_router = InferringRouter()
 
 @cbv(my_router)
 class MyNewController(AicaciaPublicAPI):
-    @my_router.get("/my")
+    @my_router.get("/")
     def get(self) -> str:
         return f"Hello, World!"
