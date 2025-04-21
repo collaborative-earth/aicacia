@@ -116,7 +116,7 @@ class SourcedDocument(Base, table=True):
     title: str = Field(nullable=False)
     source_corpus: str = Field(nullable=False)
     sourced_at: datetime = Field()
-    source_links: List["SourceLink"] = Relationship(back_populates="sourced_documents")
+    source_links: List["SourceLink"] = Relationship(back_populates="document")
     authors: list[str] = Field(default_factory=list, sa_column=Column(JSONB))
     doi: Optional[str] = Field()
     page_link: Optional[str] = Field()
