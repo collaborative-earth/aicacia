@@ -134,6 +134,7 @@ class SourceLink(Base, table=True):
     doc_id: uuid.UUID = Field(foreign_key="sourced_documents.doc_id", nullable=False)
     link: str = Field(nullable=False)
     type: str = Field(nullable=False)
+    s3_location: Optional[str] = Field()
     document: "SourcedDocument" = Relationship(back_populates="source_links")
 
 

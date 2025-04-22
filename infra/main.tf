@@ -149,3 +149,10 @@ resource "aws_ecr_repository" "aicacia_webapp" {
     Project = "aicacia"
   }
 }
+
+resource "aws_s3_bucket" "aicacia_extracted_data" {
+  bucket = "aicacia-extracted-data"
+  tags = {
+    Name = "Aicacia Extracted Data"
+  }
+}

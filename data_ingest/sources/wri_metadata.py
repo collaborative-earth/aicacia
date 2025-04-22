@@ -10,7 +10,7 @@ ALLOWED_FILE_TYPES = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 ]
 
-def extract(start_page=1, page_limit=-1, reversed_traversal=True):
+def extract_wri_metadata(start_page=1, page_limit=-1, reversed_traversal=True):
     if page_limit <= 0:
         if not reversed_traversal:
             last_page = -1
