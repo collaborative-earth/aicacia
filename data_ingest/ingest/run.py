@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, create_engine, Session
 from data_ingest.entities.Document import SourcedDocumentMetadata
-from data_ingest.sources.wri import extract
+from data_ingest.sources.wri_metadata import extract_wri_metadata
 from api.server.models import SourcedDocument, SourceLink
 
 if __name__ == '__main__':
@@ -10,7 +10,7 @@ if __name__ == '__main__':
     with Session(engine) as session:
         batch = []
 
-        for doc in extract(start_page=0, page_limit=70, reversed_traversal=False): #type: SourcedDocumentMetadata
+        for doc in extract_wri_metadata(start_page=0, page_limit=70, reversed_traversal=False): #type: SourcedDocumentMetadata
             db_entity = SourcedDocument(
                 title=doc.title,
                 source_corpus=doc.source_corpus.value,
