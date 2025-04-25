@@ -42,7 +42,6 @@ def delete_collection_if_exists(client, collection_name):
         client.delete_collection(collection_name)
         print(f"Collection '{collection_name}' has been deleted.")
     else:
-<<<<<<< HEAD
         print(f"Collection '{collection_name}' does not exist.")
 
 
@@ -119,9 +118,6 @@ def read_db(input_dir):
         conn.close()
     final_df = pd.concat(df_list, ignore_index=True)
     return final_df
-=======
-        print(f"Collection '{collection_name}' does not exist.")
->>>>>>> 4f44f68 (Initial commit for qdrant vectordb)
 
 def extract_file_name(json_str):
     try:
