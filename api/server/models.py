@@ -127,6 +127,7 @@ class SourcedDocument(Base, table=True):
     tags: list[str] = Field(default_factory=list, sa_column=Column(JSONB))
     references: list[str] = Field(default_factory=list, sa_column=Column(JSONB))
     other_metadata: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
+    is_relevant: bool = Field(default=False)
 
 class SourceLink(Base, table=True):
     __tablename__ = "source_links"
