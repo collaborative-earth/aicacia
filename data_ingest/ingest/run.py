@@ -1,10 +1,35 @@
-from sqlmodel import SQLModel, create_engine, Session
+from sqlmodel import SQLModel, create_engine, Session, select
 from data_ingest.entities.Document import SourcedDocumentMetadata
-from data_ingest.sources.wri_metadata import extract_wri_metadata
+from data_ingest.sources.wri_metadata import extract_wri_metadata, stream_relevant_links
 from api.server.models import SourcedDocument, SourceLink
 
-if __name__ == '__main__':
-    engine = create_engine("<DB_URL>")
+def mark_articles_as_relevant(db_url: str):
+    engine = create_engine(db_url)
+    SQLModel.metadata.create_all(engine)
+
+    with Session(engine) as session:
+        batch = []
+
+        for doc_link in stream_relevant_links():
+            statement = select(SourcedDocument).where(SourcedDocument.page_link == doc_link)
+            result: SourcedDocument | None = session.exec(statement).first()
+
+            if result:
+                result.is_relevant = True
+                batch.append(result)
+
+            if len(batch) > 10:
+                session.add_all(batch)
+                session.commit()
+                batch.clear()
+
+        if batch:
+            session.add_all(batch)
+            session.commit()
+            batch.clear()
+
+def extract_and_save_articles_metadata(db_url: str):
+    engine = create_engine(db_url)
     SQLModel.metadata.create_all(engine)
 
     with Session(engine) as session:
@@ -39,7 +64,3 @@ if __name__ == '__main__':
             session.add_all(batch)
             session.commit()
             batch.clear()
-
-
-
-

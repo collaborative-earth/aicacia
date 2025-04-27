@@ -5,10 +5,26 @@ from data_ingest.entities.Document import SourcedDocumentMetadata, SourceLink, D
 
 BASE_URL = 'https://www.wri.org'
 BASE_SEARCH_URL = 'https://www.wri.org/resources/type/research-65'
+RELEVANT_SEARCH_URL = 'https://www.wri.org/resources/type/research-65/tags/agriculture-8576/tags/biodiversity-9154/tags/deforestation-9159/tags/floods-19820/tags/forest-and-landscape-restoration-30011/tags/forest-monitoring-10557/tags/forest-products-9650/tags/forests-73/tags/illegal-logging-19024/tags/indigenous-peoples-local-communities-30150/tags/land-rights-8639/tags/land-use-10921/tags/landscapes-9653/tags/protected-areas-9157/tags/restoration-9843/tags/rivers-9932/tags/wetlands-9163'
 ALLOWED_FILE_TYPES = [
     'application/pdf',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 ]
+
+def stream_relevant_links():
+    page = 0
+    while True:
+        projects = read_html(f'{RELEVANT_SEARCH_URL}?page={page}').find_all('div', class_='search-results-text')
+
+        if len(projects) == 0:
+            break
+        else:
+            print(f'Found {len(projects)} docs on page #{page}...')
+            for i, project in enumerate(projects):
+                if (project_url_doc := project.find('a', href=True)) is not None:
+                    yield BASE_URL + project_url_doc['href']
+
+            page += 1
 
 def extract_wri_metadata(start_page=1, page_limit=-1, reversed_traversal=True):
     if page_limit <= 0:
