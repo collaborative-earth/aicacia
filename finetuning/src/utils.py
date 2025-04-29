@@ -6,8 +6,8 @@ from llama_index.core.evaluation import EmbeddingQAFinetuneDataset
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core import SimpleDirectoryReader
 from llama_index.core.ingestion import IngestionPipeline
-from src.tei_parser import TEINodeParser
-from src.node_filters import *
+from vectordb.src.custom_parsers import *
+from finetuning.src.node_filters import *
 
 def load_config(config_path: str) -> dict:
     with open(config_path, 'r') as file:
