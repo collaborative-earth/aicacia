@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from dataclasses_json import dataclass_json
 from enum import Enum
 
 
@@ -37,19 +38,22 @@ class LayoutType(str, Enum):
     T_UP = 'UP'
 
 
+@dataclass_json
 @dataclass
 class PostprocessPageZoneResult:
     layout_type: LayoutType
-    paragraphs: list[str]
+    paragraphs: list[str] | None
     last_text_fragment: str | None
 
 
+@dataclass_json
 @dataclass
 class PostprocessPageResult:
     page_number: int
     zones: list[PostprocessPageZoneResult]
 
 
+@dataclass_json
 @dataclass
 class PostprocessResult:
     pages: list[PostprocessPageResult]

@@ -2,7 +2,7 @@ import os
 import cv2
 import numpy as np
 
-from data_ingest.postprocess.models import Bounds, LayoutType, Element
+from data_ingest.entities.postprocess_models import Bounds, LayoutType, Element
 
 VERTICAL_SLICE_WIDTH = 20
 

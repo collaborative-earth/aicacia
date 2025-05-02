@@ -1,6 +1,6 @@
 import json
 
-from data_ingest.postprocess.models import Element, Bounds
+from data_ingest.entities.postprocess_models import Element, Bounds
 
 def read_json(json_file_path, rendered_page_width) -> list[Element]:
     with open(json_file_path) as f:

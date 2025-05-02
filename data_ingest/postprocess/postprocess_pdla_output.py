@@ -1,6 +1,6 @@
 import re
 
-from data_ingest.postprocess.models import (
+from data_ingest.entities.postprocess_models import (
     Bounds, LayoutType, Element, PostprocessResult,
     PostprocessPageResult, PostprocessPageZoneResult
 )
@@ -63,26 +63,26 @@ def __is_page_footer_or_header(element: Element) -> bool:
 def __is_picture_or_table_element(element: Element) -> bool:
     if element.type_name in ['Picture', 'Table']:
         return True
-    elif element.text.startswith("Source:") and __words_count(element) < 10:
+    elif element.text.upper().startswith("SOURCE:") and __words_count(element) < 10:
         return True
-    elif element.text.startswith("Sources:") and __words_count(element) < 10:
+    elif element.text.upper().startswith("SOURCES:") and __words_count(element) < 10:
         return True
-    elif element.text.startswith("Note:"):
+    elif element.text.upper().startswith("NOTE:"):
         return True
-    elif element.text.startswith("Notes:"):
+    elif element.text.upper().startswith("NOTES:"):
         return True
-    elif element.text.startswith("Notes and Sources:"):
+    elif element.text.upper().startswith("NOTES AND SOURCES:"):
         return True
-    elif element.text.startswith("Figure") and element.type_name == "Caption":
+    elif element.text.upper().startswith("FIGURE") and element.type_name == "Caption":
         return True
-    elif element.text.startswith("Table") and element.type_name == "Caption":
+    elif element.text.upper().startswith("TABLE") and element.type_name == "Caption":
         return True
-    elif re.match(r"Figure \d+ .*", element.text):
+    elif re.match(r"FIGURE \d+ .*", element.text.upper()):
         if "|" in element.text:
             return True
         else:
             return False
-    elif re.match(r"Table \d+ .*", element.text):
+    elif re.match(r"TABLE \d+ .*", element.text.upper()):
         if "|" in element.text:
             return True
         else:
