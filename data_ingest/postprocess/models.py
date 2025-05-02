@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 
@@ -12,7 +12,7 @@ class Bounds:
     def width(self) -> int:
         return self.right - self.left
 
-    def middle_x(self) -> int:
+    def center_x(self) -> int:
         return (self.right + self.left) // 2
 
 
@@ -23,62 +23,34 @@ class Element:
     bounds: Bounds
     type_name: str
     text: str
-    ocr_text: str | None = None
-
-    def __eq__(self, other):
-        if isinstance(other, Element):
-            return self.index == other.index
-        return False
 
 
-class ClusterCategory(Enum):
-    DEFAULT = 1
-    TABLE = 2
-    FIGURE = 3
-    CONTOUR_GROUP = 4
+class LayoutType(str, Enum):
+    DEFAULT = 'DEFAULT'
+    TWO_COLUMNS_LEFT = 'LEFT'
+    TWO_COLUMNS_RIGHT = 'RIGHT'
+    INVERTED_T_LEFT_UP = 'LEFT_UP'
+    INVERTED_T_RIGHT_UP = 'RIGHT_UP'
+    INVERTED_T_LOW = 'LOW'
+    T_LEFT_LOW = 'LEFT_LOW'
+    T_RIGHT_LOW = 'RIGHT_LOW'
+    T_UP = 'UP'
 
 
 @dataclass
-class ElementCluster:
-    header: Element
-    other_elements: list[Element] = field(default_factory=list)
-    category: ClusterCategory = ClusterCategory.DEFAULT
-
-    def all_elements(self):
-        return [self.header] + self.other_elements
-
-    def __len__(self):
-        return 1 + len(self.other_elements)
-
-    def __getitem__(self, index):
-        if isinstance(index, int):
-            if index == 0:
-                return self.header
-            elif index > 0:
-                return self.other_elements[index - 1]
-            else:
-                index += (1 + len(self.other_elements))
-                return self.__getitem__(index)
-        else:
-            raise TypeError("Invalid index type")
-
-    def __iter__(self):
-        return iter([self.header] + self.other_elements)
-
-    def __contains__(self, item):
-        if not isinstance(item, Element):
-            return False
-
-        return self.header == item or (item in self.other_elements)
+class PostprocessPageZoneResult:
+    layout_type: LayoutType
+    paragraphs: list[str]
+    last_text_fragment: str | None
 
 
-class LayoutType(Enum):
-    DEFAULT = 1
-    TWO_COLUMNS_LEFT = 2
-    TWO_COLUMNS_RIGHT = 3
-    INVERTED_T_LEFT_UP = 4
-    INVERTED_T_RIGHT_UP = 5
-    INVERTED_T_LOW = 6
-    T_LEFT_LOW = 7
-    T_RIGHT_LOW = 8
-    T_UP = 9
+@dataclass
+class PostprocessPageResult:
+    page_number: int
+    zones: list[PostprocessPageZoneResult]
+
+
+@dataclass
+class PostprocessResult:
+    pages: list[PostprocessPageResult]
+    references: list[str]
