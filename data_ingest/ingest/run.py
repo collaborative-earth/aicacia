@@ -13,7 +13,7 @@ from data_ingest.postprocess.pdf_to_images import convert
 from data_ingest.postprocess.pdla_output_reader import read_json
 from data_ingest.postprocess.page_layout_detection import detect_pages_layout
 from data_ingest.postprocess.postprocess_pdla_output import postprocess
-from api.server.models import SourcedDocument, SourceLink
+from api.server.entities import SourcedDocument, SourceLink
 
 def mark_articles_as_relevant(db_url: str):
     engine = create_engine(db_url)

@@ -41,12 +41,12 @@ def __is_list_item(element: Element) -> bool:
 
 
 def __is_box_header(element: Element) -> bool:
-    if not element.text.startswith("Box"):
+    if not element.text.upper().startswith("BOX"):
         return False
 
     if __is_section_header(element):
         return True
-    elif re.match(r"Box \d+ .*", element.text) and "|" in element.text:
+    elif re.match(r"BOX \w?-?\d+", element.text.upper()) and "|" in element.text:
         return True
     else:
         return False
@@ -71,18 +71,20 @@ def __is_picture_or_table_element(element: Element) -> bool:
         return True
     elif element.text.upper().startswith("NOTES:"):
         return True
+    elif element.text.upper().startswith("ABBREVIATIONS:"):
+        return True
     elif element.text.upper().startswith("NOTES AND SOURCES:"):
         return True
     elif element.text.upper().startswith("FIGURE") and element.type_name == "Caption":
         return True
     elif element.text.upper().startswith("TABLE") and element.type_name == "Caption":
         return True
-    elif re.match(r"FIGURE \d+ .*", element.text.upper()):
+    elif re.match(r"FIGURE \w?-?\d+", element.text.upper()):
         if "|" in element.text:
             return True
         else:
             return False
-    elif re.match(r"TABLE \d+ .*", element.text.upper()):
+    elif re.match(r"TABLE \w?-?\d+", element.text.upper()):
         if "|" in element.text:
             return True
         else:
