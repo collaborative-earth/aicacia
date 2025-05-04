@@ -134,6 +134,24 @@ resource "aws_ssm_parameter" "openai_api_key" {
   value = var.openai_api_key
 }
 
+resource "aws_ssm_parameter" "qdrant_url" {
+  name  = "/aicacia-app/qdrant-url"
+  type  = "SecureString"
+  value = var.qdrant_url
+}
+
+resource "aws_ssm_parameter" "qdrant_api_key" {
+  name  = "/aicacia-app/qdrant-api-key"
+  type  = "SecureString"
+  value = var.qdrant_api_key
+}
+
+resource "aws_ssm_parameter" "secret_key" {
+  name  = "/aicacia-app/secret-key"
+  type  = "SecureString"
+  value = var.secret_key
+}
+
 resource "aws_ecr_repository" "aicacia_api" {
   name                 = "aicacia-api"
   image_tag_mutability = "MUTABLE"

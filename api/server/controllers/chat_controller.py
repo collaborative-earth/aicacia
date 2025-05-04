@@ -1,106 +1,92 @@
 import uuid
-from typing import Optional
 
-import models
-from controllers.base_controller import AicaciaProtectedAPI
-from fastapi_utils.cbv import cbv
-from fastapi_utils.inferring_router import InferringRouter
-from library import aicacia_ai_agent
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends
+from sqlmodel import Session
+from server.auth.dependencies import get_current_user
+from server.dtos.chat import ChatResponse, ChatRequest
+from server.entities.chat import ChatMessage, Actor
+from server.db.models.thread_messages import ThreadMessages
+from server.db.models.user import User
+from server.db.session import get_db_session
+from server.core.ai_agent import get_chat_response
 
-chat_router = InferringRouter()
-
-
-class ChatRequest(BaseModel):
-    message: str
-    thread_id: Optional[str] = None
+chat_router = APIRouter()
 
 
-class ChatResponse(BaseModel):
-    chat_messages: list[models.ChatMessage]
-    thread_id: str
+@chat_router.post("/")
+def generate_chat_response(
+        request: ChatRequest,
+        user: User = Depends(get_current_user),
+        db: Session = Depends(get_db_session)
+) -> ChatResponse:
 
+    thread_id = request.thread_id or str(uuid.uuid4())
 
-@cbv(chat_router)
-class ChatController(AicaciaProtectedAPI):
+    # get all messages of the thread.
+    thread_messages = db.query(ThreadMessages).filter_by(thread_id=thread_id).all()
 
-    @chat_router.post("/")
-    def post(self, request: ChatRequest) -> ChatResponse:
-        thread_id = request.thread_id or str(uuid.uuid4())
-
-        session = self.get_db_session()
-
-        # get all messages of the thread.
-        thread_messages = (
-            session.query(models.ThreadMessages).filter_by(thread_id=thread_id).all()
+    chat_history = [
+        ChatMessage(
+            message=thread_message.message,
+            message_from=thread_message.message_from,
+            message_id=str(thread_message.message_id),
         )
+        for thread_message in thread_messages
+    ]
 
-        chat_history = [
-            models.ChatMessage(
-                message=thread_message.message,
-                message_from=thread_message.message_from,
-                message_id=str(thread_message.message_id),
-            )
-            for thread_message in thread_messages
-        ]
+    response = get_chat_response(
+        message=request.message,
+        chat_history=chat_history,
+    )
 
-        response = aicacia_ai_agent.get_chat_response(
+    chat_history.append(
+        ChatMessage(
             message=request.message,
-            chat_history=chat_history,
+            message_from=Actor.USER,
         )
+    )
 
-        chat_history.append(
-            models.ChatMessage(
-                message=request.message,
-                message_from=models.Actor.USER,
-            )
+    chat_history.append(
+        ChatMessage(
+            message=response,
+            message_from=Actor.AGENT,
         )
+    )
 
-        chat_history.append(
-            models.ChatMessage(
-                message=response,
-                message_from=models.Actor.AGENT,
-            )
-        )
-
-        session.add(
-            models.ThreadMessages(
-                thread_id=thread_id,
-                message_id=str(uuid.uuid4()),
-                message=request.message,
-                message_from=models.Actor.USER.value,
-                user_id=self.user.user_id,
-            )
-        )
-
-        session.add(
-            models.ThreadMessages(
-                thread_id=thread_id,
-                message_id=str(uuid.uuid4()),
-                message=response,
-                message_from=models.Actor.AGENT.value,
-                user_id=self.user.user_id,
-            )
-        )
-
-        session.commit()
-
-        thread_messages = (
-            session.query(models.ThreadMessages).filter_by(thread_id=thread_id).all()
-        )
-
-        print(thread_messages)
-
-        chat_history = [
-            models.ChatMessage(
-                message=thread_message.message,
-                message_from=thread_message.message_from,
-                message_id=str(thread_message.message_id),
-            )
-            for thread_message in thread_messages
-        ]
-
-        return ChatResponse(
-            chat_messages=chat_history,
+    db.add(
+        ThreadMessages(
             thread_id=thread_id,
+            message_id=str(uuid.uuid4()),
+            message=request.message,
+            message_from=Actor.USER.value,
+            user_id=user.user_id,
         )
+    )
+
+    db.add(
+        ThreadMessages(
+            thread_id=thread_id,
+            message_id=str(uuid.uuid4()),
+            message=response,
+            message_from=Actor.AGENT.value,
+            user_id=user.user_id,
+        )
+    )
+
+    db.commit()
+
+    thread_messages = db.query(ThreadMessages).filter_by(thread_id=thread_id).all()
+
+    chat_history = [
+        ChatMessage(
+            message=thread_message.message,
+            message_from=thread_message.message_from,
+            message_id=str(thread_message.message_id),
+        )
+        for thread_message in thread_messages
+    ]
+
+    return ChatResponse(
+        chat_messages=chat_history,
+        thread_id=thread_id,
+    )

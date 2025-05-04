@@ -1,9 +1,8 @@
-from config import settings
 from langchain_openai import ChatOpenAI
+from openai import APIError
+from server.core.config import settings
 
-llm = ChatOpenAI(
-    model="gpt-4o-mini", temperature=1, max_retries=2, api_key=settings.OPENAI_API_KEY
-)
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=1, max_retries=2, api_key=settings.OPENAI_API_KEY)
 
 
 def generate_summary(user_query: str, rag_context: str) -> str:
@@ -30,5 +29,9 @@ context: {rag_context}
         ("human", user_query),
     ]
 
-    ai_msg = llm.invoke(messages)
-    return ai_msg.content
+    try:
+        ai_msg = llm.invoke(messages)
+        return ai_msg.content
+    except APIError as e:
+        print(f"Call to OpenAPI failed, returning empty summary: message={e.message}")
+        return ""

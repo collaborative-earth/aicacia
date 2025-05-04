@@ -1,57 +1,45 @@
 import uuid
 
-import models
-from controllers.base_controller import AicaciaProtectedAPI
-from fastapi import HTTPException
-from fastapi_utils.cbv import cbv
-from fastapi_utils.inferring_router import InferringRouter
-from pydantic import BaseModel
-from sqlalchemy import select
+from fastapi import HTTPException, APIRouter, Depends
+from sqlmodel import Session, select
+from server.auth.dependencies import get_current_user
+from server.db.models.thread_messages import ThreadMessages, ThreadMessageFeedback
+from server.db.models.user import User
+from server.db.session import get_db_session
+from server.dtos.feedback import ChatFeedbackPostRequest, ChatFeedbackPostResponse
+from server.entities.thread_message import ThreadMessageFeedbackDetails
 
-chat_feedback_router = InferringRouter()
-
-
-class ChatFeedbackPostRequest(BaseModel):
-    thread_id: str
-    message_id: str
-    feedback_message: str
-    feedback: int
+chat_feedback_router = APIRouter()
 
 
-class ChatFeedbackPostResponse(BaseModel):
-    pass
+@chat_feedback_router.post("/")
+def save_chat_feedback(
+        request: ChatFeedbackPostRequest,
+        user: User = Depends(get_current_user),
+        db: Session = Depends(get_db_session)
+) -> ChatFeedbackPostResponse:
 
+    thread_message = db.exec(
+        select(ThreadMessages).filter(
+            ThreadMessages.message_id == request.message_id,
+            ThreadMessages.thread_id == request.thread_id,
+        )).first()
 
-@cbv(chat_feedback_router)
-class ChatFeedbackController(AicaciaProtectedAPI):
+    if not thread_message:
+        raise HTTPException(status_code=400, detail="thread message does not exist")
 
-    @chat_feedback_router.post("/")
-    def post(self, request: ChatFeedbackPostRequest) -> ChatFeedbackPostResponse:
+    chat_feedback = ThreadMessageFeedback(
+        feedback_id=str(uuid.uuid4()),
+        message_id=request.message_id,
+        thread_id=request.thread_id,
+        user_id=user.user_id,
+        feedback_json=ThreadMessageFeedbackDetails(
+            feedback=request.feedback,
+            feedback_message=request.feedback_message,
+        ).model_dump(),
+    )
 
-        session = self.get_db_session()
+    db.add(chat_feedback)
+    db.commit()
 
-        thread_message = session.exec(
-            select(models.ThreadMessages).filter(
-                models.ThreadMessages.message_id == request.message_id,
-                models.ThreadMessages.thread_id == request.thread_id,
-            )
-        ).first()
-
-        if not thread_message:
-            raise HTTPException(status_code=400, detail="thread message does not exist")
-
-        chat_feedback = models.ThreadMessageFeedback(
-            feedback_id=str(uuid.uuid4()),
-            message_id=request.message_id,
-            thread_id=request.thread_id,
-            user_id=self.user.user_id,
-            feedback_json=models.ThreadMessageFeedbackJSON(
-                feedback=request.feedback,
-                feedback_message=request.feedback_message,
-            ).model_dump(),
-        )
-
-        session.add(chat_feedback)
-        session.commit()
-
-        return ChatFeedbackPostResponse()
+    return ChatFeedbackPostResponse()
