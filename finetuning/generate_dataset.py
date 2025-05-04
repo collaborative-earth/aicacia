@@ -31,8 +31,9 @@ def main():
     
     # Load configuration
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description="Generate a QA dataset from TEI files")
-    parser.add_argument("--tei_path", type=str, help="Path to TEI directory")
+    parser = argparse.ArgumentParser(description="Generate a QA dataset from files")
+    parser.add_argument("--path", type=str, help="Path to files.")
+    parser.add_argument("--file_ext", type=str, help="Files extension.")
     parser.add_argument("--num_questions", type=int, help="Number of questions per chunk")
     parser.add_argument("--output_path", type=str, help="Path to save the output dataset")
     
@@ -42,8 +43,9 @@ def main():
     config = load_config("config.json")
     
     # Overwrite config with command-line arguments if provided
-    tei_path = args.tei_path if args.tei_path else config["paths"]["tei_directory"]
+    path = args.path if args.path else config["paths"]["directory"]
     num_questions = args.num_questions if args.num_questions else config["qa_generation"]["num_questions_per_chunk"]
+    file_ext = args.file_ext if args.file_ext else config["ingestion_pipeline"]["file_ext"]
     output_path = args.output_path if args.output_path else config["paths"]["output_dataset"]
 
 
@@ -53,7 +55,10 @@ def main():
     prompt_template = config["qa_generation"]["prompt_template"]
     
     # Run ingestion pipeline
-    nodes = create_nodes_from_tei_path(tei_path, chunk_size, chunk_overlap,apply_filter=True,valid_tags=['abstract', 'introduction', 'discussion'])
+    if file_ext == '.tei':
+        nodes = create_nodes_from_tei_path(path, chunk_size, chunk_overlap,apply_filter=True,valid_tags=['abstract', 'introduction', 'discussion'])
+    elif file_ext == ".pdf":
+        nodes = create_nodes_from_pdf_path(path, chunk_size, chunk_overlap,use_llm=config["ingestion_pipeline"]["use_llm"])
     print(f"Generating questions from {len(nodes)} chunks." )
     
     # Generate QA dataset
@@ -79,12 +84,13 @@ def main():
     if config["save_metadata"]:
         metadata = {
             "creation_time": datetime.datetime.now().isoformat(),
-            "tei_directory": config["paths"]["tei_directory"],
+            "directory": config["paths"]["directory"],
             "output_dataset": output_path,
+            "number of chunks": len(nodes),
             "chunk_size": config["ingestion_pipeline"]["chunk_size"],
             "chunk_overlap": config["ingestion_pipeline"]["chunk_overlap"],
             "qa_method": config["qa_generation"]["method"],
-            "num_questions_per_chunk": config["qa_generation"]["num_questions_per_chunk"]
+            "num_questions_per_chunk": num_questions,
         }
         
         metadata_path = output_path.replace(".json", "_metadata.json")
