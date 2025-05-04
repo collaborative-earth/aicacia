@@ -18,11 +18,11 @@ variable "qdrant_url" {
 }
 
 variable "qdrant_api_key" {
-  description = "API key for qdrant endpoint",
+  description = "API key for qdrant endpoint"
   sensitive   = true
 }
 
 variable "secret_key" {
-  description = "Aicacia secret key",
+  description = "Aicacia secret key"
   sensitive   = true
 }
