@@ -1,8 +1,6 @@
 import ast
 import json
 
-import models
-from config import settings
 from langchain.agents import AgentExecutor, tool
 from langchain.agents.format_scratchpad.openai_tools import (
     format_to_openai_tool_messages,
@@ -11,29 +9,31 @@ from langchain.agents.output_parsers.openai_tools import OpenAIToolsAgentOutputP
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
-from library.vectordb_utils import (
-    create_embedding_class,
-    create_vectordb_client,
-    load_config,
-)
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from qdrant_client import QdrantClient
+from server.core.config import settings
+from server.entities.chat import ChatMessage, Actor
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=1, api_key=settings.OPENAI_API_KEY)
 
+vectordb_client = QdrantClient(
+    url=settings.QDRANT_URL,
+    https=True,
+    api_key=settings.QDRANT_API_KEY
+)
 
-config = load_config("config.yaml")
-client = create_vectordb_client(config)
-embed_model = create_embedding_class(config)
+embedding_model = HuggingFaceEmbedding(model_name=settings.EMBEDDING_MODEL_NAME)
 
 
 @tool
 def get_restoration_context_for_message(country: str, message: str) -> int:
     """Returns the restoration context for a message"""
     # Embed query
-    query_embedding = embed_model.get_text_embedding(message)
+    query_embedding = embedding_model.get_text_embedding(message)
 
     # Search in vector store
-    results = client.query_points(
-        collection_name=config["vectordb"]["collection"],
+    results = vectordb_client.query_points(
+        collection_name=settings.QDRANT_COLLECTION,
         query=query_embedding,
         limit=3,
     )
@@ -113,11 +113,11 @@ agent = (
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
 
-def get_chat_response(message: str, chat_history: list[models.ChatMessage]) -> str:
+def get_chat_response(message: str, chat_history: list[ChatMessage]) -> str:
     chat_history_messages = [
         (
             AIMessage(content=chat_message.message)
-            if chat_message.message_from == models.Actor.AGENT
+            if chat_message.message_from == Actor.AGENT
             else HumanMessage(content=chat_message.message)
         )
         for chat_message in chat_history

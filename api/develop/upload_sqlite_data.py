@@ -10,7 +10,7 @@ import argparse
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from server import models
+from server import entities
 
 
 def __map_ref(record: dict):
@@ -20,7 +20,7 @@ def __map_ref(record: dict):
 def __map_document(cur, record: dict):
     doc_id = record["id"]
 
-    result = [models.Document(
+    result = [entities.Document(
         doc_id=doc_id,
         title=record["title"],
         raw_content=record["raw_content"],
@@ -38,14 +38,14 @@ def __map_document(cur, record: dict):
     )]
 
     for tag in [s for s in record["provided_tags"].split(";") if s]:
-        result.append(models.DocumentTag(
+        result.append(entities.DocumentTag(
             doc_id=doc_id,
             value=tag,
             generated=False
         ))
 
     for tag in [s for s in record["generated_tags"].split(";") if s]:
-        result.append(models.DocumentTag(
+        result.append(entities.DocumentTag(
             doc_id=doc_id,
             value=tag,
             generated=True
@@ -55,7 +55,7 @@ def __map_document(cur, record: dict):
 
 
 def __map_section(record: dict):
-    return models.DocumentChunk(
+    return entities.DocumentChunk(
         doc_id=record["doc_id"],
         sequence_number=None,
         content=record["content"],
@@ -66,7 +66,7 @@ def __map_section(record: dict):
 
 
 def __map_chunk(record: dict):
-    return models.DocumentChunk(
+    return entities.DocumentChunk(
         doc_id=record["doc_id"],
         sequence_number=record["sequence_number"],
         content=record["content"],

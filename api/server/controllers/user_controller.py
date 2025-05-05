@@ -1,99 +1,70 @@
 import uuid
+import bcrypt
 
-import models
-from controllers.base_controller import AicaciaProtectedAPI, AicaciaPublicAPI
-from fastapi import HTTPException
-from fastapi_utils.cbv import cbv
-from fastapi_utils.inferring_router import InferringRouter
-from library import auth
-from pydantic import BaseModel
+from fastapi import Depends
+from fastapi import HTTPException, APIRouter
+from sqlmodel import Session
 from sqlmodel import select
+from server.auth.auth import create_jwt_token
+from server.auth.dependencies import get_current_user
+from server.db.models.user import User
+from server.db.session import get_db_session
+from server.dtos.user import UserPostRequest, UserPostResponse, UserLoginRequest, UserLoginResponse, UserGetResponse
 
-user_router = InferringRouter()
+user_router = APIRouter()
 
-user_info_router = InferringRouter()
-
-
-class UserPostRequest(BaseModel):
-    email: str
-    password: str
-
-
-class UserPostResponse(BaseModel):
-    pass
+user_info_router = APIRouter()
 
 
-class UserLoginRequest(BaseModel):
-    email: str
-    password: str
+def _hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
-class UserLoginResponse(BaseModel):
-    token: str
+def _verify_password(password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
-class UserGetResponse(BaseModel):
-    email: str
-    user_id: str
+@user_router.post("/")
+def register(request: UserPostRequest, db: Session = Depends(get_db_session)) -> UserPostResponse:
+    email = request.email.lower()
+
+    existing_user = db.exec(select(User).filter(User.email == email)).first()
+
+    if existing_user:
+        raise HTTPException(status_code=400, detail="User with this email already exists")
+
+    hashed_password = _hash_password(request.password)
+
+    user = User(
+        user_id=str(uuid.uuid4()),
+        email=email,
+        password=hashed_password,
+        is_verified=True,
+        user_json={},
+    )
+
+    db.add(user)
+    db.commit()
+    return UserPostResponse()
 
 
-@cbv(user_router)
-class UserController(AicaciaPublicAPI):
+@user_router.post("/login")
+def login(request: UserLoginRequest, db: Session = Depends(get_db_session)) -> UserLoginResponse:
+    email = request.email.lower()
 
-    @user_router.post("/")
-    def post(self, request: UserPostRequest) -> UserPostResponse:
-        session = self.get_db_session()
+    user: User = db.exec(select(User).filter(User.email == email)).first()
 
-        email = request.email.lower()
+    if not user:
+        raise HTTPException(status_code=400, detail="User not found")
 
-        existing_user = session.exec(
-            select(models.User).filter(models.User.email == email)
-        ).first()
+    if not _verify_password(request.password, user.password):
+        raise HTTPException(status_code=400, detail="Incorrect password")
 
-        if existing_user:
-            raise HTTPException(
-                status_code=400, detail="User with this email already exists"
-            )
+    token = create_jwt_token(user)
 
-        hashed_password = auth.hash_password(request.password)
-
-        user = models.User(
-            user_id=str(uuid.uuid4()),
-            email=email,
-            password=hashed_password,
-            is_verified=True,
-            user_json={},
-        )
-
-        session.add(user)
-        session.commit()
-
-        return UserPostResponse()
-
-    @user_router.post("/login")
-    def login(self, request: UserLoginRequest) -> UserLoginResponse:
-        session = self.get_db_session()
-
-        email = request.email.lower()
-
-        user = session.exec(
-            select(models.User).filter(models.User.email == email)
-        ).first()
-
-        if not user:
-            raise HTTPException(status_code=400, detail="User not found")
-
-        if not auth.verfiy_password(request.password, user.password):
-            raise HTTPException(status_code=400, detail="Incorrect password")
-
-        token = auth.create_auth_token(user)
-
-        return UserLoginResponse(token=token)
+    return UserLoginResponse(token=token)
 
 
-@cbv(user_info_router)
-class UserInfoController(AicaciaProtectedAPI):
-
-    @user_info_router.get("/")
-    def get(self) -> UserGetResponse:
-        return UserGetResponse(email=self.user.email, user_id=str(self.user.user_id))
+@user_info_router.get("/")
+def get_user_info(user: User = Depends(get_current_user)) -> UserGetResponse:
+    return UserGetResponse(email=user.email, user_id=str(user.user_id))
