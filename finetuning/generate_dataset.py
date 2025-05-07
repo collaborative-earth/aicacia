@@ -53,12 +53,12 @@ def main():
     chunk_overlap = config["ingestion_pipeline"]["chunk_overlap"]
     method = config["qa_generation"]["method"]
     prompt_template = config["qa_generation"]["prompt_template"]
-    
+    use_llm = config["ingestion_pipeline"]["use_llm"]
     # Run ingestion pipeline
     if file_ext == '.tei':
         nodes = create_nodes_from_tei_path(path, chunk_size, chunk_overlap,apply_filter=True,valid_tags=['abstract', 'introduction', 'discussion'])
     elif file_ext == ".pdf":
-        nodes = create_nodes_from_pdf_path(path, chunk_size, chunk_overlap,use_llm=config["ingestion_pipeline"]["use_llm"])
+        nodes = create_nodes_from_pdf_path(path, chunk_size, chunk_overlap,use_llm=use_llm)
     print(f"Generating questions from {len(nodes)} chunks." )
     
     # Generate QA dataset
@@ -84,12 +84,12 @@ def main():
     if config["save_metadata"]:
         metadata = {
             "creation_time": datetime.datetime.now().isoformat(),
-            "directory": config["paths"]["directory"],
+            "directory": path,
             "output_dataset": output_path,
             "number of chunks": len(nodes),
-            "chunk_size": config["ingestion_pipeline"]["chunk_size"],
-            "chunk_overlap": config["ingestion_pipeline"]["chunk_overlap"],
-            "qa_method": config["qa_generation"]["method"],
+            "chunk_size": chunk_size,
+            "chunk_overlap": chunk_overlap,
+            "qa_method": method,
             "num_questions_per_chunk": num_questions,
         }
         
