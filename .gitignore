@@ -35,3 +35,5 @@ finetuning/ir_results
 playground.ipynb
 finetuning/**/*.json
 !finetuning/config.json
+finetuning/**/*.jsonl
+finetuning/**/*.tsv
