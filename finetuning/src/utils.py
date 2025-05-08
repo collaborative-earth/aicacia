@@ -67,6 +67,7 @@ def merge_datasets(ds1: EmbeddingQAFinetuneDataset, ds2: EmbeddingQAFinetuneData
         relevant_docs=merged_relevant_docs
     )
 
+
 def save_qa_dataset_to_beir_format(qa_dataset: EmbeddingQAFinetuneDataset, output_dir, prefix="qgen"):
     """
     Save a QA dataset to BEIR-compatible format.
@@ -114,7 +115,30 @@ def save_qa_dataset_to_beir_format(qa_dataset: EmbeddingQAFinetuneDataset, outpu
         for query_id, corpus_dict in qrels.items():
             for corpus_id, score in corpus_dict.items():
                 writer.writerow([query_id, corpus_id, score])
-                
+      
+def save_nodes_to_jsonl(nodes: List[TextNode], output_dir):
+    '''
+        Save a list of llama index nodes into a jsonl file in BEIR-style format
+    '''
+    corpus_path = os.path.join(output_dir, "corpus.jsonl")
+    with open(corpus_path, "w") as f:
+        for node in nodes:
+            # Get metadata values
+            node_id = node.id_
+            node_text = node.get_text()  # assuming BaseNode has a get_text() method
+            title = node.metadata.get("title", "")  # Add title from metadata (empty if not present)
+            
+            # Create a document dictionary similar to BEIR format
+            beir_doc = {
+                "_id": node_id,
+                "title": title,
+                "text": node_text
+            }
+
+            # Write the JSON document to the file
+            f.write(json.dumps(beir_doc) + "\n")
+
+                      
 def split_dataset(dataset: EmbeddingQAFinetuneDataset, train_ratio: float = 0.8) -> Tuple[EmbeddingQAFinetuneDataset, EmbeddingQAFinetuneDataset]:
     """
     Split a QA dataset into training and validation sets.
