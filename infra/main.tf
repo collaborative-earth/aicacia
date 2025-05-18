@@ -57,6 +57,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
 resource "aws_instance" "app_server" {
   ami                         = "ami-088b41ffb0933423f"
   instance_type               = "t2.micro"
+  availability_zone           = "us-east-2b"
   key_name                    = aws_key_pair.deployer.key_name
   vpc_security_group_ids = [aws_security_group.app_sg.id]
   associate_public_ip_address = true
@@ -76,8 +77,11 @@ resource "aws_instance" "app_server" {
 
 resource "aws_ebs_volume" "db_data" {
   type              = "gp3"
-  availability_zone = aws_instance.app_server.availability_zone
+  availability_zone = "us-east-2b"
   size              = 20
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_volume_attachment" "db_attach" {
