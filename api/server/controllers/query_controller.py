@@ -5,12 +5,12 @@ from typing import Sequence
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
 from qdrant_client import QdrantClient
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from server.auth.dependencies import get_current_user
 from server.dtos.query import QueryRequest, QueryResponse, Reference
 from server.db.models.query import Query
 from server.db.models.user import User
 from server.db.models.sourced_documents import SourcedDocument
+from server.core.embedding_model import model as embedding_model
 from server.core.config import settings
 from server.db.session import get_db_session
 from server.core.ai_summary import generate_summary
@@ -23,14 +23,12 @@ vectordb_client = QdrantClient(
     api_key=settings.QDRANT_API_KEY
 )
 
-embedding_model = HuggingFaceEmbedding(model_name=settings.EMBEDDING_MODEL_NAME)
-
 
 @query_router.post("/")
 def run_user_query(
-        request: QueryRequest,
-        user: User = Depends(get_current_user),
-        db: Session = Depends(get_db_session)
+    request: QueryRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db_session)
 ) -> QueryResponse:
 
     query_id = str(uuid.uuid4())

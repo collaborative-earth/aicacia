@@ -9,9 +9,9 @@ from langchain.agents.output_parsers.openai_tools import OpenAIToolsAgentOutputP
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from qdrant_client import QdrantClient
 from server.core.config import settings
+from server.core.embedding_model import model as embedding_model
 from server.entities.chat import ChatMessage, Actor
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=1, api_key=settings.OPENAI_API_KEY)
@@ -21,9 +21,6 @@ vectordb_client = QdrantClient(
     https=True,
     api_key=settings.QDRANT_API_KEY
 )
-
-embedding_model = HuggingFaceEmbedding(model_name=settings.EMBEDDING_MODEL_NAME)
-
 
 @tool
 def get_restoration_context_for_message(country: str, message: str) -> int:
