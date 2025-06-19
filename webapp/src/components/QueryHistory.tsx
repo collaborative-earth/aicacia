@@ -4,6 +4,7 @@ import '../styles/QueryHistory.css';
 
 interface QueryHistoryProps {
   onQuerySelect: (queryId: string) => void;
+  refreshTrigger: number;
 }
 
 interface QueryItem {
@@ -13,7 +14,7 @@ interface QueryItem {
   summary: string;
 }
 
-const QueryHistory: React.FC<QueryHistoryProps> = ({ onQuerySelect }) => {
+const QueryHistory: React.FC<QueryHistoryProps> = ({ onQuerySelect, refreshTrigger }) => {
   const [queries, setQueries] = useState<QueryItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
@@ -35,7 +36,7 @@ const QueryHistory: React.FC<QueryHistoryProps> = ({ onQuerySelect }) => {
 
   useEffect(() => {
     loadQueries();
-  }, [currentPage]);
+  }, [currentPage, refreshTrigger]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 

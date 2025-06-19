@@ -9,9 +9,15 @@ import './App.css';
 
 function App() {
   const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
 
   const handleQuerySelect = (queryId: string) => {
     setSelectedQueryId(queryId);
+  };
+
+  const handleNewQuestionSubmitted = () => {
+    // Trigger a refresh of the query history
+    setRefreshTrigger(prev => prev + 1);
   };
 
   return (
@@ -20,7 +26,10 @@ function App() {
         <TopBar />
         <div className="app-layout">
           <aside className="sidebar">
-            <QueryHistory onQuerySelect={handleQuerySelect} />
+            <QueryHistory 
+              onQuerySelect={handleQuerySelect} 
+              refreshTrigger={refreshTrigger}
+            />
           </aside>
           <main className="main-content">
             <Routes>
@@ -28,7 +37,12 @@ function App() {
               <Route path="/home" element={<Home />} />
               <Route 
                 path="/" 
-                element={<QuestionSection selectedQueryId={selectedQueryId} />} 
+                element={
+                  <QuestionSection 
+                    selectedQueryId={selectedQueryId} 
+                    onNewQuestionSubmitted={handleNewQuestionSubmitted}
+                  />
+                } 
               />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

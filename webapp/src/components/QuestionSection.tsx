@@ -21,9 +21,10 @@ const DONT_KNOW_FEEDBACK = -1;
 
 interface QuestionSectionProps {
   selectedQueryId: string | null;
+  onNewQuestionSubmitted: () => void;
 }
 
-const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId }) => {
+const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNewQuestionSubmitted }) => {
   const [query, setQuery] = useState('');
   const [queryId, setQueryId] = useState('');
   const [references, setReferences] = useState<Reference[]>([]);
@@ -33,6 +34,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId }) =>
   const [overallFeedback, setOverallFeedback] = useState<string>('');
   const [summaryFeedback, setSummaryFeedback] = useState<number>(DONT_KNOW_FEEDBACK);
   const [showHistory, setShowHistory] = useState<boolean>(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
 
   useEffect(() => {
     if (selectedQueryId) {
@@ -58,6 +60,8 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId }) =>
       setReferencesFeedback(res.references.map(() => ({ feedback: DONT_KNOW_FEEDBACK, feedback_reason: '' })));
       setSummaryFeedback(DONT_KNOW_FEEDBACK);
       setOverallFeedback('');
+      // Notify parent that a new question was submitted
+      onNewQuestionSubmitted();
     } catch (error) {
       console.error('Failed to ask question:', error);
     } finally {
@@ -136,8 +140,9 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId }) =>
       summary_feedback: summaryFeedback,
       feedback: overallFeedback,
     });
-    alert('Feedback submitted successfully');
-    askForNewQuestion();
+    setFeedbackSubmitted(true);
+    // Hide the notification after 3 seconds
+    setTimeout(() => setFeedbackSubmitted(false), 3000);
   };
 
   return (
@@ -284,6 +289,11 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId }) =>
             <button className="submit-feedback-button" onClick={handleSubmitFeedback}>
               Submit Feedback
             </button>
+            {feedbackSubmitted && (
+              <div className="feedback-notification">
+                ✓ Feedback submitted successfully
+              </div>
+            )}
           </div>
         </div>
       )}
