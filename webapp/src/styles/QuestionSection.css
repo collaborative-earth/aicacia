@@ -106,11 +106,45 @@
 }
 
 .feedback-options {
-  display: flex;
-  gap: 15px;
   margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20px;
 }
 
+.feedback-radio-group {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  min-width: 300px;
+}
+
+.feedback-radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.feedback-reason-input {
+  flex: 1;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
+.feedback-reason-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
 
 .overall-feedback-input {
   width: 100%;

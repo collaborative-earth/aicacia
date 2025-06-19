@@ -10,6 +10,11 @@ interface Reference {
   chunk: string;
 }
 
+interface ReferenceFeedback {
+  feedback: number;
+  feedback_reason: string;
+}
+
 const USEFUL_FEEDBACK = 10;
 const NOT_USEFUL_FEEDBACK = 0;
 const DONT_KNOW_FEEDBACK = -1;
@@ -22,10 +27,9 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
   const [references, setReferences] = useState<Reference[]>([]);
   const [summary, setSummary] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [referencesFeedback, setReferencesFeedback] = useState<number[]>([]);
+  const [referencesFeedback, setReferencesFeedback] = useState<ReferenceFeedback[]>([]);
   const [overallFeedback, setOverallFeedback] = useState<string>('');
   const [summaryFeedback, setSummaryFeedback] = useState<number>(DONT_KNOW_FEEDBACK);
-
 
   const handleSearch = async (e: React.FormEvent) => {
     if (!query) {
@@ -41,7 +45,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
 
     setLoading(false);
     setReferences(res.references);
-    setReferencesFeedback(res.references.map(() => DONT_KNOW_FEEDBACK));
+    setReferencesFeedback(res.references.map(() => ({ feedback: DONT_KNOW_FEEDBACK, feedback_reason: '' })));
     setSummaryFeedback(DONT_KNOW_FEEDBACK);
     setSummary(res.summary);
     setQueryId(res.query_id);
@@ -65,7 +69,19 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
 
   const handleFeedbackChange = (index: number, feedback: number) => {
     const updatedReferencesFeedback = [...referencesFeedback];
-    updatedReferencesFeedback[index] = feedback;
+    updatedReferencesFeedback[index] = {
+      ...updatedReferencesFeedback[index],
+      feedback: feedback
+    };
+    setReferencesFeedback(updatedReferencesFeedback);
+  };
+
+  const handleFeedbackReasonChange = (index: number, reason: string) => {
+    const updatedReferencesFeedback = [...referencesFeedback];
+    updatedReferencesFeedback[index] = {
+      ...updatedReferencesFeedback[index],
+      feedback_reason: reason
+    };
     setReferencesFeedback(updatedReferencesFeedback);
   };
 
@@ -160,36 +176,50 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
                 </div>
                 <div className="reference-chunk">{ref.chunk}</div>
                 <div className="feedback-options">
-                  <label>
-                    <input
-                      type="radio"
-                      name={`feedback-${index}`}
-                      value="useful"
-                      checked={referencesFeedback[index] === USEFUL_FEEDBACK}
-                      onChange={() => handleFeedbackChange(index, USEFUL_FEEDBACK)}
-                    />
-                    Useful
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name={`feedback-${index}`}
-                      value="not-useful"
-                      checked={referencesFeedback[index] === NOT_USEFUL_FEEDBACK}
-                      onChange={() => handleFeedbackChange(index, NOT_USEFUL_FEEDBACK)}
-                    />
-                    Not Useful
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name={`feedback-${index}`}
-                      value="not-useful"
-                      checked={referencesFeedback[index] === DONT_KNOW_FEEDBACK}
-                      onChange={() => handleFeedbackChange(index, DONT_KNOW_FEEDBACK)}
-                    />
-                    Don't Know
-                  </label>
+                  <div className="feedback-radio-group">
+                    <label>
+                      <input
+                        type="radio"
+                        name={`feedback-${index}`}
+                        value="useful"
+                        checked={referencesFeedback[index]?.feedback === USEFUL_FEEDBACK}
+                        onChange={() => handleFeedbackChange(index, USEFUL_FEEDBACK)}
+                      />
+                      Useful
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name={`feedback-${index}`}
+                        value="not-useful"
+                        checked={referencesFeedback[index]?.feedback === NOT_USEFUL_FEEDBACK}
+                        onChange={() => handleFeedbackChange(index, NOT_USEFUL_FEEDBACK)}
+                      />
+                      Not Useful
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name={`feedback-${index}`}
+                        value="not-useful"
+                        checked={referencesFeedback[index]?.feedback === DONT_KNOW_FEEDBACK}
+                        onChange={() => handleFeedbackChange(index, DONT_KNOW_FEEDBACK)}
+                      />
+                      Don't Know
+                    </label>
+                  </div>
+                  <textarea
+                    placeholder="Why did you choose this option?"
+                    value={referencesFeedback[index]?.feedback_reason || ''}
+                    onChange={(e) => {
+                      handleFeedbackReasonChange(index, e.target.value);
+                      // Auto-grow functionality
+                      e.target.style.height = 'auto';
+                      e.target.style.height = e.target.scrollHeight + 'px';
+                    }}
+                    className="feedback-reason-input"
+                    rows={1}
+                  />
                 </div>
               </li>
             ))}

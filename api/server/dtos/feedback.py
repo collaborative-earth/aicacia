@@ -1,9 +1,14 @@
 from pydantic import BaseModel
 
 
+class ReferenceFeedback(BaseModel):
+    feedback: int
+    feedback_reason: str
+
+
 class FeedbackPostRequest(BaseModel):
     query_id: str
-    references_feedback: list[int]
+    references_feedback: list[ReferenceFeedback]
     summary_feedback: int
     feedback: str
 

@@ -1,8 +1,6 @@
 import uuid
 
-from fastapi import HTTPException, APIRouter, Depends
-from sqlalchemy import select
-from sqlmodel import Session, select
+from fastapi import APIRouter, Depends, HTTPException
 from server.auth.dependencies import get_current_user
 from server.db.models.feedback import Feedback
 from server.db.models.query import Query
@@ -10,6 +8,8 @@ from server.db.models.user import User
 from server.db.session import get_db_session
 from server.dtos.feedback import FeedbackPostRequest, FeedbackPostResponse
 from server.entities.feedback import FeedbackDetails
+from sqlalchemy import select
+from sqlmodel import Session, select
 
 feedback_router = APIRouter()
 
@@ -37,7 +37,9 @@ def save_feedback(request: FeedbackPostRequest,
         query_id=request.query_id,
         user_id=user.user_id,
         feedback_json=FeedbackDetails(
-            references_feedback=request.references_feedback,
+            references_feedback=[
+                feedback.model_dump() for feedback in request.references_feedback
+            ],
             feedback=request.feedback,
             summary_feedback=request.summary_feedback,
         ).model_dump(),
