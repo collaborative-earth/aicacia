@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/QuestionSection.css';
-import { askQuestion, submitFeedback } from '../utils/api';
+import { askQuestion, submitFeedback, getQueryWithFeedback } from '../utils/api';
 import ReactMarkdown from 'react-markdown';
 
 interface Reference {
@@ -19,9 +19,11 @@ const USEFUL_FEEDBACK = 10;
 const NOT_USEFUL_FEEDBACK = 0;
 const DONT_KNOW_FEEDBACK = -1;
 
-interface QuestionSectionProps {}
+interface QuestionSectionProps {
+  selectedQueryId: string | null;
+}
 
-const QuestionSection: React.FC<QuestionSectionProps> = () => {
+const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId }) => {
   const [query, setQuery] = useState('');
   const [queryId, setQueryId] = useState('');
   const [references, setReferences] = useState<Reference[]>([]);
@@ -30,6 +32,13 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
   const [referencesFeedback, setReferencesFeedback] = useState<ReferenceFeedback[]>([]);
   const [overallFeedback, setOverallFeedback] = useState<string>('');
   const [summaryFeedback, setSummaryFeedback] = useState<number>(DONT_KNOW_FEEDBACK);
+  const [showHistory, setShowHistory] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (selectedQueryId) {
+      loadQueryData(selectedQueryId);
+    }
+  }, [selectedQueryId]);
 
   const handleSearch = async (e: React.FormEvent) => {
     if (!query) {
@@ -41,14 +50,44 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
     setSummary('');
     setLoading(true);
 
-    const res = await askQuestion(query);
+    try {
+      const res = await askQuestion(query);
+      setReferences(res.references);
+      setSummary(res.summary);
+      setQueryId(res.query_id);
+      setReferencesFeedback(res.references.map(() => ({ feedback: DONT_KNOW_FEEDBACK, feedback_reason: '' })));
+      setSummaryFeedback(DONT_KNOW_FEEDBACK);
+      setOverallFeedback('');
+    } catch (error) {
+      console.error('Failed to ask question:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    setLoading(false);
-    setReferences(res.references);
-    setReferencesFeedback(res.references.map(() => ({ feedback: DONT_KNOW_FEEDBACK, feedback_reason: '' })));
-    setSummaryFeedback(DONT_KNOW_FEEDBACK);
-    setSummary(res.summary);
-    setQueryId(res.query_id);
+  const loadQueryData = async (queryId: string) => {
+    try {
+      setLoading(true);
+      const data = await getQueryWithFeedback(queryId);
+      setQuery(data.question);
+      setReferences(data.references);
+      setSummary(data.summary);
+      setQueryId(data.query_id);
+      
+      if (data.feedback) {
+        setReferencesFeedback(data.feedback.references_feedback);
+        setSummaryFeedback(data.feedback.summary_feedback);
+        setOverallFeedback(data.feedback.feedback);
+      } else {
+        setReferencesFeedback(data.references.map(() => ({ feedback: DONT_KNOW_FEEDBACK, feedback_reason: '' })));
+        setSummaryFeedback(DONT_KNOW_FEEDBACK);
+        setOverallFeedback('');
+      }
+    } catch (error) {
+      console.error('Failed to load query:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const askForNewQuestion = () => {
@@ -59,7 +98,8 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
     setSummary('');
     setOverallFeedback('');
     setSummaryFeedback(DONT_KNOW_FEEDBACK);
-  }
+    setShowHistory(false);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -103,6 +143,16 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
   return (
     <div className="question-section">
       <h2>Ask about Restoration Projects</h2>
+      
+      <div className="action-buttons">
+        <button 
+          className="new-question-button" 
+          onClick={askForNewQuestion}
+        >
+          New Question
+        </button>
+      </div>
+
       <form className="search-form" onSubmit={handleSearch}>
         <input
           type="text"
@@ -112,7 +162,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
           onKeyDown={handleKeyDown}
           className="search-input"
         />
-        <button type="submit" className="search-button"  disabled={loading}>
+        <button type="submit" className="search-button" disabled={loading}>
           {loading ? 'Loading...' : 'Search'}
         </button>
       </form>
@@ -124,39 +174,39 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
             <ReactMarkdown>{summary}</ReactMarkdown>
 
             <div className="feedback-divider"></div>
-              <div className="feedback-options">
-                <label>
-                  <input
-                    type="radio"
-                    name="summary-feedback"
-                    value="useful"
-                    checked={summaryFeedback === USEFUL_FEEDBACK}
-                    onChange={() => setSummaryFeedback(USEFUL_FEEDBACK)}
-                  />
-                  Useful
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="summary-feedback"
-                    value="not-useful"
-                    checked={summaryFeedback === NOT_USEFUL_FEEDBACK}
-                    onChange={() => setSummaryFeedback(NOT_USEFUL_FEEDBACK)}
-                  />
-                  Not Useful
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="summary-feedback"
-                    value="dont-know"
-                    checked={summaryFeedback === DONT_KNOW_FEEDBACK}
-                    onChange={() => setSummaryFeedback(DONT_KNOW_FEEDBACK)}
-                  />
-                  Don't Know
-                </label>
-              </div>
+            <div className="feedback-options">
+              <label>
+                <input
+                  type="radio"
+                  name="summary-feedback"
+                  value="useful"
+                  checked={summaryFeedback === USEFUL_FEEDBACK}
+                  onChange={() => setSummaryFeedback(USEFUL_FEEDBACK)}
+                />
+                Useful
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="summary-feedback"
+                  value="not-useful"
+                  checked={summaryFeedback === NOT_USEFUL_FEEDBACK}
+                  onChange={() => setSummaryFeedback(NOT_USEFUL_FEEDBACK)}
+                />
+                Not Useful
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="summary-feedback"
+                  value="dont-know"
+                  checked={summaryFeedback === DONT_KNOW_FEEDBACK}
+                  onChange={() => setSummaryFeedback(DONT_KNOW_FEEDBACK)}
+                />
+                Don't Know
+              </label>
             </div>
+          </div>
         </div>
       )}
 
@@ -166,7 +216,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = () => {
           <ul>
             {references.map((ref, index) => (
               <li key={index} className="reference-item">
-              <div className="reference-header">
+                <div className="reference-header">
                   <div className="score-badge">
                     <span className="score-label">Score:</span> {ref.score.toFixed(2)}
                   </div>

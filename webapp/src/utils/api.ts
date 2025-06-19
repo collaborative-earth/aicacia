@@ -143,3 +143,25 @@ export const sendFeedbackApiCall = async ({ message_id, feedback, thread_id }: {
   }
   
 };
+
+export const listQueries = async (skip: number = 0, limit: number = 10) => {
+  try {
+    const response = await api.get(`/user_query/list`, {
+      params: { skip, limit }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch queries:', error);
+    throw new Error('Failed to fetch queries');
+  }
+};
+
+export const getQueryWithFeedback = async (queryId: string) => {
+  try {
+    const response = await api.get(`/user_query/${queryId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch query:', error);
+    throw new Error('Failed to fetch query');
+  }
+};
