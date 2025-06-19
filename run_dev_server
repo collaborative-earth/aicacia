@@ -1,11 +1,20 @@
 #!/bin/bash
 
-# Set environment variables for development
-export POSTGRES_PASSWORD=postgres
-export OPENAI_API_KEY=placeholder
-export QDRANT_URL=https://87290d58-c438-456c-a6cc-3a1ebd4cac63.us-east-1-0.aws.cloud.qdrant.io
-export QDRANT_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.N4pCuUH3wGp7lMpQnkPezN8LQwujfJd9DFP02_BUIg4
-export SECRET_KEY=dev_secret_key_123
+# Source environment variables from .env file
+if [ -f ".env" ]; then
+    echo "Loading environment variables from .env file..."
+    export $(cat .env | grep -v '^#' | xargs)
+else
+    echo "Error: .env file not found!"
+    echo "Please create a .env file with the required environment variables."
+    echo "Required variables:"
+    echo "  POSTGRES_PASSWORD"
+    echo "  OPENAI_API_KEY"
+    echo "  QDRANT_URL"
+    echo "  QDRANT_API_KEY"
+    echo "  SECRET_KEY"
+    exit 1
+fi
 
 # Development server startup script
 echo "Starting Aicacia development environment..."
