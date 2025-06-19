@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Set environment variables for development
+export POSTGRES_PASSWORD=postgres
+export OPENAI_API_KEY=placeholder
+export QDRANT_URL=https://87290d58-c438-456c-a6cc-3a1ebd4cac63.us-east-1-0.aws.cloud.qdrant.io
+export QDRANT_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.N4pCuUH3wGp7lMpQnkPezN8LQwujfJd9DFP02_BUIg4
+export SECRET_KEY=dev_secret_key_123
+
+# Development server startup script
+echo "Starting Aicacia development environment..."
+
+# Check if docker-compose-dev.yml exists
+if [ ! -f "docker-compose-dev.yml" ]; then
+    echo "Error: docker-compose-dev.yml not found!"
+    exit 1
+fi
+
+# Clean up any existing containers
+echo "Cleaning up existing containers..."
+docker-compose -f docker-compose-dev.yml down
+
+# Start the development services
+echo "Starting development services..."
+docker-compose -f docker-compose-dev.yml up --build -d
+
+echo "Development environment started!"
+echo "API will be available at: http://localhost:8000"
+echo "Webapp will be available at: http://localhost:5173"
+
+
