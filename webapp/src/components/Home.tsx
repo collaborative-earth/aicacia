@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import TopBar from './TopBar';
 import QuestionSection from './QuestionSection';
-import ChatBox from './ChatBox';
 import '../styles/Home.css';
 
 const Home: React.FC = () => {
-  const [isChatMode, setIsChatMode] = useState(false);
+  // const [isChatMode, setIsChatMode] = useState(false);
 
   return (
     <div className="home-page">
@@ -15,7 +14,8 @@ const Home: React.FC = () => {
           {isChatMode ? 'Switch to Search' : 'Switch to Chat'}
         </button> */}
 
-        {isChatMode ? <ChatBox /> : <QuestionSection />}
+        {/* {isChatMode ? <ChatBox /> : <QuestionSection />} */}
+        <QuestionSection selectedQueryId={null} onNewQuestionSubmitted={() => {}} />
       </div>
     </div>
   );

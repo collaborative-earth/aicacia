@@ -33,7 +33,6 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
   const [referencesFeedback, setReferencesFeedback] = useState<ReferenceFeedback[]>([]);
   const [overallFeedback, setOverallFeedback] = useState<string>('');
   const [summaryFeedback, setSummaryFeedback] = useState<number>(DONT_KNOW_FEEDBACK);
-  const [showHistory, setShowHistory] = useState<boolean>(false);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
 
   useEffect(() => {
@@ -102,7 +101,6 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
     setSummary('');
     setOverallFeedback('');
     setSummaryFeedback(DONT_KNOW_FEEDBACK);
-    setShowHistory(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
