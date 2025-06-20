@@ -1,38 +1,66 @@
-
 /* Login page styles */
 .login-page {
-    background-color: #f4f9f4; /* Light green background */
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-family: Arial, sans-serif;
-  }
-  
-    /* Auth container styles */
-  .auth-container {
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: #ffffff; /* White background for contrast */
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
-  }
-  
-  input {
-    width: calc(100% - 20px);
-    margin: 10px auto;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-  
-  /* Button group to align buttons */
-  .button-group {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-  }
+  /* This class is now primarily for semantics, layout is handled by App.css */
+}
+
+  /* Auth container styles */
+.auth-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #ffffff; /* White background for contrast */
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+
+input {
+  width: calc(100% - 20px);
+  margin: 10px auto;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Button group to align buttons */
+.button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px; /* Add some space above the buttons */
+}
+
+.button-primary {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #2c5f2d; /* Aicacia Green */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.button-primary:hover {
+  background-color: #3b7d3b; /* A slightly lighter green for hover */
+  transform: translateY(-2px); /* Subtle lift effect */
+}
+
+.button-secondary {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #333;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button-secondary:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+}

@@ -1,31 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/aicacia_logo.png';
-import { removeToken } from '../utils/tokens';
 import '../styles/TopBar.css';
-import { getUserInfo } from '../utils/api';
 
-const TopBar: React.FC = () => {
-  const navigate = useNavigate();
-  const [loggedIn, setLoggedIn] = useState(false);
+interface TopBarProps {
+  isLoggedIn: boolean;
+  onLogout: () => void;
+}
 
-  const handleButtonClick = () => {
-    removeToken();
-    navigate('/login');
-  };
-
-  useEffect(() => {
-
-    const fetchUser = async () => {
-      const user = await getUserInfo();
-      if (user) {
-        setLoggedIn(true);
-      }
-    }
-    fetchUser();
-  }, []);
-
+const TopBar: React.FC<TopBarProps> = ({ isLoggedIn, onLogout }) => {
   return (
     <header className="top-bar">
       <div className="top-bar-left">
@@ -34,9 +17,9 @@ const TopBar: React.FC = () => {
           <h1>Aicacia</h1>
         </Link>
       </div>
-      {loggedIn && (
+      {isLoggedIn && (
         <div className="top-bar-right">
-          <button onClick={handleButtonClick}>Logout</button>
+          <button onClick={onLogout} className="logout-button">Logout</button>
         </div>
       )}
     </header>

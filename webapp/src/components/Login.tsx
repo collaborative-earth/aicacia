@@ -1,15 +1,16 @@
 // src/components/Login.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { setToken } from '../utils/tokens';
 import { loginUser, registerUser } from '../utils/api';
-import TopBar from './TopBar';
 import '../styles/Login.css';
 
-const Login: React.FC = () => {
+interface LoginProps {
+  onLoginSuccess: () => void;
+}
+
+const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +18,7 @@ const Login: React.FC = () => {
     try {
       const data = await loginUser(email, password);
       setToken(data.token);
-      navigate('/');
+      onLoginSuccess();
     } catch (error) {
       alert((error as Error).message);
     }
@@ -36,9 +37,8 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-page">
-      <TopBar />
       <div className="auth-container">
-        <h2>Login</h2>
+        <h2>Sign In</h2>
         <form onSubmit={handleLogin}>
           <input
             type="email"
@@ -55,8 +55,8 @@ const Login: React.FC = () => {
             required
           />
           <div className="button-group">
-            <button type="submit">Login</button>
-            <button type="button" onClick={handleRegister}>
+            <button type="submit" className="button-primary">Login</button>
+            <button type="button" onClick={handleRegister} className="button-secondary">
               Register
             </button>
           </div>
