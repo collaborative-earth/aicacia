@@ -1,21 +1,12 @@
 import React from 'react';
-import TopBar from './TopBar';
-import QuestionSection from './QuestionSection';
 import '../styles/Home.css';
 
 const Home: React.FC = () => {
-  // const [isChatMode, setIsChatMode] = useState(false);
-
   return (
     <div className="home-page">
-      <TopBar />
       <div className="home-content">
-        {/* <button onClick={() => setIsChatMode(!isChatMode)}>
-          {isChatMode ? 'Switch to Search' : 'Switch to Chat'}
-        </button> */}
-
-        {/* {isChatMode ? <ChatBox /> : <QuestionSection />} */}
-        <QuestionSection selectedQueryId={null} onNewQuestionSubmitted={() => {}} />
+        {/* The main content is now rendered directly in App.tsx */}
+        <h1>Welcome to Aicacia</h1>
       </div>
     </div>
   );
