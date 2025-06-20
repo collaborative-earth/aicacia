@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { getToken, removeToken } from './tokens';
 
-// Base URL for the API
-const API_URL = 'http://3.137.35.87:8000';
+// Base URL for the API - use environment variable with fallback
+const API_URL = import.meta.env.VITE_API_URL || 'http://3.137.35.87:8000';
 
 // Axios instance with default settings
 const api = axios.create({
@@ -64,28 +64,48 @@ export const registerUser = async (email: string, password: string) => {
     }
 }
 
-
-export const askQuestion = async (question: string) => {
-    try {
-        const response = await api.post('/user_query', { question });
-        return response.data;
-    } catch (error) {
-        console.log(error);
-        throw new Error('Failed to ask question');
-    }
+interface Reference {
+  url: string;
+  title: string;
+  score: number;
+  chunk: string;
 }
 
+interface ReferenceFeedback {
+  feedback: number;
+  feedback_reason: string;
+}
 
-export const submitFeedback = async (
-  feedback: { query_id: string; summary_feedback: number; references_feedback: number[]; feedback: string }
-) => {
-    try {
-        const response = await api.post('/feedback', feedback);
-        return response.data;
-    } catch (error) {
-        console.log(error);
-        throw new Error('Failed to submit feedback');
-    }
+interface QuestionResponse {
+  query_id: string;
+  references: Reference[];
+  summary: string;
+}
+
+interface FeedbackRequest {
+  query_id: string;
+  references_feedback: ReferenceFeedback[];
+  summary_feedback: number;
+  feedback: string;
+}
+
+export async function askQuestion(query: string): Promise<QuestionResponse> {
+  try {
+    const response = await api.post('/user_query', { question: query });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch:', error);
+    throw new Error('Failed to fetch');
+  }
+}
+
+export async function submitFeedback(feedback: FeedbackRequest): Promise<void> {
+  try {
+    await api.post('/feedback', feedback);
+  } catch (error) {
+    console.error('Failed to submit feedback:', error);
+    throw new Error('Failed to submit feedback');
+  }
 }
 
 export const chatApiCall = async (message: string, thread_id?: string) => {
@@ -122,4 +142,26 @@ export const sendFeedbackApiCall = async ({ message_id, feedback, thread_id }: {
       throw new Error('Failed to send chat feedback');
   }
   
+};
+
+export const listQueries = async (skip: number = 0, limit: number = 10) => {
+  try {
+    const response = await api.get(`/user_query/list`, {
+      params: { skip, limit }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch queries:', error);
+    throw new Error('Failed to fetch queries');
+  }
+};
+
+export const getQueryWithFeedback = async (queryId: string) => {
+  try {
+    const response = await api.get(`/user_query/${queryId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch query:', error);
+    throw new Error('Failed to fetch query');
+  }
 };

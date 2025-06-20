@@ -11,9 +11,9 @@ const Home: React.FC = () => {
     <div className="home-page">
       <TopBar />
       <div className="home-content">
-        <button onClick={() => setIsChatMode(!isChatMode)}>
+        {/* <button onClick={() => setIsChatMode(!isChatMode)}>
           {isChatMode ? 'Switch to Search' : 'Switch to Chat'}
-        </button>
+        </button> */}
 
         {isChatMode ? <ChatBox /> : <QuestionSection />}
       </div>

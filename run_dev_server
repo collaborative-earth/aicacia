@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Source environment variables from .env file
+if [ -f ".env" ]; then
+    echo "Loading environment variables from .env file..."
+    export $(cat .env | grep -v '^#' | xargs)
+else
+    echo "Error: .env file not found!"
+    echo "Please create a .env file with the required environment variables."
+    echo "Required variables:"
+    echo "  POSTGRES_PASSWORD"
+    echo "  OPENAI_API_KEY"
+    echo "  QDRANT_URL"
+    echo "  QDRANT_API_KEY"
+    echo "  SECRET_KEY"
+    exit 1
+fi
+
+# Development server startup script
+echo "Starting Aicacia development environment..."
+
+# Check if docker-compose-dev.yml exists
+if [ ! -f "docker-compose-dev.yml" ]; then
+    echo "Error: docker-compose-dev.yml not found!"
+    exit 1
+fi
+
+# Clean up any existing containers
+echo "Cleaning up existing containers..."
+docker-compose -f docker-compose-dev.yml down
+
+# Start the development services
+echo "Starting development services..."
+docker-compose -f docker-compose-dev.yml up --build -d
+
+echo "Development environment started!"
+echo "API will be available at: http://localhost:8000"
+echo "Webapp will be available at: http://localhost:5173"
+
+

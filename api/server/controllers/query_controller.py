@@ -1,19 +1,27 @@
 import json
 import uuid
+from typing import List, Sequence
 
-from typing import Sequence
-from fastapi import APIRouter, Depends
-from sqlmodel import Session, select
-from qdrant_client import QdrantClient
+from fastapi import APIRouter, Depends, HTTPException
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from qdrant_client import QdrantClient
 from server.auth.dependencies import get_current_user
-from server.dtos.query import QueryRequest, QueryResponse, Reference
-from server.db.models.query import Query
-from server.db.models.user import User
-from server.db.models.sourced_documents import SourcedDocument
-from server.core.config import settings
-from server.db.session import get_db_session
 from server.core.ai_summary import generate_summary
+from server.core.config import settings
+from server.db.models.feedback import Feedback
+from server.db.models.query import Query
+from server.db.models.sourced_documents import SourcedDocument
+from server.db.models.user import User
+from server.db.session import get_db_session
+from server.dtos.query import (
+    QueryListResponse,
+    QueryRequest,
+    QueryResponse,
+    QueryWithFeedbackResponse,
+    Reference,
+)
+from sqlalchemy import func
+from sqlmodel import Session, select
 
 query_router = APIRouter()
 
@@ -87,3 +95,70 @@ def run_user_query(
     db.commit()
 
     return QueryResponse(query_id=query_id, references=query.references, summary=query.summary)
+
+
+@query_router.get("/list")
+def list_queries(
+    skip: int = 0,
+    limit: int = 10,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db_session),
+) -> QueryListResponse:
+    # Get total count
+    total_count = db.exec(
+        select(func.count()).select_from(Query).where(Query.user_id == user.user_id)
+    ).first()
+
+    # Get paginated queries
+    queries = db.exec(
+        select(Query)
+        .where(Query.user_id == user.user_id)
+        .offset(skip)
+        .limit(limit)
+        .order_by(Query.created_at.desc())
+    ).all()
+
+    return QueryListResponse(
+        queries=[
+            {
+                "query_id": str(q.query_id),  # Convert UUID to string
+                "question": q.question,
+                "created_at": q.created_at,
+                "summary": q.summary,
+            }
+            for q in queries
+        ],
+        total_count=total_count,
+    )
+
+
+@query_router.get("/{query_id}")
+def get_query_with_feedback(
+    query_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db_session),
+) -> QueryWithFeedbackResponse:
+    # Get query
+    query = db.exec(
+        select(Query)
+        .where(Query.query_id == query_id)
+        .where(Query.user_id == user.user_id)
+    ).first()
+
+    if not query:
+        raise HTTPException(status_code=404, detail="Query not found")
+
+    # Get feedback if exists
+    feedback = db.exec(
+        select(Feedback)
+        .where(Feedback.query_id == query_id)
+        .where(Feedback.user_id == user.user_id)
+    ).first()
+
+    return QueryWithFeedbackResponse(
+        query_id=str(query.query_id),  # Convert UUID to string
+        question=query.question,
+        references=query.references,
+        summary=query.summary,
+        feedback=feedback.feedback_json if feedback else None,
+    )
