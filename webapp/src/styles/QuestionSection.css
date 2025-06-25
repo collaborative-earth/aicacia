@@ -108,9 +108,9 @@
 .feedback-options {
   margin-top: 10px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: flex-start;
-  gap: 20px;
+  gap: 8px;
 }
 
 .feedback-radio-group {
@@ -128,16 +128,20 @@
 }
 
 .feedback-reason-input {
-  flex: 1;
-  min-height: 36px;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
   resize: none;
   overflow: hidden;
+  min-height: 24px;
+  max-height: 200px;
+  transition: height 0.2s;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 15px;
   line-height: 1.5;
   font-family: inherit;
+  box-sizing: border-box;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .feedback-reason-input:focus {

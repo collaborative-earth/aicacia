@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../styles/QuestionSection.css';
 import { askQuestion, submitFeedback, getQueryWithFeedback } from '../utils/api';
 import ReactMarkdown from 'react-markdown';
@@ -34,12 +34,23 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
   const [overallFeedback, setOverallFeedback] = useState<string>('');
   const [summaryFeedback, setSummaryFeedback] = useState<number>(DONT_KNOW_FEEDBACK);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
+  const feedbackRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
 
   useEffect(() => {
     if (selectedQueryId) {
       loadQueryData(selectedQueryId);
     }
   }, [selectedQueryId]);
+
+  useEffect(() => {
+    referencesFeedback.forEach((feedback, idx) => {
+      const ref = feedbackRefs.current[idx];
+      if (ref) {
+        ref.style.height = 'auto';
+        ref.style.height = ref.scrollHeight + 'px';
+      }
+    });
+  }, [referencesFeedback]);
 
   const handleSearch = async (e: React.FormEvent) => {
     if (!query) {
@@ -262,6 +273,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
                     </label>
                   </div>
                   <textarea
+                    ref={el => feedbackRefs.current[index] = el}
                     placeholder="Why did you choose this option?"
                     value={referencesFeedback[index]?.feedback_reason || ''}
                     onChange={(e) => {
