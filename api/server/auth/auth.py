@@ -1,15 +1,15 @@
-import jwt
-
-from typing import Optional
 from datetime import datetime, timedelta, timezone
+from typing import Optional
+
+import jwt
 from server.core.config import settings
 from server.db.models.user import User
 
-ONE_DAY = 1 * 24 * 60 * 60
+ONE_MONTH = 30 * 24 * 60 * 60
 
 
 def create_jwt_token(user: User) -> str:
-    exp = datetime.now(timezone.utc) + timedelta(seconds=ONE_DAY)
+    exp = datetime.now(timezone.utc) + timedelta(seconds=ONE_MONTH)
 
     return jwt.encode(
         {

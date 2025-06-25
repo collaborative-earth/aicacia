@@ -228,7 +228,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
                   </a>
                 </div>
                 <div className="reference-chunk">{ref.chunk}</div>
-                <div className="feedback-options">
+                <div className="feedback-options" style={{ marginTop: '8px' }}>
                   <div className="feedback-radio-group">
                     <label>
                       <input
