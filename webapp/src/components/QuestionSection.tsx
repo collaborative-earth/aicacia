@@ -43,7 +43,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
   }, [selectedQueryId]);
 
   useEffect(() => {
-    referencesFeedback.forEach((feedback, idx) => {
+    referencesFeedback.forEach((_, idx) => {
       const ref = feedbackRefs.current[idx];
       if (ref) {
         ref.style.height = 'auto';
