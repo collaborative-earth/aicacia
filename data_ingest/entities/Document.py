@@ -5,6 +5,7 @@ from enum import Enum
 
 class DocumentSourceCorpus(Enum):
     WRI = "wri"
+    SER = "ser"
 
 @dataclass
 class SourceLink:
