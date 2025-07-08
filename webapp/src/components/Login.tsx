@@ -56,9 +56,9 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           />
           <div className="button-group">
             <button type="submit" className="button-primary">Login</button>
-            <button type="button" onClick={handleRegister} className="button-secondary">
+            {/* <button type="button" onClick={handleRegister} className="button-secondary">
               Register
-            </button>
+            </button> */}
           </div>
         </form>
       </div>
