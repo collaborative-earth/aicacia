@@ -24,16 +24,16 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const handleRegister = async (e: React.FormEvent) => {
+  //   e.preventDefault();
 
-    try {
-      await registerUser(email, password);
-      alert('Registration successful. Please login.');
-    } catch (error) {
-      alert((error as Error).message);
-    }
-  };
+  //   try {
+  //     await registerUser(email, password);
+  //     alert('Registration successful. Please login.');
+  //   } catch (error) {
+  //     alert((error as Error).message);
+  //   }
+  // };
 
   return (
     <div className="login-page">

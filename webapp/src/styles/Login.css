@@ -49,7 +49,7 @@ input {
   transform: translateY(-2px); /* Subtle lift effect */
 }
 
-.button-secondary {
+/* .button-secondary {
   padding: 10px 20px;
   font-size: 16px;
   color: #333;
@@ -63,4 +63,4 @@ input {
 .button-secondary:hover {
   background-color: #e0e0e0;
   transform: translateY(-2px);
-}
+} */
