@@ -1,7 +1,7 @@
 // src/components/Login.tsx
 import React, { useState } from 'react';
 import { setToken } from '../utils/tokens';
-import { loginUser, registerUser } from '../utils/api';
+import { loginUser } from '../utils/api';
 import '../styles/Login.css';
 
 interface LoginProps {
