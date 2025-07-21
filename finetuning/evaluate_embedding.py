@@ -10,7 +10,7 @@ from llama_index.core.evaluation import EmbeddingQAFinetuneDataset
 # Constants for default paths and model IDs
 BASE_DIR = Path(__file__).resolve().parents[0]  # Current script directory
 DEFAULT_QADATASET_FILE = "/Users/smalerba/Projects/AICACIA/aicacia/finetuning/qa_dataset/merged_qa_dataset.json"
-DEFAULT_OUTPUT_DIR = "ir_results"
+DEFAULT_OUTPUT_DIR = "ir_results/"
 DEFAULT_MODEL2EVALUATE = {
     "BM25": "BM25",
     "jinav3": "jinaai/jina-embeddings-v3",

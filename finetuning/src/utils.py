@@ -254,3 +254,5 @@ def create_nodes_from_pdf_path(pdf_path: str, chunk_size: int, chunk_overlap: in
     nodes = pipeline.run(documents=docs)
 
     return nodes
+
+# Example usage
