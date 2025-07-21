@@ -31,8 +31,8 @@ eval/ann-benchmarks/results/*
 *.xml
 # FInetuning outputs
 finetuning/ir_results
-#finetuning/qa_dataset
-playground.ipynb
+finetuning/qa_datasets
+**.ipynb
 finetuning/**/*.json
 !finetuning/config.json
 finetuning/**/*.jsonl
