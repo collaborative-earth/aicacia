@@ -2,7 +2,9 @@ from langchain_openai import ChatOpenAI
 from openai import APIError
 from server.core.config import settings
 
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=1, max_retries=2, api_key=settings.OPENAI_API_KEY)
+llm = ChatOpenAI(
+    model="gpt-4o-mini", temperature=0.5, max_retries=2, api_key=settings.OPENAI_API_KEY
+)
 
 
 def generate_summary(user_query: str, rag_context: str) -> str:
@@ -17,10 +19,10 @@ Using the context provided answer the users question
 Output should be in markdown format.
 
 Output format:
-#### Answer with context
+#### Answer using the references
 Answer to the primary question only using the context provided,
 dont answer anything without using the context provided.
-#### Answer without using context.
+#### Answer without using the references (LLM only)
 Answer to the primary question without using the context provided.
 
 context: {rag_context}

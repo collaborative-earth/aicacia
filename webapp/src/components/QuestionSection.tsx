@@ -189,36 +189,38 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
 
             <div className="feedback-divider"></div>
             <div className="feedback-options">
-              <label>
-                <input
-                  type="radio"
-                  name="summary-feedback"
-                  value="useful"
-                  checked={summaryFeedback === USEFUL_FEEDBACK}
-                  onChange={() => setSummaryFeedback(USEFUL_FEEDBACK)}
-                />
-                Useful
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="summary-feedback"
-                  value="not-useful"
-                  checked={summaryFeedback === NOT_USEFUL_FEEDBACK}
-                  onChange={() => setSummaryFeedback(NOT_USEFUL_FEEDBACK)}
-                />
-                Not Useful
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="summary-feedback"
-                  value="dont-know"
-                  checked={summaryFeedback === DONT_KNOW_FEEDBACK}
-                  onChange={() => setSummaryFeedback(DONT_KNOW_FEEDBACK)}
-                />
-                Don't Know
-              </label>
+              <div className="feedback-radio-group">
+                <label>
+                  <input
+                    type="radio"
+                    name="summary-feedback"
+                    value="useful"
+                    checked={summaryFeedback === USEFUL_FEEDBACK}
+                    onChange={() => setSummaryFeedback(USEFUL_FEEDBACK)}
+                  />
+                  Useful
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="summary-feedback"
+                    value="not-useful"
+                    checked={summaryFeedback === NOT_USEFUL_FEEDBACK}
+                    onChange={() => setSummaryFeedback(NOT_USEFUL_FEEDBACK)}
+                  />
+                  Not Useful
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="summary-feedback"
+                    value="dont-know"
+                    checked={summaryFeedback === DONT_KNOW_FEEDBACK}
+                    onChange={() => setSummaryFeedback(DONT_KNOW_FEEDBACK)}
+                  />
+                  Don't Know
+                </label>
+              </div>
             </div>
           </div>
         </div>
