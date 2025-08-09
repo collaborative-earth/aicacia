@@ -70,16 +70,35 @@ def run_user_query(
 
         references = []
         rag_context = []
+        duplicate_chunk_counter = {}
 
         for point in vectordb_results.points:
             point_doc_id = uuid.UUID(point.payload["doc_id"])
             doc = next((d for d in docs if d.doc_id == point_doc_id), None)
             title = doc.title if doc else "Unknown"
             url = doc.page_link if doc else "Unknown"
+            doi = doc.doi if doc else "Unknown"
+
+            if (not url or url == "Unknown") and doi and doi != "Unknown":
+                url = f"https://doi.org/{doi}"
+
             text = json.loads(point.payload["_node_content"])["text"]
 
+            if text in duplicate_chunk_counter:
+                duplicate_chunk_counter[text] += 1
+                continue
+            else:
+                duplicate_chunk_counter[text] = 1
+
             rag_context.append({"title": title, "url": url, "text": text})
-            references.append(Reference(title=title, url=url, score=point.score, chunk=text).model_dump())
+            references.append(
+                Reference(
+                    title=title, url=url, score=point.score, chunk=text
+                ).model_dump()
+            )
+
+        for text, count in duplicate_chunk_counter.items():
+            print(f"Duplicate chunk found: {text} with count: {count}")
 
         summary = generate_summary(request.question, json.dumps(rag_context))
 
