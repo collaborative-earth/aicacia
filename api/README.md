@@ -30,7 +30,7 @@ Add `.env` inside `api` and add the following
 
 Run server
 ```
-./develop/run_dev_server
+docker compose -f docker-compose-dev.yml up -d
 ```
 
 Create tables for the first time.
