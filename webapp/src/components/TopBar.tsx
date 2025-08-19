@@ -5,10 +5,11 @@ import '../styles/TopBar.css';
 
 interface TopBarProps {
   isLoggedIn: boolean;
+  userInfo: {email: string, user_id: string, is_admin: boolean} | null;
   onLogout: () => void;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ isLoggedIn, onLogout }) => {
+const TopBar: React.FC<TopBarProps> = ({ isLoggedIn, userInfo, onLogout }) => {
   return (
     <header className="top-bar">
       <div className="top-bar-left">
@@ -19,6 +20,12 @@ const TopBar: React.FC<TopBarProps> = ({ isLoggedIn, onLogout }) => {
       </div>
       {isLoggedIn && (
         <div className="top-bar-right">
+          <nav className="top-bar-nav">
+            <Link to="/" className="nav-link">Home</Link>
+            {userInfo?.is_admin && (
+              <Link to="/admin/feedbacks" className="nav-link admin-link">Admin Feedbacks</Link>
+            )}
+          </nav>
           <button onClick={onLogout} className="logout-button">Logout</button>
         </div>
       )}

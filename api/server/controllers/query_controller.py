@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from qdrant_client import QdrantClient
 from server.auth.dependencies import get_current_user
+from server.controllers.user_controller import get_admin_user
 from server.core.ai_summary import generate_summary
 from server.core.config import settings
 from server.db.models.feedback import Feedback
@@ -24,6 +25,8 @@ from sqlalchemy import func
 from sqlmodel import Session, select
 
 query_router = APIRouter()
+
+admin_query_router = APIRouter()
 
 vectordb_client = QdrantClient(
     url=settings.QDRANT_URL,
@@ -176,6 +179,75 @@ def get_query_with_feedback(
 
     return QueryWithFeedbackResponse(
         query_id=str(query.query_id),  # Convert UUID to string
+        question=query.question,
+        references=query.references,
+        summary=query.summary,
+        feedback=feedback.feedback_json if feedback else None,
+    )
+
+
+@admin_query_router.get("/users/{user_id}/queries")
+def list_user_queries_admin(
+    user_id: str,
+    skip: int = 0,
+    limit: int = 10,
+    admin_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db_session),
+) -> QueryListResponse:
+    """List queries for specific user - admin only"""
+    # Get total count for the specific user
+    total_count = db.exec(
+        select(func.count()).select_from(Query).where(Query.user_id == user_id)
+    ).first()
+
+    # Get paginated queries for the specific user
+    queries = db.exec(
+        select(Query)
+        .where(Query.user_id == user_id)
+        .offset(skip)
+        .limit(limit)
+        .order_by(Query.created_at.desc())
+    ).all()
+
+    return QueryListResponse(
+        queries=[
+            {
+                "query_id": str(q.query_id),
+                "question": q.question,
+                "created_at": q.created_at,
+                "summary": q.summary,
+            }
+            for q in queries
+        ],
+        total_count=total_count,
+    )
+
+
+@admin_query_router.get("/users/{user_id}/queries/{query_id}")
+def get_user_query_with_feedback_admin(
+    user_id: str,
+    query_id: str,
+    admin_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db_session),
+) -> QueryWithFeedbackResponse:
+    """Get specific query with feedback for specific user - admin only"""
+    # Get query for the specific user
+    query = db.exec(
+        select(Query).where(Query.query_id == query_id).where(Query.user_id == user_id)
+    ).first()
+
+    if not query:
+        raise HTTPException(status_code=404, detail="Query not found")
+
+    # Get feedback if exists for this user and query
+    feedback = db.exec(
+        select(Feedback)
+        .where(Feedback.query_id == query_id)
+        .where(Feedback.user_id == user_id)
+    ).first()
+
+    return QueryWithFeedbackResponse(
+        query_id=str(query.query_id),
         question=query.question,
         references=query.references,
         summary=query.summary,

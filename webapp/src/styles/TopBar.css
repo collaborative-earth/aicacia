@@ -25,6 +25,31 @@
 .top-bar-right {
     display: flex;
     align-items: center;
+    gap: 20px;
+}
+
+.top-bar-nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    font-size: 0.9em;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-link {
+    background-color: rgba(255, 255, 255, 0.15);
+    font-weight: 500;
 }
 
 .logo {

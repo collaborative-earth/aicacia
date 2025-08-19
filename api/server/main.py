@@ -1,11 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from server.controllers.chat_controller import chat_router
 from server.controllers.chat_feedback_controller import chat_feedback_router
 from server.controllers.feedback_controller import feedback_router
-from server.controllers.user_controller import user_info_router, user_router
-from server.controllers.query_controller import query_router
+from server.controllers.query_controller import admin_query_router, query_router
+from server.controllers.user_controller import (
+    admin_router,
+    user_info_router,
+    user_router,
+)
 
 
 def create_app():
@@ -30,6 +33,8 @@ def create_app():
     app.include_router(user_router, prefix="/user", tags=["user"])
     app.include_router(user_info_router, prefix="/user_info", tags=["user_info"])
     app.include_router(chat_feedback_router, prefix="/chat_feedback", tags=["chat_feedback"])
+    app.include_router(admin_router, prefix="/admin", tags=["admin"])
+    app.include_router(admin_query_router, prefix="/admin", tags=["admin"])
 
     return app
 

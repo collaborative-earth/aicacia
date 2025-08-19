@@ -4,6 +4,7 @@ import TopBar from './components/TopBar';
 import Login from './components/Login';
 import QuestionSection from './components/QuestionSection';
 import QueryHistory from './components/QueryHistory';
+import AdminFeedbacks from './components/admin/AdminFeedbacks';
 import { getToken, removeToken } from './utils/tokens';
 import { getUserInfo } from './utils/api';
 import './App.css';
@@ -12,17 +13,22 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!getToken());
   const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+  const [userInfo, setUserInfo] = useState<{email: string, user_id: string, is_admin: boolean} | null>(null);
 
   useEffect(() => {
     const verifyUser = async () => {
       if (isLoggedIn) {
         try {
-          await getUserInfo();
+          const userInfoResponse = await getUserInfo();
+          setUserInfo(userInfoResponse);
         } catch (error) {
           console.error('User verification failed:', error);
           removeToken();
           setIsLoggedIn(false);
+          setUserInfo(null);
         }
+      } else {
+        setUserInfo(null);
       }
     };
     verifyUser();
@@ -36,6 +42,7 @@ function App() {
   const handleLogout = () => {
     removeToken();
     setIsLoggedIn(false);
+    setUserInfo(null);
   };
 
   const handleQuerySelect = (queryId: string) => {
@@ -49,39 +56,49 @@ function App() {
   return (
     <Router>
       <div className="app">
-        <TopBar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+        <TopBar isLoggedIn={isLoggedIn} userInfo={userInfo} onLogout={handleLogout} />
         <div className="app-layout">
-          {isLoggedIn && (
-            <aside className="sidebar">
-              <QueryHistory 
-                onQuerySelect={handleQuerySelect} 
-                refreshTrigger={refreshTrigger}
-              />
-            </aside>
-          )}
-          <main className={`main-content ${!isLoggedIn ? 'full-width' : ''}`}>
-            <Routes>
-              {!isLoggedIn ? (
-                <>
-                  <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
-                  <Route path="*" element={<Navigate to="/login" replace />} />
-                </>
-              ) : (
-                <>
-                  <Route 
-                    path="/" 
-                    element={
-                      <QuestionSection 
-                        selectedQueryId={selectedQueryId} 
-                        onNewQuestionSubmitted={handleNewQuestionSubmitted}
-                      />
-                    } 
-                  />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </>
-              )}
-            </Routes>
-          </main>
+          <Routes>
+            {!isLoggedIn ? (
+              <>
+                <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+                <Route path="*" element={<Navigate to="/login" replace />} />
+              </>
+            ) : (
+              <>
+                <Route 
+                  path="/" 
+                  element={
+                    <>
+                      <aside className="sidebar">
+                        <QueryHistory 
+                          onQuerySelect={handleQuerySelect} 
+                          refreshTrigger={refreshTrigger}
+                        />
+                      </aside>
+                      <main className="main-content">
+                        <QuestionSection 
+                          selectedQueryId={selectedQueryId} 
+                          onNewQuestionSubmitted={handleNewQuestionSubmitted}
+                        />
+                      </main>
+                    </>
+                  } 
+                />
+                <Route 
+                  path="/admin/feedbacks" 
+                  element={
+                    userInfo?.is_admin ? (
+                      <AdminFeedbacks />
+                    ) : (
+                      <Navigate to="/" replace />
+                    )
+                  } 
+                />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </>
+            )}
+          </Routes>
         </div>
       </div>
     </Router>

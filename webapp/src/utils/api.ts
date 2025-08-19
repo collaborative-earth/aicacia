@@ -129,6 +129,39 @@ export const getUserInfo = async () => {
     }
 }
 
+// Admin API functions
+export const listAllUsers = async () => {
+    try {
+        const response = await api.get('/admin/users');
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch users:', error);
+        throw new Error('Failed to fetch users');
+    }
+};
+
+export const listUserQueries = async (userId: string, skip: number = 0, limit: number = 10) => {
+    try {
+        const response = await api.get(`/admin/users/${userId}/queries`, {
+            params: { skip, limit }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch user queries:', error);
+        throw new Error('Failed to fetch user queries');
+    }
+};
+
+export const getUserQueryWithFeedback = async (userId: string, queryId: string) => {
+    try {
+        const response = await api.get(`/admin/users/${userId}/queries/${queryId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch user query:', error);
+        throw new Error('Failed to fetch user query');
+    }
+};
+
 export const sendFeedbackApiCall = async ({ message_id, feedback, thread_id }: { message_id: string, feedback: 'up' | 'down', thread_id: string }) => {
 
   try {

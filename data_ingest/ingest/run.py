@@ -1,20 +1,21 @@
-import os
 import json
-import boto3
-import psycopg
-
+import os
 from enum import Enum
 
+import boto3
+import psycopg
 from psycopg.types.json import Json
-from sqlmodel import SQLModel, create_engine, Session, select, and_
+from sqlmodel import Session, SQLModel, and_, create_engine, select
+
+from api.server.db.models.sourced_documents import SourcedDocument, SourceLink
 from data_ingest.entities.Document import SourcedDocumentMetadata
-from data_ingest.sources.wri_metadata import extract_wri_metadata, stream_relevant_links
-from data_ingest.sources.ser_metadata import extract_ser_metadata
+from data_ingest.postprocess.page_layout_detection import detect_pages_layout
 from data_ingest.postprocess.pdf_to_images import convert
 from data_ingest.postprocess.pdla_output_reader import read_json
-from data_ingest.postprocess.page_layout_detection import detect_pages_layout
 from data_ingest.postprocess.postprocess_pdla_output import postprocess
-from api.server.db.models.sourced_documents import SourcedDocument, SourceLink
+from data_ingest.sources.ser_metadata import extract_ser_metadata
+from data_ingest.sources.wri_metadata import extract_wri_metadata, stream_relevant_links
+
 
 def mark_articles_as_relevant(db_url: str):
     engine = create_engine(db_url)
@@ -41,6 +42,7 @@ def mark_articles_as_relevant(db_url: str):
             session.commit()
             batch.clear()
 
+# generator is a function that yields SourcedDocumentMetadata objects
 def extract_and_save_articles_metadata(db_url: str, generator):
     engine = create_engine(db_url)
     SQLModel.metadata.create_all(engine)
