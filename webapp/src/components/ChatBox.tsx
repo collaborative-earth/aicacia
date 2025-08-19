@@ -14,7 +14,7 @@ const ChatBox: React.FC = () => {
 
     const sender = 'user' as 'user' | 'bot';
     const userMessage = { sender, text: input };
-    let messages_with_user_message = [...messages, userMessage];
+    const messages_with_user_message = [...messages, userMessage];
     setMessages(messages_with_user_message);
     setInput('');
 
@@ -30,7 +30,7 @@ const ChatBox: React.FC = () => {
       text: res.chat_messages[res.chat_messages.length - 1].message,
       message_id: res.chat_messages[res.chat_messages.length - 1].message_id,
     };
-    let messages_with_bot_response = [...messages_with_user_message, botResponse];
+    const messages_with_bot_response = [...messages_with_user_message, botResponse];
     setMessages(messages_with_bot_response);
   };
 

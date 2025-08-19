@@ -35,7 +35,6 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
   selectedQueryId 
 }) => {
   const [query, setQuery] = useState('');
-  const [queryId, setQueryId] = useState('');
   const [references, setReferences] = useState<Reference[]>([]);
   const [summary, setSummary] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -47,7 +46,6 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
     } else {
       // Clear data when no query is selected
       setQuery('');
-      setQueryId('');
       setReferences([]);
       setSummary('');
       setFeedback(null);
@@ -61,7 +59,6 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
       setQuery(data.question);
       setReferences(data.references);
       setSummary(data.summary);
-      setQueryId(data.query_id);
       setFeedback(data.feedback);
     } catch (error) {
       console.error('Failed to load query:', error);
