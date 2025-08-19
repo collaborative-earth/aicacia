@@ -1,13 +1,18 @@
 /* Login page styles */
 .login-page {
-  /* This class is now primarily for semantics, layout is handled by App.css */
+  /* Override the flexbox layout from parent container */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px); /* Account for the fixed top bar */
+  width: 100%;
 }
 
-  /* Auth container styles */
+/* Auth container styles */
 .auth-container {
   max-width: 400px;
-  margin: 50px auto;
-  padding: 20px;
+  width: 100%;
+  padding: 30px;
   border: 1px solid #ddd;
   border-radius: 8px;
   background: #ffffff; /* White background for contrast */
