@@ -35,26 +35,32 @@ const UserList: React.FC<UserListProps> = ({ onUserSelect, selectedUserId }) => 
     loadUsers();
   }, []);
 
+  const handleUserChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const userId = event.target.value;
+    if (userId) {
+      onUserSelect(userId);
+    }
+  };
+
   return (
     <div className="history-sidebar">
       <h3>All Users</h3>
       {loading ? (
         <div className="loading">Loading...</div>
       ) : (
-        <div className="query-list">
-          {users.map((user) => (
-            <div
-              key={user.user_id}
-              className={`history-item ${selectedUserId === user.user_id ? 'selected' : ''}`}
-              onClick={() => onUserSelect(user.user_id)}
-            >
-              <div className="history-date">
-                {new Date(user.created_at).toLocaleDateString()}
-                {user.is_admin && <span style={{ color: '#e74c3c', marginLeft: '8px' }}>Admin</span>}
-              </div>
-              <div className="history-question">{user.email}</div>
-            </div>
-          ))}
+        <div className="user-dropdown-container">
+          <select
+            value={selectedUserId || ''}
+            onChange={handleUserChange}
+            className="user-dropdown"
+          >
+            <option value="">Select a user...</option>
+            {users.map((user) => (
+              <option key={user.user_id} value={user.user_id}>
+                {user.email} {user.is_admin && '(Admin)'}
+              </option>
+            ))}
+          </select>
         </div>
       )}
     </div>
