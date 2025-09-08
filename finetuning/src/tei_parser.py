@@ -109,7 +109,6 @@ class TEINodeParser(NodeParser):
                         )
                     )
                 
-
         return tei_nodes
     
     def _build_node_from_split(
