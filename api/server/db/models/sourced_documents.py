@@ -1,11 +1,11 @@
 import uuid
-
 from datetime import datetime
-from typing import List, Optional, Any
-from sqlalchemy import Column
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlmodel import Field, Relationship
+from typing import Any, List, Optional
+
 from server.db.models.base import Base
+from sqlalchemy import Column
+from sqlalchemy.dialects.postgresql import JSON, JSONB
+from sqlmodel import Field, Relationship
 
 
 class SourcedDocument(Base, table=True):
@@ -36,3 +36,16 @@ class SourceLink(Base, table=True):
     type: str = Field(nullable=False)
     s3_location: Optional[str] = Field()
     document: "SourcedDocument" = Relationship(back_populates="source_links")
+
+
+class UserDocument(Base, table=True):
+    __tablename__ = "user_documents"
+    doc_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="users.user_id", nullable=False)
+    title: str = Field(nullable=False)
+    filename: str = Field(nullable=False)
+    s3_key: str = Field(nullable=False)
+    file_size: int = Field(nullable=False)
+    processing_status: str = Field(default="pending")
+    # TODO: Figure out a way to enforce the structure of the json field.
+    user_document_json: dict = Field(sa_column=Column(JSON))
