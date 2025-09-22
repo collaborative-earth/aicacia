@@ -56,10 +56,7 @@ class TEINodeParser(NodeParser):
             tags=tags,
         )
     
-    @classmethod
-    def class_name(cls) -> str:
-        """Get class name."""
-        return "TEINodeParser"
+
     
     def _parse_nodes(
         self,
