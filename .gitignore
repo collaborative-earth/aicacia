@@ -29,6 +29,12 @@ eval/ann-benchmarks/results/*
 
 # Grobid output
 *.xml
-
-finetuning/results
-playground.ipynb
+# FInetuning outputs
+finetuning/ir_results
+finetuning/qa_datasets
+**.ipynb
+finetuning/**/*.json
+!finetuning/config.json
+finetuning/**/*.jsonl
+finetuning/**/*.tsv
+finetuning/*.txt

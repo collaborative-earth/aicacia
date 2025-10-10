@@ -2,7 +2,7 @@ import os
 import sqlite3
 from glob import glob
 from typing import Dict, List
-
+import json
 import pandas as pd
 import yaml
 from llama_index.core.node_parser import SentenceSplitter
@@ -13,19 +13,27 @@ from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 
 
-class MetadataCleanupTransformation(TransformComponent):
-    """Transformation to remove unwanted metadata fields."""
-    def __init__(self):
-        super().__init__()
+def extract_text_from_pdf(path):
+    full_text = ""
+    with pdfplumber.open(path) as pdf:
+        for page in pdf.pages:
+            full_text += page.extract_text()
+    return full_text
 
-    def __call__(self, nodes: List[BaseNode], **kwargs) -> List[BaseNode]:
-        for node in nodes:
-            # Remove any unwanted metadata keys"
-            node.metadata = {k: v for k, v in node.metadata.items() 
-                           if not k.startswith("Header_")
-                           and k != 'filename'
-                           and k != 'file_path'}
-        return nodes
+
+def get_file_extension(file_path):
+    _, extension = os.path.splitext(file_path)
+    return extension
+
+    
+def extract_text_from_html(path):
+    full_text = ""
+    with open(path, 'r', encoding='utf-8') as file:
+        html_content = file.read()
+        soup = BeautifulSoup(html_content, 'html.parser')
+        # Extract text from all tags
+        full_text = soup.get_text()
+    return full_text
 
 
 def delete_collection_if_exists(client, collection_name):
@@ -110,3 +118,9 @@ def read_db(input_dir):
         conn.close()
     final_df = pd.concat(df_list, ignore_index=True)
     return final_df
+
+def extract_file_name(json_str):
+    try:
+        return json.loads(json_str).get("file_name")
+    except (json.JSONDecodeError, TypeError):
+        return None
