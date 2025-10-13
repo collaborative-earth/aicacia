@@ -31,4 +31,6 @@ eval/ann-benchmarks/results/*
 *.xml
 
 finetuning/results
-playground.ipynb
+playground.ipynbfinetuning/local_playground.ipynb
+finetuning/qa_datasets/
+notebooks/*
