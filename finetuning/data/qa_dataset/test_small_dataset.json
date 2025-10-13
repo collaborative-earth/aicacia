@@ -1,0 +1,18 @@
+{
+  "queries": {
+    "q1": "What is machine learning?"
+  },
+  "corpus": {
+    "d1": "Machine learning is a subset of artificial intelligence that focuses on algorithms.",
+    "d2": "Deep learning uses neural networks with multiple layers.",
+    "d3": "Natural language processing deals with text and speech.",
+    "d4": "Computer vision enables machines to interpret visual information.",
+    "d5": "Machine learning algorithms learn from data without explicit programming."
+  },
+  "relevant_docs": {
+    "q1": [
+      "d1",
+      "d5"
+    ]
+  }
+}

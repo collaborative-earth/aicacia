@@ -12,6 +12,16 @@ lxml = "*"
 path = "*"
 rank-bm25 = "*"
 einops = "*"
+sentence_transformers = "*"
+transformers = "*"
+torch = "*"
+numpy = "*"
+scikit-learn = "*"
+pyyaml = "*"
+psutil = "*"
+matplotlib = "*"
+seaborn = "*"
+pandas = "*"
 
 [dev-packages]
 
