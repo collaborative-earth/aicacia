@@ -34,3 +34,5 @@ finetuning/results
 playground.ipynbfinetuning/local_playground.ipynb
 finetuning/qa_datasets/
 notebooks/*
+finetuning/local_playground.ipynb
+*.ipynb
