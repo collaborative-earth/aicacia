@@ -1,14 +1,18 @@
 {
   "ingestion_pipeline": {
+    "file_ext" : ".pdf",
+    "use_llm" : false,
     "chunk_size": 512,
     "chunk_overlap": 20
   },
   "qa_generation": {
-    "num_questions_per_chunk": 1,
+    "method": "MarcosT5",
+    "num_questions_per_chunk": 4,
     "prompt_template": "You are a curious AI assistant, please generate {num_questions_per_chunk} specific and valuable question based on the following text. The generated question should revolve around the core content of this text, and avoid using pronouns (e.g., 'this'). Note that you should generate only one question, without including additional content: {context_str}"
   },
   "paths": {
-    "tei_directory": "./data/files/tei_all_afr_carbon_2",
-    "output_dataset": "./data/qa_dataset/qa_finetune_dataset.json"
-  }
+    "directory": "../data/Wocat",
+    "output_dataset": "./qa_dataset/qa_finetune_dataset.json"
+  },
+  "save_metadata": true
 }

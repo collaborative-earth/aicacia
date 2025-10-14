@@ -3,10 +3,11 @@ from typing import TYPE_CHECKING, Any, List, Optional, Sequence
 from llama_index.core.bridge.pydantic import Field
 from llama_index.core.callbacks.base import CallbackManager
 from llama_index.core.node_parser.node_utils import build_nodes_from_splits
-from llama_index.core.schema import BaseNode, MetadataMode, TextNode
+from llama_index.core.schema import Node,BaseNode, MetadataMode, TextNode
 from llama_index.core.node_parser.interface import NodeParser
 from llama_index.core.utils import get_tqdm_iterable
-
+from data_ingest.entities.postprocess_models import PostprocessResult
+from data_ingest.generate_embeddings_and_upload import _join_paragraphs
 from extraction.src.aicacia_extraction.grobid import IDNOType, TEIDocument
 
 DEFAULT_TAGS = ['abstract','sections']
@@ -109,7 +110,6 @@ class TEINodeParser(NodeParser):
                         )
                     )
                 
-
         return tei_nodes
     
     def _build_node_from_split(
@@ -118,6 +118,41 @@ class TEINodeParser(NodeParser):
         node: BaseNode,
         metadata: dict,
     ) -> TextNode:
+        """Build node from single text split."""
+        node = build_nodes_from_splits([text_split], node, id_func=self.id_func)[0]
+
+        if self.include_metadata:
+            node.metadata = {**node.metadata, **metadata}
+
+        return node
+    
+class PDFLAJSONNodeParser(NodeParser):
+    @classmethod
+    def class_name(cls) -> str:
+        """Get class name."""
+        return "PDFLANodeParser"
+    def _parse_nodes(
+          self,
+          nodes: Sequence[BaseNode],
+          show_progress: bool = False,
+          **kwargs: Any,
+      ) -> List[BaseNode]:
+          all_nodes: List[Node] = []
+          nodes_with_progress = get_tqdm_iterable(nodes, show_progress, "Parsing nodes")
+
+          for node in nodes_with_progress:
+              postprocess_result = PostprocessResult.from_json(node.text)
+              text = _join_paragraphs(postprocess_result)
+              all_nodes.extend([self._build_node_from_split(text, node, {})])
+
+          return all_nodes
+                               
+    def _build_node_from_split(
+        self,
+        text_split: str,
+        node: BaseNode,
+        metadata: dict,
+    ) -> Node:
         """Build node from single text split."""
         node = build_nodes_from_splits([text_split], node, id_func=self.id_func)[0]
 
