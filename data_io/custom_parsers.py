@@ -6,8 +6,6 @@ from llama_index.core.node_parser.node_utils import build_nodes_from_splits
 from llama_index.core.schema import Node,BaseNode, MetadataMode, TextNode
 from llama_index.core.node_parser.interface import NodeParser
 from llama_index.core.utils import get_tqdm_iterable
-import sys
-sys.path.append("..")
 from data_ingest.entities.postprocess_models import PostprocessResult
 from data_ingest.generate_embeddings_and_upload import _join_paragraphs
 from extraction.src.aicacia_extraction.grobid import IDNOType, TEIDocument

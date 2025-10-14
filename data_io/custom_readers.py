@@ -1,6 +1,7 @@
 import os
 import boto3
 from llama_index.core.schema import Document
+
 class S3ReaderBase:
     def __init__(self, bucket_name: str, aws_key: str, aws_secret: str, prefix: str):
         self.bucket_name = bucket_name
