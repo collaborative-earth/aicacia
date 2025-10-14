@@ -1,7 +1,7 @@
 from logging.config import fileConfig
 
 from alembic import context
-from server.db.models.base import Base
+from server.db.models import Base  # This will import all models
 from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides

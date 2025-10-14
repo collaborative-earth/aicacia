@@ -49,6 +49,9 @@ def run_user_query(
     # Embed query
     query_embedding = embedding_model.get_text_embedding(request.question)
 
+    print("Qdrant URL:", settings.QDRANT_URL)
+    print("Qdrant Collection:", settings.QDRANT_COLLECTION)
+
     # Search in vector store
     vectordb_results = vectordb_client.query_points(
         collection_name=settings.QDRANT_COLLECTION,

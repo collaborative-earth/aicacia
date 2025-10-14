@@ -29,12 +29,17 @@ eval/ann-benchmarks/results/*
 
 # Grobid output
 *.xml
-# FInetuning outputs
+# FInetuning datasets and outputs
 finetuning/ir_results
 finetuning/qa_datasets
-**.ipynb
+notebooks/*
 finetuning/**/*.json
 !finetuning/config.json
 finetuning/**/*.jsonl
 finetuning/**/*.tsv
 finetuning/*.txt
+
+# Notebooks
+*.ipynb
+
+
