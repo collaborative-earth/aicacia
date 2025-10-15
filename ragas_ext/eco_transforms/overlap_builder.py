@@ -56,14 +56,19 @@ class EcoContextOverlapBuilder(RelationshipBuilder):
 
                 x_ctx = node_x.get_property(self.property_name) or {}
                 y_ctx = node_y.get_property(self.property_name) or {}
-
                 total_overlaps = []
                 overlapped_items_per_key = {}
-
+                distance_measure = self.distance_measure_map[self.distance_measure]
                 for key in x_ctx.keys():
+                    
+                    x_items = x_ctx.get(key, [])
+                    y_items = y_ctx.get(key, [])
+                    overlapped_items = []
+                    
                     if not x_items and not y_items:
                         per_key_overlap = 0.0
                     else:
+                      
                         x_matches = sum(
                             any(1 - distance_measure.distance(xi.lower(), yi.lower()) >= self.distance_threshold
                                 for yi in y_items)
@@ -79,7 +84,7 @@ class EcoContextOverlapBuilder(RelationshipBuilder):
                             for yi in y_items:
                                 sim = 1 - distance_measure.distance(xi.lower(), yi.lower())
                                 if sim >= self.distance_threshold:
-                                    overlapped_items_per_key.append((xi, yi))
+                                    overlapped_items.append((xi, yi))
 
                         prop_x = float(x_matches) / float(len(x_items)) if x_items else 0.0
                         prop_y = float(y_matches) / float(len(y_items)) if y_items else 0.0
