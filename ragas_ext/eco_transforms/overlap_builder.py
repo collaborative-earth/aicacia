@@ -1,3 +1,4 @@
+import numpy as np
 import typing as t
 from dataclasses import dataclass
 from ragas.metrics._string import DistanceMeasure
@@ -60,20 +61,31 @@ class EcoContextOverlapBuilder(RelationshipBuilder):
                 overlapped_items_per_key = {}
 
                 for key in x_ctx.keys():
-                    x_items = x_ctx.get(key, [])
-                    y_items = y_ctx.get(key, [])
-                    overlaps = []
-                    overlapped_items = []
+                    if not x_items and not y_items:
+                        per_key_overlap = 0.0
+                    else:
+                        x_matches = sum(
+                            any(1 - distance_measure.distance(xi.lower(), yi.lower()) >= self.distance_threshold
+                                for yi in y_items)
+                            for xi in x_items
+                        )
+                        y_matches = sum(
+                            any(1 - distance_measure.distance(yi.lower(), xi.lower()) >= self.distance_threshold
+                                for xi in x_items)
+                            for yi in y_items
+                        )
 
-                    for xi in x_items:
-                        for yi in y_items:
-                            similarity = 1 - distance_measure.distance(xi.lower(), yi.lower())
-                            verdict = similarity >= self.distance_threshold
-                            overlaps.append(verdict)
-                            if verdict:
-                                overlapped_items.append((xi, yi))
+                        for xi in x_items:
+                            for yi in y_items:
+                                sim = 1 - distance_measure.distance(xi.lower(), yi.lower())
+                                if sim >= self.distance_threshold:
+                                    overlapped_items_per_key.append((xi, yi))
 
-                    total_overlaps.extend(overlaps)
+                        prop_x = float(x_matches) / float(len(x_items)) if x_items else 0.0
+                        prop_y = float(y_matches) / float(len(y_items)) if y_items else 0.0
+                        per_key_overlap = (prop_x + prop_y) / 2.0
+
+                    total_overlaps.append(per_key_overlap)
                     overlapped_items_per_key[key] = overlapped_items
 
                 similarity = self._overlap_score(total_overlaps)
