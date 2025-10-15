@@ -39,33 +39,66 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
     examples: t.List[t.Tuple[QueryConditionEco, GeneratedQueryAnswer]] = [
         (
             QueryConditionEco(
-            persona=Persona(
-                name="Ecological practitioner",
-                role_description="Focuses on ecological restoration and management practices."
+                persona=Persona(
+                    name="Ecological practitioner",
+                    role_description="Focuses on ecological restoration and management practices."
+                ),
+                ecocontext={
+                    "locations": ["Amazon"],
+                    "ecosystems": ["tropical dry forest"],
+                    "species": ["Caesalpinia ferrea"],
+                    "challenges": ["drought"]
+                },
+                query_style="Formal",
+                query_length="Medium",
+                context=(
+                    "In the Amazon rainforest, restoration efforts focus on replanting native tree species. "
+                    "Tropical dry forest areas in Brazil are particularly affected by drought, and projects "
+                    "often include Caesalpinia ferrea to improve ecosystem recovery."
+                ),
             ),
-            ecocontext={
-                "locations": ["Amazon"],
-                "ecosystems": ["tropical dry forest"],
-                "species": ["Caesalpinia ferrea"],
-                "challenges": ["drought"]
-            },
-            query_style="Formal",
-            query_length="Medium",
-            context=(
-                "In the Amazon rainforest, restoration efforts focus on replanting native tree species. "
-                "Tropical dry forest areas in Brazil are particularly affected by drought, and projects "
-                "often include Caesalpinia ferrea to improve ecosystem recovery."
+            GeneratedQueryAnswer(
+                query="What strategies are recommended for selecting tree species in tropical dry forest restoration projects in the Amazon?",
+                answer=(
+                    "For restoration in the tropical dry forests of the Amazon, species selection should include "
+                    "Caesalpinia ferrea to improve ecosystem recovery, "
+                    "while considering challenges such as drought."
+                ),
+            )
+        ),
+        (
+            QueryConditionEco(
+                persona=Persona(
+                    name="Forest restoration researcher",
+                    role_description="Studies post-fire forest recovery dynamics and reforestation strategies."
+                ),
+                ecocontext={
+                    "locations": ["Colorado", "Western United States"],
+                    "ecosystems": ["montane forest"],
+                    "species": ["Pinus ponderosa", "Pseudotsuga menziesii"],
+                    "challenges": ["wildfire", "climate change"]
+                },
+                query_style="Informative",
+                query_length="Medium",
+                context=(
+                    "Following severe wildfires in the montane forests of Colorado, large-scale replanting efforts "
+                    "are underway to restore forest cover. Research indicates that seedling survival after the first "
+                    "growing season is highly variable and influenced by factors such as long-term climate, "
+                    "post-planting weather conditions, species selection, and seed source location. "
+                    "Topography, time since fire, and fire severity also play important roles in determining outcomes."
+                ),
             ),
-          ),
-          GeneratedQueryAnswer(
-              query="What strategies are recommended for selecting tree species in tropical dry forest restoration projects in the Amazon?",
-              answer=(
-                  "For restoration in the tropical dry forests of the Amazon, species selection should include "
-                  "Caesalpinia ferrea to improve ecosystem recovery, "
-                  "while considering challenges such as drought."
-              ),
-          )
-      )
+            GeneratedQueryAnswer(
+                query="What are the best conditions for replanting forests after a fire in Colorado?",
+                answer=(
+                    "The best conditions for replanting forests after a fire typically include favorable weather, "
+                    "careful selection of tree species suited to local montane environments such as Pinus ponderosa and "
+                    "Pseudotsuga menziesii, and consideration of topography and burn severity. "
+                    "Recent studies in Colorado show that long-term climate, post-planting weather, and seed source "
+                    "location are strong predictors of early seedling survival."
+                ),
+                ),
+            ),
 
     ]
     
@@ -124,5 +157,33 @@ class QueryAnswerGenerationPromptMultiEco(PydanticPrompt[QueryConditions, Genera
                     "of native tree species in degraded tropical ecosystems by providing better rooting conditions and nutrient availability."
                 ),
             ),
+        ),
+        (
+            QueryConditions(
+                persona=Persona(
+                    name="Ecological Restoration Manager'r",
+                    role_description="Designs and evaluates ecosystem restoration projects, focusing on target definition and reference ecosystem selection.",
+                ),
+                themes=["Restoration Planning", "Ecosystem Targeting"],
+                query_style="Analytical",
+                query_length="Medium",
+                context=[
+                    "<1-hop> Forest restoration aims to accelerate natural succession toward a self-sustaining climax forest ecosystem — the target ecosystem.",
+                    "<2-hop> Defining this target requires identifying reference sites that represent the desired end-state of restoration. These sites should match the project's conditions in terms of climate, topography, and forest type.",
+                    "<3-hop> Existing tools like GIS mapping platforms (e.g., Google Earth) and ecological databases (e.g., GBIF, vegetation classification maps) can support the identification and characterization of suitable reference ecosystems."
+                ],
+            ),
+            GeneratedQueryAnswer(
+                query=(
+                    "What is a good way to set a restoration target for an ecosystem type, and are there existing off-the-shelf tools that can help with this?"
+                ),
+                answer=(
+                    "A good way to set a restoration target is to define a reference ecosystem that represents the desired end-state of the project. "
+                    "This involves surveying relatively undisturbed remnants of the same climax forest type and ensuring they share similar environmental "
+                    "conditions—such as elevation, slope, and aspect—with the restoration site. "
+                    "Tools like topographic maps, Google Earth, vegetation classification systems, and global biodiversity databases such as GBIF "
+                    "can be used to locate and characterize these reference sites effectively."
+                ),
+            )
         ),
     ]
