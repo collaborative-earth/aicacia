@@ -39,7 +39,7 @@ class BGEM3Evaluator(BaseEvaluator):
             device: Device to run the model on
             batch_size: Batch size for encoding
         """
-        super().__init__(queries, corpus, relevant_docs, "BGE-M3", **kwargs)
+        super().__init__(queries, corpus, relevant_docs, "bge-m3", **kwargs)
         
         self.model_id = model_id
         self.trust_remote_code = trust_remote_code
