@@ -17,20 +17,18 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
         "Generate a single-hop query and answer based on the specified conditions "
         "(persona, ecological context with location, ecosystem, species, and challenge) "
         "and the provided node context.\n\n"
-        "### Goals\n"
-        "1. Create a question that reflects the persona's perspective and integrates the ecological context elements.\n"
-        "2. Produce an answer that is fully grounded in the provided context, without adding external information.\n\n"
-        "### Style Requirements\n"
+        "### Instructions:\n"
+        "1. **Generate a Query**: Based on the context, persona, ecological context, style, and length, create a question "
+        "that aligns with the persona's perspective and incorporates at least one among location, ecosystem, species, and challenge "
+        "from the ecological context. Formulate a question with analytical or actionable intent.\n"
+        "2. **Generate an Answer**: Using only the content from the provided context, construct a detailed answer "
+        "to the query. Do not add any information not included in or inferable from the context.\n"
+        "### Style\n"
         "- Reduce lexical overlap of the query from the context whenever possible, while preserving meaning.\n"
         "- Avoid **copying long sequences of words** from the context (no more than 3–4 consecutive identical words).\n"
         "- You may **paraphrase key terms** (e.g., 'drought' → 'water scarcity', 'restoration project' → 'rehabilitation effort') "
         "as long as the meaning remains faithful.\n"
-        "- The query should sound natural and insightful, not like a restatement of a sentence from the context.\n\n"
-        "### Steps\n"
-        "1. **Generate a Query**: Based on the persona and ecological context (location, ecosystem, species, challenges), "
-        "formulate a question that reflects curiosity or analytical intent, not just surface-level recall.\n"
-        "2. **Generate an Answer**: Use only the information contained in the node context, but express it with varied language "
-        "and natural phrasing."
+        "- Formulate the question naturally using varied starters (How, What, Why, Which) depending on the persona."
     )
 
     input_model: t.Type[QueryConditionEco] = QueryConditionEco
@@ -49,8 +47,8 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
                     "species": ["Caesalpinia ferrea"],
                     "challenges": ["drought"]
                 },
-                query_style="Formal",
-                query_length="Medium",
+                query_style="Web Search",
+                query_length="Short",
                 context=(
                     "In the Amazon rainforest, restoration efforts focus on replanting native tree species. "
                     "Tropical dry forest areas in Brazil are particularly affected by drought, and projects "
@@ -58,7 +56,7 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
                 ),
             ),
             GeneratedQueryAnswer(
-                query="What strategies are recommended for selecting tree species in tropical dry forest restoration projects in the Amazon?",
+                query="Strategies for planting tree species in Amazon",
                 answer=(
                     "For restoration in the tropical dry forests of the Amazon, species selection should include "
                     "Caesalpinia ferrea to improve ecosystem recovery, "
@@ -104,29 +102,25 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
     
 class QueryAnswerGenerationPromptMultiEco(PydanticPrompt[QueryConditions, GeneratedQueryAnswer]):
     instruction: str = (
-        "Generate a multi-hop query and answer grounded in the ecological restoration domain. "
-        "Use the provided persona, themes, style, and length to guide tone and focus. "
-        "The context contains multiple text segments (<1-hop>, <2-hop>, etc.), each describing "
-        "different but related aspects of restoration processes, such as site conditions, interventions, or outcomes.\n\n"
+        "Generate a multi-hop query and answer based on the provided conditions "
+        "(persona, ecological context with locations, ecosystems, species, and challenges) "
+        "and the provided multi-segment node context and the themes they share.\n\n"
         "### Instructions:\n"
-        "1. **Generate a Multi-Hop Query**:\n"
-        "   - Combine information from at least **two distinct context segments** (e.g., `<1-hop>` and `<2-hop>`). "
-        "   - Ensure the question can only be answered by reasoning across these segments — e.g., linking causes, mechanisms, or effects.\n"
-        "   - Explicitly integrate one or more of the provided **themes** in the query.\n"
-        "   - Keep the query realistic and relevant to restoration ecology (e.g., soil recovery, reforestation success, hydrological effects, biodiversity response).\n\n"
-        "2. **Generate an Answer**:\n"
-        "   - Base the answer only on the provided context — do not add external information.\n"
-        "   - Synthesize content from **both** segments into a coherent explanation.\n"
-        "   - Clearly reflect the multi-hop reasoning that connects the two pieces of information (e.g., intervention → ecological outcome).\n\n"
+        "1. **Generate a Multi-Hop Query**: Use the provided context segments and themes to form a query that requires combining "
+        "information from multiple segments (e.g., `<1-hop>` and `<2-hop>`). Ensure the query explicitly incorporates one or more "
+        "themes and reflects their relevance to the context. Formulate question with analytical or actionable intent.\n"
+        "2. **Generate an Answer**: Use only the content from the provided context to create a detailed and faithful answer to "
+        "the query. Avoid adding information that is not directly present or inferable from the given context.\n"
         "3. **Multi-Hop Context Tags**:\n"
         "   - Each context segment is tagged as `<1-hop>`, `<2-hop>`, etc.\n"
-        "   - Your question must integrate evidence or concepts from at least two segments."
-        "### Style Requirements\n"
-        "- Reduce lexical overlap of the query from the context whenever possible, while preserving meaning.\n"
+        "   - Ensure the query uses information from at least two segments and connects them meaningfully."
+        "### Style\n"
+        "- Reduce lexical overlap of the query from the contexts whenever possible, while preserving meaning.\n"
         "- Avoid **copying long sequences of words** from the context (no more than 3–4 consecutive identical words).\n"
         "- You may **paraphrase key terms** (e.g., 'drought' → 'water scarcity', 'restoration project' → 'rehabilitation effort') "
         "as long as the meaning remains faithful.\n"
-        "- The query should sound natural and insightful, not like a restatement of a sentence from the context.\n\n"
+        "- Formulate the question naturally using varied starters (How, What, Why, Which) depending on the persona."
+
     )
 
     input_model: t.Type[QueryConditions] = QueryConditions
