@@ -67,6 +67,24 @@ def merge_datasets(ds1: EmbeddingQAFinetuneDataset, ds2: EmbeddingQAFinetuneData
         relevant_docs=merged_relevant_docs
     )
 
+def save_nodes_to_jsonl(nodes: List[TextNode], output_dir):
+    corpus_path = os.path.join(output_dir, "corpus.jsonl")
+    with open(corpus_path, "w") as f:
+        for node in nodes:
+            # Get metadata values
+            id = node.id_
+            node_text = node.get_text()  # assuming BaseNode has a get_text() method
+            title = node.metadata.get("title", "")  # Add title from metadata (empty if not present)
+
+            # Create a document dictionary similar to BEIR format
+            beir_doc = {
+                "_id": id,
+                "title": title,
+                "text": node_text
+            }
+
+            # Write the JSON document to the file
+            f.write(json.dumps(beir_doc) + "\n")
 
 def save_qa_dataset_to_beir_format(qa_dataset: EmbeddingQAFinetuneDataset, output_dir, prefix="qgen"):
     """
