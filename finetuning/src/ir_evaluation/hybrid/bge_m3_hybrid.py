@@ -22,6 +22,7 @@ class BGEM3HybridEvaluator(BaseEvaluator):
         corpus: Dict[str, str],
         relevant_docs: Dict[str, set],
         model_id: str = "BAAI/bge-m3",
+        method_name: Optional[str] = "bge-m3_hybrid",
         dense_weight: float = 0.7,
         sparse_weight: float = 0.3,
         trust_remote_code: bool = True,
@@ -43,7 +44,7 @@ class BGEM3HybridEvaluator(BaseEvaluator):
             device: Device to run the model on
             batch_size: Batch size for encoding
         """
-        super().__init__(queries, corpus, relevant_docs, "BGE-M3-Hybrid", **kwargs)
+        super().__init__(queries, corpus, relevant_docs, method_name, **kwargs)
         
         self.model_id = model_id
         self.dense_weight = dense_weight

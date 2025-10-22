@@ -99,6 +99,7 @@ class ComprehensiveEvaluator:
                 corpus=self.dataset.corpus,
                 relevant_docs=self.dataset.relevant_docs,
                 model_id=model_config.model_id,
+                method_name = model_config.name,
                 trust_remote_code=model_config.trust_remote_code,
                 device=model_config.device,
                 batch_size=model_config.batch_size,
@@ -111,6 +112,7 @@ class ComprehensiveEvaluator:
                 corpus=self.dataset.corpus,
                 relevant_docs=self.dataset.relevant_docs,
                 model_id=model_config.model_id,
+                method_name = model_config.name,
                 trust_remote_code=model_config.trust_remote_code,
                 device=model_config.device,
                 batch_size=model_config.batch_size,
@@ -148,11 +150,12 @@ class ComprehensiveEvaluator:
                 corpus=self.dataset.corpus,
                 relevant_docs=self.dataset.relevant_docs,
                 model_id=model_config.model_id,
+                method_name = model_config.name,
                 trust_remote_code=model_config.trust_remote_code,
                 device=model_config.device,
                 batch_size=model_config.batch_size,
                 k_values=self.config.k_values,
-                show_progress=self.config.show_progress
+                show_progress=self.config.show_progress,
             )
         else:
             raise ValueError(f"Unknown sparse method: {model_config.name}")
@@ -166,6 +169,7 @@ class ComprehensiveEvaluator:
                 relevant_docs=self.dataset.relevant_docs,
                 model_id=model_config.model_id,
                 trust_remote_code=model_config.trust_remote_code,
+                method_name=model_config.name,
                 device=model_config.device,
                 batch_size=model_config.batch_size,
                 k_values=self.config.k_values,

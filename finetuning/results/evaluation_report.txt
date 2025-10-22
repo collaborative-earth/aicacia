@@ -1,0 +1,145 @@
+================================================================================
+COMPREHENSIVE RETRIEVAL EVALUATION REPORT
+================================================================================
+
+DATASET INFORMATION:
+  Queries: 1
+  Documents: 5
+  K values: [1, 3, 5, 10, 20]
+
+RESULTS SUMMARY:
+----------------------------------------
+
+BM25:
+  MRR@10: 1.0000
+  NDCG@10: 1.0000
+  Precision@5: 0.4000
+  Recall@10: 1.0000
+  Execution time: 0.00s
+  Memory usage: 0.00MB
+
+BGE-M3:
+  MRR@10: 0.2500
+  NDCG@10: 0.5013
+  Precision@5: 0.4000
+  Recall@10: 1.0000
+  Execution time: 0.10s
+  Memory usage: 14.83MB
+
+BGE-M3-HYBRID:
+  MRR@10: 0.2500
+  NDCG@10: 0.5013
+  Precision@5: 0.4000
+  Recall@10: 1.0000
+  Execution time: 0.06s
+  Memory usage: 9.78MB
+
+================================================================================
+DETAILED METRICS
+================================================================================
+
+BGE-M3:
+------
+  mrr@1: 0.0000
+  ndcg@1: 0.0000
+  precision@1: 0.0000
+  recall@1: 0.0000
+  hit_rate@1: 0.0000
+  mrr@3: 0.0000
+  ndcg@3: 0.0000
+  precision@3: 0.0000
+  recall@3: 0.0000
+  hit_rate@3: 0.0000
+  mrr@5: 0.2500
+  ndcg@5: 0.5013
+  precision@5: 0.4000
+  recall@5: 1.0000
+  hit_rate@5: 1.0000
+  mrr@10: 0.2500
+  ndcg@10: 0.5013
+  precision@10: 0.2000
+  recall@10: 1.0000
+  hit_rate@10: 1.0000
+  mrr@20: 0.2500
+  ndcg@20: 0.5013
+  precision@20: 0.1000
+  recall@20: 1.0000
+  hit_rate@20: 1.0000
+  map: 0.3250
+
+BM25:
+----
+  mrr@1: 1.0000
+  ndcg@1: 1.0000
+  precision@1: 1.0000
+  recall@1: 0.5000
+  hit_rate@1: 1.0000
+  mrr@3: 1.0000
+  ndcg@3: 1.0000
+  precision@3: 0.6667
+  recall@3: 1.0000
+  hit_rate@3: 1.0000
+  mrr@5: 1.0000
+  ndcg@5: 1.0000
+  precision@5: 0.4000
+  recall@5: 1.0000
+  hit_rate@5: 1.0000
+  mrr@10: 1.0000
+  ndcg@10: 1.0000
+  precision@10: 0.2000
+  recall@10: 1.0000
+  hit_rate@10: 1.0000
+  mrr@20: 1.0000
+  ndcg@20: 1.0000
+  precision@20: 0.1000
+  recall@20: 1.0000
+  hit_rate@20: 1.0000
+  map: 1.0000
+
+BGE-M3-HYBRID:
+-------------
+  mrr@1: 0.0000
+  ndcg@1: 0.0000
+  precision@1: 0.0000
+  recall@1: 0.0000
+  hit_rate@1: 0.0000
+  mrr@3: 0.0000
+  ndcg@3: 0.0000
+  precision@3: 0.0000
+  recall@3: 0.0000
+  hit_rate@3: 0.0000
+  mrr@5: 0.2500
+  ndcg@5: 0.5013
+  precision@5: 0.4000
+  recall@5: 1.0000
+  hit_rate@5: 1.0000
+  mrr@10: 0.2500
+  ndcg@10: 0.5013
+  precision@10: 0.2000
+  recall@10: 1.0000
+  hit_rate@10: 1.0000
+  mrr@20: 0.2500
+  ndcg@20: 0.5013
+  precision@20: 0.1000
+  recall@20: 1.0000
+  hit_rate@20: 1.0000
+  map: 0.3250
+
+================================================================================
+PERFORMANCE COMPARISON
+================================================================================
+
+Execution Time (seconds):
+  bm25: 0.00s
+  bge-m3-hybrid: 0.06s
+  bge-m3: 0.10s
+
+Memory Usage (MB):
+  bm25: 0.00MB
+  bge-m3-hybrid: 9.78MB
+  bge-m3: 14.83MB
+
+Queries per Second:
+  bm25: 2189.09
+  bge-m3-hybrid: 17.72
+  bge-m3: 9.52

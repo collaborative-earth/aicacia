@@ -22,6 +22,7 @@ class JinaV3Evaluator(BaseEvaluator):
         corpus: Dict[str, str],
         relevant_docs: Dict[str, set],
         model_id: str = "jinaai/jina-embeddings-v3",
+        method_name: Optional[str] = "jina-v3",
         trust_remote_code: bool = True,
         device: Optional[str] = None,
         batch_size: int = 32,
@@ -39,7 +40,7 @@ class JinaV3Evaluator(BaseEvaluator):
             device: Device to run the model on
             batch_size: Batch size for encoding
         """
-        super().__init__(queries, corpus, relevant_docs, "Jina-v3", **kwargs)
+        super().__init__(queries, corpus, relevant_docs, method_name, **kwargs)
         
         self.model_id = model_id
         self.trust_remote_code = trust_remote_code

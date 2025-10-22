@@ -22,6 +22,7 @@ class BGEM3SparseEvaluator(BaseEvaluator):
         corpus: Dict[str, str],
         relevant_docs: Dict[str, set],
         model_id: str = "BAAI/bge-m3",
+        method_name: Optional[str] = "bge-m3_sparse",
         trust_remote_code: bool = True,
         device: Optional[str] = None,
         batch_size: int = 256,
@@ -39,7 +40,7 @@ class BGEM3SparseEvaluator(BaseEvaluator):
             device: Device to run the model on
             batch_size: Batch size for encoding
         """
-        super().__init__(queries, corpus, relevant_docs, "BGE-M3-Sparse", **kwargs)
+        super().__init__(queries, corpus, relevant_docs, method_name, **kwargs)
 
         self.model_id = model_id
         self.trust_remote_code = trust_remote_code
