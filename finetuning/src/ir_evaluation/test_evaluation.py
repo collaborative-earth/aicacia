@@ -49,6 +49,7 @@ def test_small_evaluation():
         assert len(results) > 0, "No results generated"
         
         for method_name, result in results.items():
+            # Key in results are model_config name, while each entry name is 
             assert result.method_name == method_name, f"Method name mismatch: {result.method_name} != {method_name}"
             assert len(result.metrics) > 0, f"No metrics for {method_name}"
             assert 'mrr@10' in result.metrics, f"Missing MRR@10 metric for {method_name}"

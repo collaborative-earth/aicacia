@@ -22,6 +22,7 @@ psutil = "*"
 matplotlib = "*"
 seaborn = "*"
 pandas = "*"
+flagembedding = "*"
 
 [dev-packages]
 
