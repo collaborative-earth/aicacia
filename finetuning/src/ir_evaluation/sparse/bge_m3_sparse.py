@@ -54,23 +54,59 @@ class BGEM3SparseEvaluator(BaseEvaluator):
         # Pre-compute document sparse embeddings
         logger.info("Computing document sparse embeddings...")
         self.doc_sparse_embeddings = self._compute_document_sparse_embeddings()
-
+        self.query_sparse_embeddings = self._compute_query_sparse_embeddings()
         logger.info(f"BGE-M3 sparse evaluator initialized with {len(self.doc_sparse_embeddings)} document embeddings")
 
-    def _compute_document_sparse_embeddings(self) -> np.ndarray:
-        """Compute sparse embeddings for all documents in the corpus."""
-        doc_texts = list(self.corpus.values())
-        doc_ids = list(self.corpus.keys())
+    def _compute_sparse_embeddings(self, texts: list[str], ids: list[str], label: str) -> dict:
+        """
+        Generic helper to compute sparse embeddings for a list of texts.
 
-        # Compute sparse embeddings in batches
+        Args:
+            texts: List of input strings to encode
+            ids: List of corresponding IDs
+            label: Label for logging (e.g. "Corpus" or "Queries")
+
+        Returns:
+            dict: Mapping from ID to sparse embedding
+        """
+        logger.info(f"Encoding {len(texts)} {label.lower()} into sparse embeddings...")
+
+        # Model encode call for sparse embeddings
         output = self.model.encode(
-            doc_texts,
+            texts,
             return_dense=False,
             return_sparse=True,
             return_colbert_vecs=False
         )
 
-        return {doc_id: output['lexical_weights'][i] for i, doc_id in enumerate(doc_ids)}
+        id_to_embedding = {id_: output['lexical_weights'][i] for i, id_ in enumerate(ids)}
+
+        if label.lower() == "corpus":
+            self.doc_id_to_idx = {id_: i for i, id_ in enumerate(ids)}
+            self.doc_sparse_embeddings = id_to_embedding
+        elif label.lower() == "queries":
+            self.query_id_to_idx = {id_: i for i, id_ in enumerate(ids)}
+            self.query_sparse_embeddings = id_to_embedding
+
+        return id_to_embedding
+
+
+    def _compute_document_sparse_embeddings(self) -> dict:
+        """Compute sparse embeddings for all documents in the corpus."""
+        return self._compute_sparse_embeddings(
+            texts=list(self.corpus.values()),
+            ids=list(self.corpus.keys()),
+            label="Corpus"
+        )
+
+
+    def _compute_query_sparse_embeddings(self) -> dict:
+        """Compute sparse embeddings for all queries."""
+        return self._compute_sparse_embeddings(
+            texts=list(self.queries.values()),
+            ids=list(self.queries.keys()),
+            label="Queries"
+        )
 
     def _retrieve(self, query: str, top_k: int = 100) -> List[str]:
         """
@@ -101,6 +137,30 @@ class BGEM3SparseEvaluator(BaseEvaluator):
 
         return  [doc_id for doc_id, _ in ranked[:top_k]]
 
+    def _get_query_results(self, top_k: int = 100) -> Dict[str, List[str]]:
+        """
+        Retrieve all top-k documents for all queries in the datasets.
+        
+        Args:
+            top_k: Number of documents to retrieve for each query
+            
+        Returns:
+            List of document IDs ranked by relevance
+        """
+        query_results = {}
+        for query_id, q_vec in self.query_sparse_embeddings.items():
+            # Compute scores against all documents
+            scores = {
+                doc_id: self.model.compute_lexical_matching_score(q_vec, d_vec)
+                for doc_id, d_vec in self.doc_sparse_embeddings.items()
+            }
+
+            # Get top-k sorted
+            ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+            query_results[query_id] = [doc_id for doc_id, _ in ranked[:top_k]]
+        
+        return query_results
+    
     def get_model_info(self) -> Dict:
         """Get information about the BGE-M3 sparse model."""
         info = super().get_model_info()

@@ -66,7 +66,7 @@ class BGEM3Evaluator(BaseEvaluator):
         embeddings = []
         for i in range(0, len(doc_texts), self.batch_size):
             batch_texts = doc_texts[i:i + self.batch_size]
-            batch_embeddings = self.model.encode(batch_texts, show_progress_bar=self.show_progress)
+            batch_embeddings = self.model.encode(batch_texts, show_progress_bar=self.show_progress) 
             embeddings.append(batch_embeddings)
         
         # Concatenate all embeddings
