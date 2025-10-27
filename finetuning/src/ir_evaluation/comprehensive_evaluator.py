@@ -10,7 +10,7 @@ from llama_index.core.evaluation import EmbeddingQAFinetuneDataset
 
 from .base.config import EvaluationConfig, create_default_config
 from .base.evaluator import EvaluationResult
-from .dense import BGEM3Evaluator, CustomDenseEvaluator, JinaV3Evaluator
+from .dense import BGEM3Evaluator, CustomDenseEvaluator, JinaV3Evaluator, STDenseEvaluator
 from .hybrid import BGEM3HybridEvaluator
 from .reranking import CrossEncoderReranker
 from .sparse import BGEM3SparseEvaluator, BM25Evaluator
@@ -93,45 +93,18 @@ class ComprehensiveEvaluator:
     
     def _create_dense_evaluator(self, model_config) -> Any:
         """Create a dense evaluator based on model configuration."""
-        if "bge-m3" in model_config.name.lower():
-            return BGEM3Evaluator(
-                queries=self.dataset.queries,
-                corpus=self.dataset.corpus,
-                relevant_docs=self.dataset.relevant_docs,
-                model_id=model_config.model_id,
-                method_name = model_config.name,
-                trust_remote_code=model_config.trust_remote_code,
-                device=model_config.device,
-                batch_size=model_config.batch_size,
-                k_values=self.config.k_values,
-                show_progress=self.config.show_progress
-            )
-        elif "jina" in model_config.name.lower():
-            return JinaV3Evaluator(
-                queries=self.dataset.queries,
-                corpus=self.dataset.corpus,
-                relevant_docs=self.dataset.relevant_docs,
-                model_id=model_config.model_id,
-                method_name = model_config.name,
-                trust_remote_code=model_config.trust_remote_code,
-                device=model_config.device,
-                batch_size=model_config.batch_size,
-                k_values=self.config.k_values,
-                show_progress=self.config.show_progress
-            )
-        else:
-            return CustomDenseEvaluator(
-                queries=self.dataset.queries,
-                corpus=self.dataset.corpus,
-                relevant_docs=self.dataset.relevant_docs,
-                model_id=model_config.model_id,
-                method_name=model_config.name,
-                trust_remote_code=model_config.trust_remote_code,
-                device=model_config.device,
-                batch_size=model_config.batch_size,
-                k_values=self.config.k_values,
-                show_progress=self.config.show_progress
-            )
+        return STDenseEvaluator(
+            queries=self.dataset.queries,
+            corpus=self.dataset.corpus,
+            relevant_docs=self.dataset.relevant_docs,
+            model_id=model_config.model_id,
+            method_name=model_config.name,
+            trust_remote_code=model_config.trust_remote_code,
+            device=model_config.device,
+            batch_size=model_config.batch_size,
+            k_values=self.config.k_values,
+            show_progress=self.config.show_progress
+        )
     
     def _create_sparse_evaluator(self, model_config) -> Any:
         """Create a sparse evaluator based on model configuration."""

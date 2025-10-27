@@ -4,6 +4,7 @@ import json
 import pymupdf4llm
 import uuid
 import csv
+import re
 from copy import deepcopy
 from typing import Dict, List, Tuple
 from llama_index.core.evaluation import EmbeddingQAFinetuneDataset
@@ -14,60 +15,9 @@ from llama_index.core.node_parser import MarkdownNodeParser, MarkdownElementNode
 from finetuning.src.node_filters import *
 from vectordb.custom_parsers import *
 
-def load_config(config_path: str) -> dict:
-    with open(config_path, 'r') as file:
-        return json.load(file)
+## Llama index to BEIR format
 
-def merge_datasets(ds1: EmbeddingQAFinetuneDataset, ds2: EmbeddingQAFinetuneDataset):
-    """
-    Merge two QADataset objects into one, preserving all data and avoiding ID collisions.
-
-    If there are duplicate query or document IDs between the two datasets, new UUIDs are generated
-    for the conflicting entries in the second dataset (ds2) to maintain uniqueness.
-    """
-    merged_queries = deepcopy(ds1.queries)
-    merged_corpus = deepcopy(ds1.corpus)
-    merged_relevant_docs = deepcopy(ds1.relevant_docs)
-
-    # Track existing IDs
-    existing_query_ids = set(merged_queries.keys())
-    existing_doc_ids = set(merged_corpus.keys())
-
-    # Map for doc ID renaming
-    doc_id_map = {}
-
-    # Merge corpus from ds2
-    for doc_id, doc in ds2.corpus.items():
-        if doc_id in existing_doc_ids:
-            print("IId collision")
-            new_doc_id = str(uuid.uuid4())
-            doc_id_map[doc_id] = new_doc_id
-            merged_corpus[new_doc_id] = doc
-            existing_doc_ids.add(new_doc_id)
-        else:
-            doc_id_map[doc_id] = doc_id
-            merged_corpus[doc_id] = doc
-            existing_doc_ids.add(doc_id)
-
-    # Merge queries and relevant_docs
-    for qid, query in ds2.queries.items():
-        new_qid = qid
-        if qid in existing_query_ids:
-            new_qid = str(uuid.uuid4())
-        merged_queries[new_qid] = query
-
-        original_relevant_docs = ds2.relevant_docs[qid]
-        remapped_relevant_docs = [doc_id_map[doc_id] for doc_id in original_relevant_docs]
-        merged_relevant_docs[new_qid] = remapped_relevant_docs
-        existing_query_ids.add(new_qid)
-
-    return EmbeddingQAFinetuneDataset(
-        queries=merged_queries,
-        corpus=merged_corpus,
-        relevant_docs=merged_relevant_docs
-    )
-
-def save_nodes_to_jsonl(nodes: List[TextNode], output_dir):
+def save_nodes_to_jsonl(nodes: List[TextNode], output_dir="."):
     corpus_path = os.path.join(output_dir, "corpus.jsonl")
     with open(corpus_path, "w") as f:
         for node in nodes:
@@ -134,28 +84,57 @@ def save_qa_dataset_to_beir_format(qa_dataset: EmbeddingQAFinetuneDataset, outpu
             for corpus_id, score in corpus_dict.items():
                 writer.writerow([query_id, corpus_id, score])
       
-def save_nodes_to_jsonl(nodes: List[TextNode], output_dir):
-    '''
-        Save a list of llama index nodes into a jsonl file in BEIR-style format
-    '''
-    corpus_path = os.path.join(output_dir, "corpus.jsonl")
-    with open(corpus_path, "w") as f:
-        for node in nodes:
-            # Get metadata values
-            node_id = node.id_
-            node_text = node.get_text()  # assuming BaseNode has a get_text() method
-            title = node.metadata.get("title", "")  # Add title from metadata (empty if not present)
-            
-            # Create a document dictionary similar to BEIR format
-            beir_doc = {
-                "_id": node_id,
-                "title": title,
-                "text": node_text
-            }
 
-            # Write the JSON document to the file
-            f.write(json.dumps(beir_doc) + "\n")
+## Llama index utils
 
+def merge_datasets(ds1: EmbeddingQAFinetuneDataset, ds2: EmbeddingQAFinetuneDataset):
+    """
+    Merge two QADataset objects into one, preserving all data and avoiding ID collisions.
+
+    If there are duplicate query or document IDs between the two datasets, new UUIDs are generated
+    for the conflicting entries in the second dataset (ds2) to maintain uniqueness.
+    """
+    merged_queries = deepcopy(ds1.queries)
+    merged_corpus = deepcopy(ds1.corpus)
+    merged_relevant_docs = deepcopy(ds1.relevant_docs)
+
+    # Track existing IDs
+    existing_query_ids = set(merged_queries.keys())
+    existing_doc_ids = set(merged_corpus.keys())
+
+    # Map for doc ID renaming
+    doc_id_map = {}
+
+    # Merge corpus from ds2
+    for doc_id, doc in ds2.corpus.items():
+        if doc_id in existing_doc_ids:
+            print("IId collision")
+            new_doc_id = str(uuid.uuid4())
+            doc_id_map[doc_id] = new_doc_id
+            merged_corpus[new_doc_id] = doc
+            existing_doc_ids.add(new_doc_id)
+        else:
+            doc_id_map[doc_id] = doc_id
+            merged_corpus[doc_id] = doc
+            existing_doc_ids.add(doc_id)
+
+    # Merge queries and relevant_docs
+    for qid, query in ds2.queries.items():
+        new_qid = qid
+        if qid in existing_query_ids:
+            new_qid = str(uuid.uuid4())
+        merged_queries[new_qid] = query
+
+        original_relevant_docs = ds2.relevant_docs[qid]
+        remapped_relevant_docs = [doc_id_map[doc_id] for doc_id in original_relevant_docs]
+        merged_relevant_docs[new_qid] = remapped_relevant_docs
+        existing_query_ids.add(new_qid)
+
+    return EmbeddingQAFinetuneDataset(
+        queries=merged_queries,
+        corpus=merged_corpus,
+        relevant_docs=merged_relevant_docs
+    )
                       
 def split_dataset(dataset: EmbeddingQAFinetuneDataset, train_ratio: float = 0.8) -> Tuple[EmbeddingQAFinetuneDataset, EmbeddingQAFinetuneDataset]:
     """
@@ -195,6 +174,86 @@ def split_dataset(dataset: EmbeddingQAFinetuneDataset, train_ratio: float = 0.8)
 
     return train_dataset, val_dataset
 
+## RAGAS utils
+
+def save_ragasjsonl_to_llamaindexjson(file_path, kg_path=None, output_dir="."):
+    """
+    Convert a RAGAS JSONL dataset into a LlamaIndex-style JSON file.
+
+    Reads queries and reference contexts (optionally using a KG for the corpus)/
+    Saves a JSON file with 'queries', 'relevant_docs', and 'corpus'.
+    
+    Args:
+        file_path (str): Path to the RAGAS JSONL file.
+        kg_path (str, optional): Path to a knowledge graph JSON file. If None, corpus is built from the file.
+        output_dir (str, optional): Directory to save the output JSON. Defaults to current directory.
+
+    Returns:
+        dict: The converted dataset.
+    """
+    
+    file_name = os.path.splitext(os.path.basename(file_path))[0]
+
+    data = []
+    with open(file_path, "r") as f:
+        for line in f:
+            data.append(json.loads(line))
+
+    # --- Build corpus ---
+    if kg_path is not None:
+        with open(kg_path, "r") as f:
+            kg = json.load(f)
+        corpus = {node["id"]: node["properties"]["page_content"] for node in kg["nodes"]}
+    else:
+        corpus = {}
+        for d in data:
+            ctx_ids = d["reference_context_ids"]
+            ctx_texts = d["reference_contexts"]
+
+            # Combine and split hop sections if any
+            for cid, ctext in zip(ctx_ids, ctx_texts):
+                hops_texts = re.split(r"<\d+-hop>\s*", ctext.strip())
+                hops_texts = [h.strip() for h in hops_texts if h.strip()]
+
+                if len(hops_texts) > 1:
+                    for i, hop_text in enumerate(hops_texts, start=1):
+                        corpus[f"{cid}__{i}hop"] = hop_text
+                else:
+                    corpus[cid] = hops_texts[0] if hops_texts else ctext.strip()
+
+    # --- Build queries and relevant_docs ---
+    queries = {}
+    relevant_docs = {}
+
+    for d in data:
+        qid = str(uuid.uuid4())
+        queries[qid] = d["user_input"]
+
+        valid_ids = [cid for cid in d["reference_context_ids"] if any(cid in k for k in corpus.keys())]
+
+        if valid_ids:
+            relevant_docs[qid] = valid_ids
+        else:
+            print(f"Mismatch: query has no matching contexts in corpus")
+
+    dataset = {
+        "queries": queries,
+        "relevant_docs": relevant_docs,
+        "corpus": corpus,
+    }
+    
+    os.makedirs(output_dir, exist_ok=True)
+    out_path = os.path.join(output_dir, f"{file_name}_llama.json")
+
+    with open(out_path, "w") as f:
+        json.dump(dataset, f, indent=2)
+
+    print(f"✅ Saved dataset to: {out_path}")
+    print(f"Queries: {len(queries)} | Corpus: {len(corpus)} | With relevant_docs: {len(relevant_docs)}")
+
+    return dataset
+
+## Files to llama index nodes
 
 def create_nodes_from_tei_path(tei_path: str, chunk_size: int, chunk_overlap: int, apply_filter: bool = True, valid_tags: list = None, reverse: bool = False):
     """Ingest and process TEI documents, returning parsed chunks (nodes).
@@ -273,4 +332,4 @@ def create_nodes_from_pdf_path(pdf_path: str, chunk_size: int, chunk_overlap: in
 
     return nodes
 
-# Example usage
+
