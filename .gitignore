@@ -40,6 +40,8 @@ finetuning/**/*.tsv
 finetuning/**/*.txt
 finetuning/**/*.csv
 finetuning/*.txt
+finetuning/data/*
+finetuning/results/*
 
 # Notebooks
 *.ipynb
