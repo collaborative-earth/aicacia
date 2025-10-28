@@ -1,6 +1,6 @@
 dataset:
   path: "data/qa_dataset/qa_finetune_dataset.json"
-  max_queries: null  # null for all queries
+  max_queries: null # null for all queries
 
 methods:
   dense:
@@ -13,7 +13,7 @@ methods:
       additional_params: {}
     
     - name: "bge-m3-finetuned"
-      model_id: "your-org/bge-m3-finetuned"  # Replace with actual model ID
+      model_id: "collaborativeearth/bge-m3_wri_wflagtraining"  
       trust_remote_code: true
       device: null
       batch_size: 32

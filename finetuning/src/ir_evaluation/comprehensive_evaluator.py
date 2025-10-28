@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import yaml
+import pandas as pd
 from llama_index.core.evaluation import EmbeddingQAFinetuneDataset
 
 from .base.config import EvaluationConfig, create_default_config
@@ -220,7 +221,9 @@ class ComprehensiveEvaluator:
             Report text
         """
         if output_path is None:
-            output_path = str(Path(self.config.results_dir) / "evaluation_report.txt")
+            output_path = Path(self.config.results_dir) / "evaluation_report.txt"
+        else:
+            output_path = Path(output_path)
         
         report_lines = []
         report_lines.append("=" * 80)
@@ -260,12 +263,24 @@ class ComprehensiveEvaluator:
         report_lines.append("DETAILED METRICS")
         report_lines.append("=" * 80)
         
+        # Create a dataframe with metrics
+        rows = []
         for method_name, result in results.items():
             report_lines.append(f"\n{method_name.upper()}:")
             report_lines.append("-" * len(method_name))
             
+            row = {'method':method_name}
+            
             for metric_name, value in result.metrics.items():
                 report_lines.append(f"  {metric_name}: {value:.4f}")
+                row[metric_name] = value
+            row["execution_time_s"] = getattr(result, "execution_time", float("nan"))
+            row["memory_usage_mb"] = getattr(result, "memory_usage", float("nan"))
+            qps = getattr(result, "performance", {}).get("queries_per_second", float("nan"))
+            row["queries_per_second"] = qps
+            rows.append(row)    
+            
+        df = pd.DataFrame(rows)
         
         # Performance comparison
         report_lines.append("\n" + "=" * 80)
@@ -290,6 +305,11 @@ class ComprehensiveEvaluator:
         # Save report
         with open(output_path, 'w') as f:
             f.write(report_text)
-        
+            
+        table_path = output_path.with_suffix(".csv")
+        df.to_csv(table_path, index=False)
+        logger.info(f"Structured results saved to {table_path}")
+            
         logger.info(f"Report saved to {output_path}")
+            
         return report_text

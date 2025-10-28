@@ -37,6 +37,8 @@ finetuning/**/*.json
 !finetuning/config.json
 finetuning/**/*.jsonl
 finetuning/**/*.tsv
+finetuning/**/*.txt
+finetuning/**/*.csv
 finetuning/*.txt
 
 # Notebooks
