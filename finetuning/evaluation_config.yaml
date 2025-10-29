@@ -1,6 +1,6 @@
 dataset:
   path: "data/qa_dataset/qa_finetune_dataset.json"
-  max_queries: null # null for all queries
+  max_queries: 10 # null for all queries
 
 methods:
   dense:

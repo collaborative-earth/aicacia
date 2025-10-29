@@ -168,27 +168,20 @@ class ComprehensiveEvaluator:
         if not existing_results:
             raise ValueError("No existing results available for reranking")
         
-        # Use the first result as base for reranking
         base_method_name = list(existing_results.keys())[0]
         base_result = existing_results[base_method_name]
         
         # Get top-k candidates for reranking
         top_k_candidates = model_config.additional_params.get('top_k_candidates', 100)
-        
-        # Rerank for each query
-        reranked_results = {}
-        for query_id, query in self.dataset.queries.items():
-            # Get top candidates from base method
-            top_candidates = base_result.query_results[query_id][:top_k_candidates]
-            
-            # Rerank using cross-encoder
-            reranked_docs = reranker.rerank(
-                query=query,
-                candidate_docs=top_candidates,
-                doc_texts=self.dataset.corpus
-            )
-            
-            reranked_results[query_id] = reranked_docs
+        top_k_output = model_config.additional_params.get('top_k_output', None)
+
+        reranked_results = reranker.rerank_all(
+            queries=self.dataset.queries,
+            base_results=base_result.query_results,
+            doc_texts=self.dataset.corpus,
+            top_k_candidates=top_k_candidates,
+            top_k_output=top_k_output,
+        )
         
         # Calculate metrics for reranked results
         from .base.metrics import MetricsCalculator
