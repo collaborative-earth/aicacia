@@ -40,15 +40,31 @@ def get_restoration_context_for_message(country: str, message: str) -> int:
 
     rag_context = []
     for res in results.points:
-        sources = ast.literal_eval(res.payload["sources"].split(";{")[0])
-        rag_context.append(
-            {
-                "title": res.payload["title"],
-                "url": sources["link"],
-                "score": res.score,
-                "text": json.loads(res.payload["_node_content"])["text"],
-            }
-        )
+        try:
+            # Safely get sources
+            sources_data = res.payload.get("sources", "")
+            if sources_data:
+                sources = ast.literal_eval(sources_data.split(";{")[0])
+                url = sources.get("link", "")
+            else:
+                url = ""
+            
+            # Safely get other fields
+            title = res.payload.get("title", "Unknown")
+            node_content = res.payload.get("_node_content", "{}")
+            text = json.loads(node_content).get("text", "")
+            
+            rag_context.append(
+                {
+                    "title": title,
+                    "url": url,
+                    "score": res.score,
+                    "text": text,
+                }
+            )
+        except Exception as e:
+            print(f"Error processing result: {e}")
+            continue
 
     print(f"RAG Context: {json.dumps(rag_context, indent=2)}")
     return json.dumps(rag_context)

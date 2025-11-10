@@ -109,13 +109,64 @@ export async function submitFeedback(feedback: FeedbackRequest): Promise<void> {
   }
 }
 
-export const chatApiCall = async (message: string, thread_id?: string) => {
+export interface ChatMessage {
+  message: string;
+  message_from: 'user' | 'agent';
+  message_id?: string;
+}
+
+export interface ChatResponse {
+  chat_messages: ChatMessage[];
+  thread_id: string;
+}
+
+export interface ThreadSummary {
+  thread_id: string;
+  last_message: string;
+  last_message_time: string;
+  message_count: number;
+}
+
+export interface ThreadListResponse {
+  threads: ThreadSummary[];
+}
+
+export const chatApiCall = async (message: string, thread_id?: string): Promise<ChatResponse> => {
     try {
         const response = await api.post('/chat', { message, thread_id: thread_id });
         return response.data;
     } catch (error) {
         console.log(error);
         throw new Error('Failed to send chat message');
+    }
+}
+
+export const getThreadsApiCall = async (): Promise<ThreadListResponse> => {
+    try {
+        const response = await api.get('/chat/threads');
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw new Error('Failed to fetch threads');
+    }
+}
+
+export const getThreadMessagesApiCall = async (thread_id: string): Promise<ChatResponse> => {
+    try {
+        const response = await api.get(`/chat/threads/${thread_id}`);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw new Error('Failed to fetch thread messages');
+    }
+}
+
+export const deleteThreadApiCall = async (thread_id: string): Promise<void> => {
+    try {
+        await api.delete(`/chat/threads/${thread_id}`);
+    } catch (error) {
+        console.log(error);
+        throw new Error('Failed to delete thread');
     }
 }
 

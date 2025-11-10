@@ -1,9 +1,9 @@
 import uuid
 
-from fastapi import APIRouter, Depends
-from sqlmodel import Session
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session, func, select
 from server.auth.dependencies import get_current_user
-from server.dtos.chat import ChatResponse, ChatRequest
+from server.dtos.chat import ChatResponse, ChatRequest, ThreadListResponse, ThreadSummary
 from server.entities.chat import ChatMessage, Actor
 from server.db.models.thread_messages import ThreadMessages
 from server.db.models.user import User
@@ -90,3 +90,105 @@ def generate_chat_response(
         chat_messages=chat_history,
         thread_id=thread_id,
     )
+
+
+@chat_router.get("/threads")
+def get_user_threads(
+        user: User = Depends(get_current_user),
+        db: Session = Depends(get_db_session)
+) -> ThreadListResponse:
+    """Get all chat threads for the current user."""
+
+    # Get distinct thread_ids for the user with message counts and last message time
+    stmt = (
+        select(
+            ThreadMessages.thread_id,
+            func.count(ThreadMessages.message_id).label('message_count'),
+            func.max(ThreadMessages.created_at).label('last_message_time')
+        )
+        .where(ThreadMessages.user_id == user.user_id)
+        .group_by(ThreadMessages.thread_id)
+        .order_by(func.max(ThreadMessages.created_at).desc())
+    )
+
+    results = db.exec(stmt).all()
+
+    threads = []
+    for thread_id, message_count, last_message_time in results:
+        # Get the last message for preview
+        last_message_record = (
+            db.query(ThreadMessages)
+            .filter_by(thread_id=thread_id, user_id=user.user_id)
+            .order_by(ThreadMessages.created_at.desc())
+            .first()
+        )
+
+        if last_message_record:
+            threads.append(
+                ThreadSummary(
+                    thread_id=str(thread_id),
+                    last_message=last_message_record.message[:100],  # Truncate for preview
+                    last_message_time=last_message_time,
+                    message_count=message_count
+                )
+            )
+
+    return ThreadListResponse(threads=threads)
+
+
+@chat_router.get("/threads/{thread_id}")
+def get_thread_messages(
+        thread_id: str,
+        user: User = Depends(get_current_user),
+        db: Session = Depends(get_db_session)
+) -> ChatResponse:
+    """Get all messages for a specific thread."""
+
+    # Verify the thread belongs to the user and get all messages
+    thread_messages = db.query(ThreadMessages).filter_by(
+        thread_id=thread_id,
+        user_id=user.user_id
+    ).order_by(ThreadMessages.created_at.asc()).all()
+
+    if not thread_messages:
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    chat_messages = [
+        ChatMessage(
+            message=thread_message.message,
+            message_from=thread_message.message_from,
+            message_id=str(thread_message.message_id),
+        )
+        for thread_message in thread_messages
+    ]
+
+    return ChatResponse(
+        chat_messages=chat_messages,
+        thread_id=thread_id,
+    )
+
+
+@chat_router.delete("/threads/{thread_id}")
+def delete_thread(
+        thread_id: str,
+        user: User = Depends(get_current_user),
+        db: Session = Depends(get_db_session)
+) -> dict:
+    """Delete a chat thread and all its messages."""
+
+    # Verify the thread belongs to the user
+    thread_messages = db.query(ThreadMessages).filter_by(
+        thread_id=thread_id,
+        user_id=user.user_id
+    ).all()
+
+    if not thread_messages:
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    # Delete all messages in the thread
+    for message in thread_messages:
+        db.delete(message)
+
+    db.commit()
+
+    return {"status": "success", "message": "Thread deleted successfully"}

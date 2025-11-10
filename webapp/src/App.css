@@ -1,16 +1,17 @@
 .app {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: 60px; /* Add padding instead of margin to account for fixed top bar */
+  overflow: hidden;
 }
 
 .app-layout {
   display: flex;
   flex: 1;
-  height: calc(100vh - 60px);
+  min-height: 0;
   overflow: hidden;
   background: #f4f9f4; /* Light green background */
+  margin-top: 60px;
 }
 
 .sidebar {
