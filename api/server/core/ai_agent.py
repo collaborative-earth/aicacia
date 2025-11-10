@@ -12,7 +12,7 @@ from langchain_openai import ChatOpenAI
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from qdrant_client import QdrantClient
 from server.core.config import settings
-from server.entities.chat import ChatMessage, Actor
+from server.entities.chat import Actor, ChatMessage
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=1, api_key=settings.OPENAI_API_KEY)
 

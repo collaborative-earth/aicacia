@@ -8,20 +8,16 @@ const ChatPage: React.FC = () => {
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [refreshThreads, setRefreshThreads] = useState(0);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [loadingMessages, setLoadingMessages] = useState(false);
 
   useEffect(() => {
     const loadThreadMessages = async () => {
       if (activeThreadId) {
-        setLoadingMessages(true);
         try {
           const response = await getThreadMessagesApiCall(activeThreadId);
           setMessages(response.chat_messages);
         } catch (error) {
           console.error('Failed to load thread messages:', error);
           setMessages([]);
-        } finally {
-          setLoadingMessages(false);
         }
       } else {
         setMessages([]);
