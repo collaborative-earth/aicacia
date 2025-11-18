@@ -8,6 +8,7 @@ const ChatPage: React.FC = () => {
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [refreshThreads, setRefreshThreads] = useState(0);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const loadThreadMessages = async () => {
@@ -29,6 +30,7 @@ const ChatPage: React.FC = () => {
 
   const handleThreadSelect = (threadId: string | null) => {
     setActiveThreadId(threadId);
+    setIsSidebarOpen(false); // Close sidebar on mobile after selection
   };
 
   const handleNewMessage = (newMessages: ChatMessage[], newThreadId: string) => {
@@ -44,11 +46,35 @@ const ChatPage: React.FC = () => {
 
   return (
     <div className="chat-page">
-      <ThreadList
-        onThreadSelect={handleThreadSelect}
-        activeThreadId={activeThreadId}
-        refreshTrigger={refreshThreads}
-      />
+      {/* Hamburger menu button for mobile */}
+      <button 
+        className="hamburger-menu" 
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        aria-label="Toggle menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      {/* Overlay for mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="sidebar-overlay" 
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`sidebar-container ${isSidebarOpen ? 'open' : ''}`}>
+        <ThreadList
+          onThreadSelect={handleThreadSelect}
+          activeThreadId={activeThreadId}
+          refreshTrigger={refreshThreads}
+        />
+      </div>
+
+      {/* Main chat area */}
       <div className="chat-main">
         <ChatBox
           threadId={activeThreadId}

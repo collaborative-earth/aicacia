@@ -1,3 +1,10 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100vh;
+}
+
 .app {
   height: 100vh;
   display: flex;
@@ -9,9 +16,11 @@
   display: flex;
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: #f4f9f4; /* Light green background */
   margin-top: 60px;
+  justify-content: center;
 }
 
 .sidebar {
