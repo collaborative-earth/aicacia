@@ -1,8 +1,22 @@
 body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
   height: 100vh;
+}
+
+/* For Firefox */
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
+/* For Internet Explorer and Edge */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+}
+
+/* For Chrome, Safari, and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 .app {
