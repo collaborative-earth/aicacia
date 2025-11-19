@@ -1,3 +1,18 @@
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  /* Hide scrollbar for Firefox */
+  scrollbar-width: none;
+  /* Hide scrollbar for IE and Edge */
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar for Chrome, Safari, and Opera */
+body::-webkit-scrollbar {
+  display: none;
+}
+
 .app {
   height: 100vh;
   display: flex;
@@ -9,9 +24,11 @@
   display: flex;
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: #f4f9f4; /* Light green background */
   margin-top: 60px;
+  justify-content: center;
 }
 
 .sidebar {

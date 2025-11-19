@@ -1,21 +1,118 @@
 .chat-page {
   display: flex;
-  height: 100%;
-  overflow: hidden;
-  background-color: #f0f7f0;
+  min-height: 100%;
+  position: relative;
+  font-family: sans-serif;
 }
 
-.chat-main {
-  flex: 1;
-  display: flex;
+/* Hamburger menu button */
+.hamburger-menu {
+  display: none;
+  position: fixed;
+  top: 76px;
+  left: 16px;
+  z-index: 1001;
+  width: 44px;
+  height: 44px;
+  background-color: #ffffff;
+  border: 1px solid #d1e7dd;
+  border-radius: 8px;
+  cursor: pointer;
   flex-direction: column;
-  overflow: hidden;
-  min-height: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
-/* Mobile responsive */
+.hamburger-menu:hover {
+  background-color: #f0f7f0;
+  border-color: #a5d6a7;
+}
+
+.hamburger-menu span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: #2c5f2d;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Sidebar container - desktop: fixed to left */
+.sidebar-container {
+  position: fixed;
+  left: 0;
+  top: 60px;
+  width: 280px;
+  height: calc(100% - 60px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 100;
+}
+
+/* Overlay for mobile */
+.sidebar-overlay {
+  display: none;
+}
+
+/* Main chat area - desktop: account for fixed sidebar */
+.chat-main {
+  width: calc(100% - 280px);
+  margin-left: 280px;
+  min-height: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Tablet and mobile responsive */
 @media (max-width: 768px) {
-  .chat-page {
-    flex-direction: column;
+  .hamburger-menu {
+    display: flex;
+  }
+
+  .sidebar-container {
+    transform: translateX(-100%);
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+  }
+
+  .sidebar-container.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 999;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .chat-messages {
+    margin-top: 44px;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .chat-main {
+    margin-left: 0;
+    width: 100%;
+    padding: 16px;
   }
 }
