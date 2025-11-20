@@ -163,5 +163,6 @@ class SingleHopScenarioEco(BaseSynthesizer[Scenario]):
             user_input=response.query,
             reference=response.answer,
             reference_contexts=[reference_context],
-            reference_context_ids = [str(scenario.nodes[0].id)]
+            reference_context_ids = [str(scenario.nodes[0].id)],
+            persona_name=scenario.persona.name,
         )
