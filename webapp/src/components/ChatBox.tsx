@@ -1,96 +1,163 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../styles/ChatBox.css';
-import { chatApiCall, sendFeedbackApiCall } from '../utils/api'; // Add feedback API call here
+import { chatApiCall, sendFeedbackApiCall, ChatMessage } from '../utils/api';
 import ReactMarkdown from 'react-markdown';
 
-const ChatBox: React.FC = () => {
-  const [messages, setMessages] = useState<{ sender: 'user' | 'bot', text: string, feedback?: 'up' | 'down', message_id?: string }[]>([]);
+interface ChatBoxProps {
+  threadId: string | null;
+  initialMessages: ChatMessage[];
+  onNewMessage: (messages: ChatMessage[], threadId: string) => void;
+}
+
+const ChatBox: React.FC<ChatBoxProps> = ({ threadId, initialMessages, onNewMessage }) => {
+  const [messages, setMessages] = useState<{ sender: 'user' | 'agent', text: string, feedback?: 'up' | 'down', message_id?: string }[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [input, setInput] = useState('');
-  const [threadId, setThreadId] = useState<string | undefined>(undefined);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Convert API messages to internal format
+  useEffect(() => {
+    const convertedMessages = initialMessages.map(msg => ({
+      sender: msg.message_from as 'user' | 'agent',
+      text: msg.message,
+      message_id: msg.message_id,
+    }));
+    setMessages(convertedMessages);
+  }, [initialMessages]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      // Use setTimeout to ensure DOM is updated
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [messages]);
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
 
-    const sender = 'user' as 'user' | 'bot';
-    const userMessage = { sender, text: input };
-    const messages_with_user_message = [...messages, userMessage];
-    setMessages(messages_with_user_message);
+    const userMessage = { sender: 'user' as 'user' | 'agent', text: input };
+    const messagesWithUserMessage = [...messages, userMessage];
+    setMessages(messagesWithUserMessage);
     setInput('');
-
     setLoading(true);
 
-    const res = await chatApiCall(userMessage.text, threadId);
+    try {
+      const res = await chatApiCall(input, threadId || undefined);
+      setLoading(false);
 
-    setThreadId(res.thread_id);
-    setLoading(false);
+      // Convert all messages from API response
+      const allMessages = res.chat_messages.map(msg => ({
+        sender: msg.message_from as 'user' | 'agent',
+        text: msg.message,
+        message_id: msg.message_id,
+      }));
 
-    const botResponse = { 
-      sender: 'bot' as 'user' | 'bot',
-      text: res.chat_messages[res.chat_messages.length - 1].message,
-      message_id: res.chat_messages[res.chat_messages.length - 1].message_id,
-    };
-    const messages_with_bot_response = [...messages_with_user_message, botResponse];
-    setMessages(messages_with_bot_response);
+      setMessages(allMessages);
+      onNewMessage(res.chat_messages, res.thread_id);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      setLoading(false);
+      // Revert to previous messages on error
+      setMessages(messages);
+    }
   };
 
-  const handleInputKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       handleSendMessage();
     }
   };
 
   const handleFeedback = async (index: number, feedback: 'up' | 'down') => {
     const updatedMessages = [...messages];
-    updatedMessages[index].feedback = feedback; // Update feedback for the message
+    updatedMessages[index].feedback = feedback;
     setMessages(updatedMessages);
 
-    // API call for feedback
-    await sendFeedbackApiCall({
-      message_id: messages[index].message_id!,
-      thread_id: threadId!,
-      feedback,
-    });
+    if (messages[index].message_id && threadId) {
+      try {
+        await sendFeedbackApiCall({
+          message_id: messages[index].message_id!,
+          thread_id: threadId,
+          feedback,
+        });
+      } catch (error) {
+        console.error('Failed to send feedback:', error);
+      }
+    }
   };
 
   return (
     <div className="chatbox">
-      <h2>Restoration Projects Chat!</h2>
-      <div className="chat-messages">
-        {messages.map((message, index) => (
-          <div key={index} className={`message-bubble ${message.sender}`}>
-            <ReactMarkdown>{message.text}</ReactMarkdown>
-            {message.sender === 'bot' && (
-              <div className="feedback-buttons">
-                <button 
-                  className={`thumb-button ${message.feedback === 'up' ? 'selected' : ''}`} 
-                  onClick={() => handleFeedback(index, 'up')}
-                >
-                  👍
-                </button>
-                <button 
-                  className={`thumb-button ${message.feedback === 'down' ? 'selected' : ''}`} 
-                  onClick={() => handleFeedback(index, 'down')}
-                >
-                  👎
-                </button>
+      {messages.length === 0 ? (
+        <div className="chat-welcome">
+          <h1>Aicacia Chat</h1>
+          <p>Ask me anything about environmental restoration projects!</p>
+        </div>
+      ) : (
+        <div className="chat-messages">
+          {messages.map((message, index) => (
+            <div key={index} className={`message-container ${message.sender}`}>
+              <div className="message-content">
+                <div className="message-bubble">
+                  <ReactMarkdown>{message.text}</ReactMarkdown>
+                </div>
+                {message.sender === 'agent' && message.message_id && (
+                  <div className="feedback-buttons">
+                    <button
+                      className={`thumb-button ${message.feedback === 'up' ? 'selected' : ''}`}
+                      onClick={() => handleFeedback(index, 'up')}
+                      title="Good response"
+                    >
+                      👍
+                    </button>
+                    <button
+                      className={`thumb-button ${message.feedback === 'down' ? 'selected' : ''}`}
+                      onClick={() => handleFeedback(index, 'down')}
+                      title="Bad response"
+                    >
+                      👎
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="input-bar">
-        <input
-          type="text"
-          placeholder="Type a message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleInputKeyPress}
-          className="input-field"
-        />
-      </div>
-      <div className={`loader-container ${loading ? 'show' : ''}`}>
-        <span className="loader-text">AI is thinking...</span>
+            </div>
+          ))}
+          {loading && (
+            <div className="message-container agent">
+              <div className="message-content">
+                <div className="message-bubble loading">
+                  <span className="loader-text">Thinking...</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+      )}
+
+      <div className="input-container">
+        <div className={`input-wrapper ${input.trim() ? 'has-text' : ''}`}>
+          <textarea
+            placeholder="Message Aicacia..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleInputKeyDown}
+            className="input-field"
+            rows={1}
+            disabled={loading}
+          />
+          <button
+            onClick={handleSendMessage}
+            className="send-button"
+            disabled={loading || !input.trim()}
+          >
+            ↑
+          </button>
+        </div>
       </div>
     </div>
   );

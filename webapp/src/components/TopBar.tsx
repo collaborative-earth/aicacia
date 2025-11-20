@@ -22,6 +22,7 @@ const TopBar: React.FC<TopBarProps> = ({ isLoggedIn, userInfo, onLogout }) => {
         <div className="top-bar-right">
           <nav className="top-bar-nav">
             <Link to="/" className="nav-link">Home</Link>
+            <Link to="/chat" className="nav-link">Chat</Link>
             {userInfo?.is_admin && (
               <Link to="/admin/feedbacks" className="nav-link admin-link">Admin Feedbacks</Link>
             )}

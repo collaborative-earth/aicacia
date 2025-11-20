@@ -177,3 +177,4 @@ class MetricsCalculator:
         
         return np.mean(average_precisions) if average_precisions else 0.0
 
+

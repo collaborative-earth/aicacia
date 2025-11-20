@@ -5,6 +5,7 @@ import Login from './components/Login';
 import QuestionSection from './components/QuestionSection';
 import QueryHistory from './components/QueryHistory';
 import AdminFeedbacks from './components/admin/AdminFeedbacks';
+import ChatPage from './components/ChatPage';
 import { getToken, removeToken } from './utils/tokens';
 import { getUserInfo } from './utils/api';
 import './App.css';
@@ -85,15 +86,19 @@ function App() {
                     </>
                   } 
                 />
-                <Route 
-                  path="/admin/feedbacks" 
+                <Route
+                  path="/chat"
+                  element={<ChatPage />}
+                />
+                <Route
+                  path="/admin/feedbacks"
                   element={
                     userInfo?.is_admin ? (
                       <AdminFeedbacks />
                     ) : (
                       <Navigate to="/" replace />
                     )
-                  } 
+                  }
                 />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </>
