@@ -19,13 +19,13 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
         "and the provided node context.\n\n"
         "### Instructions:\n"
         "1. **Generate a Query**: Based on the context, persona, ecological context, style, and length, create a question "
-        "that aligns with the persona's perspective and incorporates at least one among location, ecosystem, species, and challenge "
-        "from the ecological context. Formulate a question with analytical or actionable intent.\n"
+        "that aligns with the persona's intent, knowledge and terminology and incorporates at least one concept among location,"
+        "ecosystem, species, and challenge from the ecological context."
         "2. **Generate an Answer**: Using only the content from the provided context, construct a detailed answer "
         "to the query. Do not add any information not included in or inferable from the context.\n"
         "### Style\n"
-        "- Reduce lexical overlap of the query from the context whenever possible, while preserving meaning.\n"
-        "- Avoid **copying long sequences of words** from the context (no more than 3–4 consecutive identical words).\n"
+        "- Reduce lexical overlap of the query from the context whenever possible, while preserving meaning and persona terminology.\n"
+        "- Avoid **copying long sequences of words (>4)** from the context.\n"
         "- You may **paraphrase key terms** (e.g., 'drought' → 'water scarcity', 'restoration project' → 'rehabilitation effort') "
         "as long as the meaning remains faithful.\n"
         "- Formulate the question naturally using varied starters (How, What, Why, Which) depending on the persona."
@@ -38,37 +38,57 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
         (
             QueryConditionEco(
                 persona=Persona(
-                    name="Ecological practitioner",
-                    role_description="Focuses on ecological restoration and management practices."
+                    name="Quantitative Restoration Technician",
+                    role_description=(
+                        """
+                        Implements field measurements, remote-sensing analysis, and monitoring protocols. 
+                        Works with precise definitions, thresholds, and data-collection methodologies.
+                        Technical terminology, high technical knowledge, quantitative intent (numbers).
+                        """
+                    )
                 ),
                 ecocontext={
                     "locations": ["Amazon"],
                     "ecosystems": ["tropical dry forest"],
-                    "species": ["Caesalpinia ferrea"],
-                    "challenges": ["drought"]
+                    "species": [],
+                    "challenges": ["forest restoration"]
                 },
-                query_style="Web Search",
+                query_style="PERFECT_GRAMMAR",
                 query_length="Short",
                 context=(
-                    "In the Amazon rainforest, restoration efforts focus on replanting native tree species. "
-                    "Tropical dry forest areas in Brazil are particularly affected by drought, and projects "
-                    "often include Caesalpinia ferrea to improve ecosystem recovery."
+                    """
+                    Natural regeneration, if present in sufficient density, can restore forest cover on
+                    its own within a few years. As a general rule, in the humid tropics (e.g., Amazon), 800 well-distributed
+                    natural seedlings per hectare should be sufficient to achieve canopy cover within three
+                    years. In seasonally dry tropics, the minimum seedling density required range from 1 600
+                    per ha (to restore basic forest structure within five years) to 3 000 per ha (to initiate canopy
+                    closure within two years) without enrichment planting (see Elliott et al., Section 3.1). Such
+                    general guidelines should be communicated to practitioners to help improve restoration
+                    success.
+                    """
                 ),
             ),
             GeneratedQueryAnswer(
-                query="Strategies for planting tree species in Amazon",
+                query="At what density should I plant trees in a tropical forest restoration project?",
                 answer=(
-                    "For restoration in the tropical dry forests of the Amazon, species selection should include "
-                    "Caesalpinia ferrea to improve ecosystem recovery, "
-                    "while considering challenges such as drought."
+                    """
+                    Tree densities suitable for tropical forest restoration generally range from around 800 seedlings/ha 
+                    in humid regions to 1600–3000 seedlings/ha in seasonally dry areas, depending on how quickly canopy 
+                    closure is desired.
+                    """
                 ),
             )
         ),
         (
             QueryConditionEco(
                 persona=Persona(
-                    name="Forest restoration researcher",
-                    role_description="Studies post-fire forest recovery dynamics and reforestation strategies."
+                    name="Ecological Restoration Manager",
+                    role_description=(
+                        """
+                        Oversees planning, budgeting, and coordination of restoration projects. Focuses on practical outcomes (survival rates,
+                        landscape connectivity, intervention choices)and must balance ecological goals with logistical and financial constraints.
+                        Specific terminology, project designing intent, mid-high knowledge of whole restoration process."""
+                    )
                 ),
                 ecocontext={
                     "locations": ["Colorado", "Western United States"],
@@ -76,7 +96,7 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
                     "species": ["Pinus ponderosa", "Pseudotsuga menziesii"],
                     "challenges": ["wildfire", "climate change"]
                 },
-                query_style="Informative",
+                query_style="MISSPELLED",
                 query_length="Medium",
                 context=(
                     "Following severe wildfires in the montane forests of Colorado, large-scale replanting efforts "
@@ -87,7 +107,7 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
                 ),
             ),
             GeneratedQueryAnswer(
-                query="What are the best conditions for replanting forests after a fire in Colorado?",
+                query="What are the best conditions for replantng forests after a fire in Colrado?",
                 answer=(
                     "The best conditions for replanting forests after a fire typically include favorable weather, "
                     "careful selection of tree species suited to local montane environments such as Pinus ponderosa and "
@@ -97,6 +117,45 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
                 ),
                 ),
             ),
+        (
+            QueryConditionEco(
+                persona=Persona(
+                    name="Community Restoration Volunteer",
+                    role_description=(
+                    """
+                    Participates in hands-on restoration events. Asks about simple practices, why actions matter, and how to 
+                    avoid mistakes in the field. Informal terminology, low domain scientific knowledge, practical curiosity 
+                    (planting, maintenance)."""
+                    )
+                ),
+                ecocontext={
+                    "locations": [],
+                    "ecosystems": [],
+                    "species": ["roses"],
+                    "challenges": ["bare root planting"]
+                },
+                query_style="Web Search",
+                query_length="Short",
+                context=(
+                    """
+                    Bare root plants (like rose bushes) can be stored in a cool, dark place before planting. Some good options include:A garage or shed
+                    A basement or cellar An unheated room in your house A shady spot outdoors If you store your bare root plants in a cool,
+                    dark place, they will stay dormant and will not start to grow. This will give you time to plant them when the weather is
+                    right. Be sure to store in a dark location until you are ready to plant.When storing bare root plants, it is important 
+                    to keep the roots moist. You can do this by wrapping the roots in damp burlap or newspaper and placing them in a plastic 
+                    bag. Be sure to open the bag every few days to let in some fresh air.
+                    """
+                ),
+            ),
+            GeneratedQueryAnswer(
+                query="store bare root plants before planting”",
+                answer=(
+                        "Store bareroot plants in a cool, dark spot like a garage or shed, and keep the roots moist by wrapping "
+                        "them in damp burlap or newspaper inside a loose plastic bag. Open the bag every few days for air and plant "
+                        "them when conditions are right."
+                    ),
+                ),
+            )
 
     ]
     
