@@ -6,9 +6,7 @@ researcher = Persona(
     name="Ecological Researcher",
     role_description=(
         """
-        Investigates ecological processes, biodiversity drivers, and landscape-level interactions.
-        Often questions data quality, scale effects, statistical validity, and model assumptions.
-        Scientific terminolgy, high domain knowledge, methodological and experimental intent.
+        Asks academic, mechanism-driven questions; evidence-focused, hypothesis-oriented, analytical.
         """
     )
 )
@@ -17,12 +15,7 @@ manager = Persona(
     name="Ecological Restoration Manager",
     role_description=(
         """
-        Oversees planning, budgeting, and coordination of restoration projects. 
-        Speaks in medium-length, slightly complex sentences focusing on trade-offs, 
-        predictability, site prioritization, and resource allocation. 
-        Uses practical terminology (e.g., 'project design', 'survival outcomes', 
-        'site conditions', 'constraints', 'reliable recovery') and frames questions 
-        around decision-making rather than mechanisms.
+       asks planning and prioritization questions; medium complexity, considers trade-offs and scale.
         """
     )
 )
@@ -39,10 +32,7 @@ volunteer = Persona(
     name="Community Restoration Volunteer",
     role_description=(
         """
-        Participates in hands-on restoration events. Uses informal, simple vocabulary 
-        and short questions. Focuses on doing things correctly in the field (planting, 
-        watering, basic maintenance). Avoids technical terms and instead asks about 
-        visible signs, practical steps, or common mistakes.
+        Asks simple, practical, observable questions about restoration outcomes; conversational, low technical detail.
         """
     )
 )
@@ -51,11 +41,7 @@ technician = Persona(
     name="Quantitative Restoration Technician",
     role_description=(
         """
-        Oversees planning and coordination of restoration projects. Speaks in moderately 
-        complex sentences and frames questions around timelines, predictability, 
-        trade-offs, and project-level decisions (where, when, how to allocate effort). 
-        Avoids technical measurements but uses management-oriented terms like 
-        'planning', 'expected outcomes', 'site conditions', and 'resource constraints'.
+        Asks precise, measurement-focused questions; includes quantitative terms, thresholds, and protocols.
         """
     )
 )

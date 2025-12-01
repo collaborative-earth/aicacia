@@ -99,50 +99,24 @@ class QueryAnswerGenerationPromptMultiEco(PydanticPrompt[QueryConditions, Genera
     
 class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, GeneratedQueryAnswer]):
     instruction: str = ("""
-        Generate a query and answer based on the persona, ecological context, and provided context.
-        
-        ### Core Rule: Each persona asks fundamentally different questions
-        Example of context: Soil reclamation after surface mining in southeastern United States; soil quality indicators
-        (aggregate stability, total C, organic C, microbial  biomass C) improve over time, reaching levels similar 
-        to undisturbed soil within 7–12 years.
-        
-        **Community Restoration Volunteer**
-        - Ask about: observable outcomes, practical actions, what they'll see/do
-        - Language: simple, conversational, no jargon
-        - Never ask about: costs, technical specs, study methods
-        - Example query : "How long before the soil feels healthy again after mining?"
-        
-        **Ecological Restoration Manager**
-        - Ask about: planning, site selection, resource trade-offs, timelines
-        - Language: professional, decision-focused
-        - Never ask about: detailed measurements, volunteer tasks, pure mechanisms
-        - Example query: "What timeline should we plan for soil recovery when budgeting a mine reclamation project in Mississippi?"
-        
-        **Quantitative Restoration Technician**
-        - Ask about: measurements, protocols, specifications, thresholds
-        - Language: precise technical terms with units
-        - Never ask about: budgets, why something works, general factors
-        - Example query : "What are the measured changes in aggregate stability, total C, organic C, and microbial biomass C over a 12-year reclamation chronosequence?"
-        
-        **Ecological Researcher**
-        - Ask about: mechanisms, evidence, causation, patterns
-        - Language: academic, hypothesis-focused
-        - Never ask about: implementation, costs, field procedures
-        - Example query:"What evidence indicates that reclamation practices successfully restore soil functionality to 
-        premining conditions in southeastern US ecosystems?"
-        
-        ### Process
-        1. Identify what THIS persona cares about in the context
-        2. Generate a query using appropriate vocabulary and focus
-        3. Generate an answer matching persona's knowledge level
-        4. Check: Would another persona ask this? If yes → revise
+        **Instructions:**\n
+        Generate **one single-hop query** and its **answer** based strictly on the provided context. The query must follow the persona, style, and length specified,
+        Ensure the answer is entirely faithful to the context, using only the information directly from the provided context.\n
+        \n
+       ### Requirements\n
+        1. **Query:**\n
+        - Must align with the persona perspective.\n
+        - Include at least one ecological element from the context.\n
+        - Match the specified style and length.\n
+        - Each persona asks a fundamentally different type of question.\n
+        - Generate the question first based on persona and ecological context.\n
+        - If style is WEB_SEARCH, remove some words (and, for, which, what).\n
+        - If style is MISSPELLED, introduce spelling errors (remove letters inside the word, exchange them).\n
+        2. **Answer:**\n
+        - Must be entirely faithful to the provided context.\n
+        - Do **not** add any external information.\n
+        - Be detailed and self-contained.\n
 
-        ### Requirements
-        - Include ≥1 element from ecocontext (location, ecosystem, species, challenge)
-        - Match query_style: PERFECT_GRAMMAR, CONVERSATIONAL, MISSPELLED, Web Search
-        - Match query_length: Short (<15 words), Medium (15-30), Long (>30)
-        - Avoid long lexical overlap
-        - Do not add any information not included in or inferable from the context.
         """
 
     )
@@ -295,40 +269,6 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
                 answer=(
                     "Keep bare root roses in a cool, dark spot like a garage or basement. Wrap the roots in damp burlap "
                     "or newspaper inside a loose plastic bag, and open it every few days for air. Plant when conditions are right."
-                ),
-            ),
-        ),
-        
-        # Example 5: Soil sampling - showing correct differentiation
-        (
-            QueryConditionEco(
-                persona=Persona(
-                    name="Community Restoration Volunteer",
-                    role_description=(
-                        "Hands-on participant with limited technical background. Asks about observable outcomes "
-                        "and practical actions. Uses simple, conversational language."
-                    )
-                ),
-                ecocontext={
-                    "locations": ["Mississippi"],
-                    "ecosystems": ["forest"],
-                    "species": [],
-                    "challenges": ["mine reclamation"]
-                },
-                query_style="CONVERSATIONAL",
-                query_length="Short",
-                context=(
-                    "In the forest ecosystem, all sites were hilly, so soil samples were collected at the 0- to 15-cm "
-                    "and the 15- to 30-cm depths from three landscape positions, the summit, the shoulder, and the foot-slope, "
-                    "in each site to examine landscape position effect on reclaimed soil properties. In contrast, the grass cover "
-                    "ecosystem site was level, so grass cover ecosystem soil samples represented one landscape position."
-                ),
-            ),
-            GeneratedQueryAnswer(
-                query="Why do we check soil at different spots on the hill?",
-                answer=(
-                    "The top, middle, and bottom of a hill have different conditions that affect how soil recovers "
-                    "after mining. Testing each spot shows where restoration is working best."
                 ),
             ),
         ),
