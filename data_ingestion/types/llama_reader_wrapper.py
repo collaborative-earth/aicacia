@@ -4,14 +4,14 @@ import fsspec
 from llama_index.core.readers.base import BaseReader
 from llama_index.core.schema import Document
 
-from data_ingestion.parsing.doc_loaders import DocumentLoader
+from data_ingestion.parsing.document_loaders import BaseFileDocument
 
 
-# TODO: make it generic
+# TODO: make it generic!
 class LlamaReaderWrapper(BaseReader):
-    def __init__(self, file_loader_cls: Type[DocumentLoader]) -> None:
+    def __init__(self, file_loader_cls: Type[BaseFileDocument]) -> None:
         super().__init__()
-        self.file_loader_cls: Type[DocumentLoader] = file_loader_cls
+        self.file_loader_cls: Type[BaseFileDocument] = file_loader_cls
 
     def load_data(
             self,

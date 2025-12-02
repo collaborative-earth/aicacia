@@ -1,17 +1,19 @@
+# Reference: Logic taken from _build_combined_text and _build_metadata in GrobidReader
 from typing import List, Dict, Any
 
-from data_ingestion.parsing.doc_loaders import DocumentLoader
+from data_ingestion.parsing.document_loaders import BaseFileDocument
 from data_ingestion.types.tei_document import TEIDocument
 
 
-class TEIDocumentLoader(DocumentLoader):
+class TEIFileDocument(BaseFileDocument):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
-        self.tei_object: TEIDocument = TEIDocument(content=self.content)
+        # TODO: double check scenarios where content is None. Lazy load content?
+        if self.content:
+            self.tei_object: TEIDocument = TEIDocument(content=self.content)
 
     def get_textual_repr(self) -> str:
-        # Reference: Taken from _build_combined_text from grobid_reader.py
         parts: List[str] = []
         if self.tei_object.title:
             parts.append(f"Title: {self.tei_object.title}\n")

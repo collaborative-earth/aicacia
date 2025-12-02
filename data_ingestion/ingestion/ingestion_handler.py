@@ -1,14 +1,10 @@
-from typing import Sequence, Optional
+from typing import Sequence
 
 import fsspec
-import fsspec.utils
 from llama_index.core.readers import SimpleDirectoryReader
 from llama_index.core.schema import Document
-from core.db_manager import db_manager
-from core.app_config import configs
-from data_ingestion.parsing.doc_loaders.tei_doc_loader import TEIDocumentLoader
+from data_ingestion.parsing.document_loaders.tei_file_document import TEIFileDocument
 from data_ingestion.types.llama_reader_wrapper import LlamaReaderWrapper
-from fsspec.implementations.local import LocalFileSystem
 
 
 class IngestionHandler():
@@ -23,7 +19,7 @@ class IngestionHandler():
         directoryReader = SimpleDirectoryReader(
             input_files=filepaths,
             file_extractor={
-                ".xml": LlamaReaderWrapper(TEIDocumentLoader)
+                ".xml": LlamaReaderWrapper(TEIFileDocument)
             },
             fs=self.source_fs
         )
@@ -39,23 +35,3 @@ class IngestionHandler():
 
         for doc in documents:
             print(f"--- Document text: {doc.text} ---")
-
-
-if __name__ == '__main__':
-    print("In IngestionHandler main!")
-
-    # Configure parameters
-    local_folder: str = configs.TMP_LOCAL_FOLDER
-    source_fs = fsspec.filesystem(configs.SOURCE_FILESYSTEM)  # 's3' or 'file' for local filesystem
-
-    ingestion_handler = IngestionHandler(source_fs=source_fs)
-
-    filepaths = [
-        filepath.removeprefix("s3://")  # TODO: ensure proper path handling
-        for filepath in db_manager.get_ready_to_ingest_files()
-    ]
-
-    documents = ingestion_handler.get_documents_from_filepaths(filepaths)
-
-    for doc in documents:
-        print(f"--- Document length: {len(doc.text)} and metadata: {doc.metadata} ---")

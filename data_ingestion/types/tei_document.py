@@ -1,7 +1,7 @@
-# Reference: Taken from grobid_reader.py
+# Reference: Combined from files in extraction.src.aicacia_extraction.grobid
 from bs4 import BeautifulSoup
 from functools import cached_property
-from typing import Optional, TextIO
+from typing import Optional
 
 from dataclasses import dataclass
 from enum import Enum
