@@ -4,15 +4,189 @@ from ragas.prompt import PydanticPrompt
 from ragas.testset.persona import Persona
 from ragas.testset.synthesizers.single_hop.prompts import GeneratedQueryAnswer
 from ragas.testset.synthesizers.multi_hop.prompts import QueryConditions
+from ragas_ext.utils.eco_personas import *
 
 class QueryConditionEco(BaseModel):
     persona: Persona
-    ecocontext: t.Dict[str, t.List[str]]
+    ecothemes: t.Dict[str, t.List[str]]
+    concept : str
     query_style: str
     query_length: str
     context: str
+    
 
+class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, GeneratedQueryAnswer]):
+    instruction: str = ("""
+            Generate a single-hop query and its answer using only the provided context.
+            You must strictly follow all the constraints below.
+            ────────────────────────────────────────
+            1. PERSONA: style, vocabulary, perspective
+            ────────────────────────────────────────
+            Write the query exactly as this persona would:
+            - Volunteer → informal, friendly, very simple words, no technical and scientifical phrasing.
+            - Manager → planning-oriented, decision-focused, mentions priorities, constraints and strategy.
+            - Technician → quantitative, mentions thresholds, values, metrics.
+            - Researcher → analytical, causal, comparative, evidence-based wording.
+            ────────────────────────────────────────
+            2. CONCEPT + ECOTHEMES
+            ────────────────────────────────────────
+            Your query must:
+            - Center on the given concept, but might paraphrise.
+            - Include at least one ecological theme (locations, ecosystems, species, or challenges).
+            - Avoid copying more than 3–4 words from the context.
+            ────────────────────────────────────────
+            3. QUERY STYLE AND LENGTH
+            ────────────────────────────────────────
+            After generating the query, adjust it if necessary so that both style and length constraints 
+            are satisfied exactly.
+            `query_style`:
+            - If WEB_SEARCH → keyword-like query; remove function words (the, for, and, which, how, etc.).
+            - If MISSPELLED → include natural misspellings, swap close letters, miss ones; sentence still understandable.
+            - If PERFECT_GRAMMAR → fully standard grammar, formal.
+            `query_length`:
+            - Short → fewer than 10 words.
+            - Medium → 10–20 words.
+            - Long → 20–30 words.
+            ────────────────────────────────────────
+            4. ANSWER
+            ────────────────────────────────────────
+            Generate an answer that:
+            - Uses only the information from the context.
+            - Contains no external knowledge.
+            - Is concise, factual, and consistent with the context.
 
+            """
+    )
+
+    input_model: t.Type[QueryConditionEco] = QueryConditionEco
+    output_model: t.Type[GeneratedQueryAnswer] = GeneratedQueryAnswer
+
+    examples: t.List[t.Tuple[QueryConditionEco, GeneratedQueryAnswer]] = [
+        # Example 1: Technical context about tree planting density
+        (
+            QueryConditionEco(
+                persona=technician,
+                ecothemes={
+                    "locations": ["Amazon"],
+                    "ecosystems": ["tropical dry forest"],
+                    "species": [],
+                    "challenges": ["forest restoration"]
+                },
+                concept = "seedling density",
+                query_style="PERFECT_GRAMMAR",
+                query_length="Medium",
+                context=(
+                    "Natural regeneration, if present in sufficient density, can restore forest cover on "
+                    "its own within a few years. As a general rule, in the humid tropics (e.g., Amazon), 800 well-distributed "
+                    "natural seedlings per hectare should be sufficient to achieve canopy cover within three "
+                    "years. In seasonally dry tropics, the minimum seedling density required range from 1 600 "
+                    "per ha (to restore basic forest structure within five years) to 3 000 per ha (to initiate canopy "
+                    "closure within two years) without enrichment planting."
+                ),
+            ),
+            GeneratedQueryAnswer(
+                query="What seedling density thresholds are needed for canopy closure in tropical dry forest restoration?",
+                answer=(
+                    "In seasonally dry tropics, minimum densities range from 1,600 seedlings/ha for basic forest "
+                    "structure within five years to 3,000 seedlings/ha for canopy closure within two years. "
+                    "Humid tropical regions require approximately 800 well-distributed seedlings/ha to achieve "
+                    "canopy cover in three years."
+                ),
+            )
+        ),
+        
+        # Example 2: Same context, different persona
+        (
+            QueryConditionEco(
+                persona=volunteer,
+                ecothemes={
+                    "locations": ["Amazon"],
+                    "ecosystems": ["tropical forest"],
+                    "species": [],
+                    "challenges": ["reforestation"]
+                },
+                concept = "forest regeneration",
+                query_style="CONVERSATIONAL",
+                query_length="Short",
+                context=(
+                    "Natural regeneration, if present in sufficient density, can restore forest cover on "
+                    "its own within a few years. As a general rule, in the humid tropics (e.g., Amazon), 800 well-distributed "
+                    "natural seedlings per hectare should be sufficient to achieve canopy cover within three "
+                    "years. In seasonally dry tropics, the minimum seedling density required range from 1 600 "
+                    "per ha (to restore basic forest structure within five years) to 3 000 per ha (to initiate canopy "
+                    "closure within two years) without enrichment planting."
+                ),
+            ),
+            GeneratedQueryAnswer(
+                query="Can the forest grow back on its own without us planting trees?",
+                answer=(
+                    "Yes, if there are enough young trees already growing naturally (at least a few per small area), "
+                    "the forest can recover by itself within a few years. Otherwise, you'll need to plant to help it along."
+                ),
+            )
+        ),
+        
+        # Example 3: Wildfire context with Manager persona
+        (
+            QueryConditionEco(
+                persona= manager,
+                ecothemes={
+                    "locations": ["Colorado"],
+                    "ecosystems": ["montane forest"],
+                    "species": ["Pinus ponderosa"],
+                    "challenges": ["wildfire", "replanting"]
+                },
+                concept = "site prioritization",
+                query_style="MISSPELLED",
+                query_length="Medium",
+                context=(
+                    "Following severe wildfires in the montane forests of Colorado, large-scale replanting efforts "
+                    "are underway to restore forest cover. Research indicates that seedling survival after the first "
+                    "growing season is highly variable and influenced by factors such as long-term climate, "
+                    "post-planting weather conditions, species selection, and seed source location. "
+                    "Topography, time since fire, and fire severity also play important roles in determining outcomes."
+                ),
+            ),
+            GeneratedQueryAnswer(
+                query="What factors should guide our site prioritization when plannig ponderosa pine replanting after wildifre in Colorado?",
+                answer=(
+                    "Survival depends on long-term climate patterns, topography, fire severity, and seed source matching. "
+                    "Sites with favorable climate, appropriate topography, and moderate burn severity will likely show "
+                    "better establishment. Time since fire also matters, so prioritize sites where these factors align "
+                    "with available resources."
+                ),
+            ),
+        ),
+        
+        # Example 4: Bare root planting for Volunteer with web search style
+        (
+            QueryConditionEco(
+                persona=volunteer,
+                ecothemes={
+                    "locations": [],
+                    "ecosystems": [],
+                    "species": ["roses"],
+                    "challenges": ["bare root planting"]
+                },
+                concept = "bare root storage",
+                query_style="Web Search",
+                query_length="Short",
+                context=(
+                    "Bare root plants (like rose bushes) can be stored in a cool, dark place before planting. Some good options include: "
+                    "A garage or shed, a basement or cellar, an unheated room, or a shady spot outdoors. Store in a dark location "
+                    "until you are ready to plant. When storing bare root plants, keep the roots moist by wrapping them in damp "
+                    "burlap or newspaper and placing them in a plastic bag. Open the bag every few days to let in fresh air."
+                ),
+            ),
+            GeneratedQueryAnswer(
+                query="bare root rose storage before planting",
+                answer=(
+                    "Keep bare root roses in a cool, dark spot like a garage or basement. Wrap the roots in damp burlap "
+                    "or newspaper inside a loose plastic bag, and open it every few days for air. Plant when conditions are right."
+                ),
+            ),
+        ),
+    ]
     
 class QueryAnswerGenerationPromptMultiEco(PydanticPrompt[QueryConditions, GeneratedQueryAnswer]):
     instruction: str = (
@@ -97,179 +271,3 @@ class QueryAnswerGenerationPromptMultiEco(PydanticPrompt[QueryConditions, Genera
     ]
     
     
-class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, GeneratedQueryAnswer]):
-    instruction: str = ("""
-        **Instructions:**\n
-        Generate **one single-hop query** and its **answer** based strictly on the provided context. The query must follow the persona, style, and length specified,
-        Ensure the answer is entirely faithful to the context, using only the information directly from the provided context.\n
-        \n
-       ### Requirements\n
-        1. **Query:**\n
-        - Must align with the persona perspective.\n
-        - Include at least one ecological element from the context.\n
-        - Match the specified style and length.\n
-        - Each persona asks a fundamentally different type of question.\n
-        - Generate the question first based on persona and ecological context.\n
-        - If style is WEB_SEARCH, remove some words (and, for, which, what).\n
-        - If style is MISSPELLED, introduce spelling errors (remove letters inside the word, exchange them).\n
-        2. **Answer:**\n
-        - Must be entirely faithful to the provided context.\n
-        - Do **not** add any external information.\n
-        - Be detailed and self-contained.\n
-
-        """
-
-    )
-
-    input_model: t.Type[QueryConditionEco] = QueryConditionEco
-    output_model: t.Type[GeneratedQueryAnswer] = GeneratedQueryAnswer
-
-    examples: t.List[t.Tuple[QueryConditionEco, GeneratedQueryAnswer]] = [
-        # Example 1: Technical context about tree planting density
-        (
-            QueryConditionEco(
-                persona=Persona(
-                    name="Quantitative Restoration Technician",
-                    role_description=(
-                        "Implements field measurements, remote-sensing analysis, and monitoring protocols. "
-                        "Works with precise definitions, thresholds, and data-collection methodologies. "
-                        "Technical terminology, high technical knowledge, quantitative intent."
-                    )
-                ),
-                ecocontext={
-                    "locations": ["Amazon"],
-                    "ecosystems": ["tropical dry forest"],
-                    "species": [],
-                    "challenges": ["forest restoration"]
-                },
-                query_style="PERFECT_GRAMMAR",
-                query_length="Medium",
-                context=(
-                    "Natural regeneration, if present in sufficient density, can restore forest cover on "
-                    "its own within a few years. As a general rule, in the humid tropics (e.g., Amazon), 800 well-distributed "
-                    "natural seedlings per hectare should be sufficient to achieve canopy cover within three "
-                    "years. In seasonally dry tropics, the minimum seedling density required range from 1 600 "
-                    "per ha (to restore basic forest structure within five years) to 3 000 per ha (to initiate canopy "
-                    "closure within two years) without enrichment planting."
-                ),
-            ),
-            GeneratedQueryAnswer(
-                query="What seedling density thresholds are needed for canopy closure in tropical dry forest restoration?",
-                answer=(
-                    "In seasonally dry tropics, minimum densities range from 1,600 seedlings/ha for basic forest "
-                    "structure within five years to 3,000 seedlings/ha for canopy closure within two years. "
-                    "Humid tropical regions require approximately 800 well-distributed seedlings/ha to achieve "
-                    "canopy cover in three years."
-                ),
-            )
-        ),
-        
-        # Example 2: Same context, different persona
-        (
-            QueryConditionEco(
-                persona=Persona(
-                    name="Community Restoration Volunteer",
-                    role_description=(
-                        "Participates in hands-on restoration events. Asks about simple practices, why actions matter, "
-                        "and how to avoid mistakes in the field. Informal terminology, low domain scientific knowledge, "
-                        "practical curiosity."
-                    )
-                ),
-                ecocontext={
-                    "locations": ["Amazon"],
-                    "ecosystems": ["tropical forest"],
-                    "species": [],
-                    "challenges": ["reforestation"]
-                },
-                query_style="CONVERSATIONAL",
-                query_length="Short",
-                context=(
-                    "Natural regeneration, if present in sufficient density, can restore forest cover on "
-                    "its own within a few years. As a general rule, in the humid tropics (e.g., Amazon), 800 well-distributed "
-                    "natural seedlings per hectare should be sufficient to achieve canopy cover within three "
-                    "years. In seasonally dry tropics, the minimum seedling density required range from 1 600 "
-                    "per ha (to restore basic forest structure within five years) to 3 000 per ha (to initiate canopy "
-                    "closure within two years) without enrichment planting."
-                ),
-            ),
-            GeneratedQueryAnswer(
-                query="Can the forest grow back on its own without us planting trees?",
-                answer=(
-                    "Yes, if there are enough young trees already growing naturally (at least a few per small area), "
-                    "the forest can recover by itself within a few years. Otherwise, you'll need to plant to help it along."
-                ),
-            )
-        ),
-        
-        # Example 3: Wildfire context with Manager persona
-        (
-            QueryConditionEco(
-                persona=Persona(
-                    name="Ecological Restoration Manager",
-                    role_description=(
-                        "Oversees planning, budgeting, and coordination of restoration projects. "
-                        "Speaks in medium-length, slightly complex sentences focusing on trade-offs, "
-                        "predictability, site prioritization, and resource allocation."
-                    )
-                ),
-                ecocontext={
-                    "locations": ["Colorado"],
-                    "ecosystems": ["montane forest"],
-                    "species": ["Pinus ponderosa"],
-                    "challenges": ["wildfire", "replanting"]
-                },
-                query_style="MISSPELLED",
-                query_length="Medium",
-                context=(
-                    "Following severe wildfires in the montane forests of Colorado, large-scale replanting efforts "
-                    "are underway to restore forest cover. Research indicates that seedling survival after the first "
-                    "growing season is highly variable and influenced by factors such as long-term climate, "
-                    "post-planting weather conditions, species selection, and seed source location. "
-                    "Topography, time since fire, and fire severity also play important roles in determining outcomes."
-                ),
-            ),
-            GeneratedQueryAnswer(
-                query="What factors should guide our site prioritization when plannig ponderosa pine replanting after wildifre in Colorado?",
-                answer=(
-                    "Survival depends on long-term climate patterns, topography, fire severity, and seed source matching. "
-                    "Sites with favorable climate, appropriate topography, and moderate burn severity will likely show "
-                    "better establishment. Time since fire also matters, so prioritize sites where these factors align "
-                    "with available resources."
-                ),
-            ),
-        ),
-        
-        # Example 4: Bare root planting for Volunteer with web search style
-        (
-            QueryConditionEco(
-                persona=Persona(
-                    name="Community Restoration Volunteer",
-                    role_description=(
-                        "Participates in hands-on restoration events. Asks about simple practices, why actions matter, "
-                        "and how to avoid mistakes. Informal terminology, low scientific knowledge, practical curiosity."
-                    )
-                ),
-                ecocontext={
-                    "locations": [],
-                    "ecosystems": [],
-                    "species": ["roses"],
-                    "challenges": ["bare root planting"]
-                },
-                query_style="Web Search",
-                query_length="Short",
-                context=(
-                    "Bare root plants (like rose bushes) can be stored in a cool, dark place before planting. Some good options include: "
-                    "A garage or shed, a basement or cellar, an unheated room, or a shady spot outdoors. Store in a dark location "
-                    "until you are ready to plant. When storing bare root plants, keep the roots moist by wrapping them in damp "
-                    "burlap or newspaper and placing them in a plastic bag. Open the bag every few days to let in fresh air."
-                ),
-            ),
-            GeneratedQueryAnswer(
-                query="bare root rose storage before planting",
-                answer=(
-                    "Keep bare root roses in a cool, dark spot like a garage or basement. Wrap the roots in damp burlap "
-                    "or newspaper inside a loose plastic bag, and open it every few days for air. Plant when conditions are right."
-                ),
-            ),
-        ),
-    ]

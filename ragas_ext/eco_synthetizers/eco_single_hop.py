@@ -28,10 +28,11 @@ class SingleHopScenario_eco(BaseScenario):
         The theme of the query.
     """
 
-    ecocontext: t.Dict[str, t.List[str]]
-
+    ecothemes: t.Dict[str, t.List[str]]
+    concept: str
+    
     def __repr__(self) -> str:
-        return f"SingleHopScenario(\nnodes={len(self.nodes)}\necocontext={self.ecocontext}\npersona={self.persona}\nstyle={self.style}\nlength={self.length})"
+        return f"SingleHopScenario(\nnodes={len(self.nodes)}\necothemes={self.ecothemes}\npersona={self.persona}\nstyle={self.style}\nlength={self.length})"
 
 
 class SingleHopScenarioEco(BaseSynthesizer[Scenario]):
@@ -41,7 +42,8 @@ class SingleHopScenarioEco(BaseSynthesizer[Scenario]):
     def prepare_combinations(
         self,
         node: Node,
-        ecocontext: t.Dict[str, t.List[str]],
+        ecothemes: t.Dict[str, t.List[str]],
+        themes: t.List[str],
         personas: t.List[Persona],
     ) -> t.List[t.Dict[str, t.Any]]:
         """
@@ -51,50 +53,49 @@ class SingleHopScenarioEco(BaseSynthesizer[Scenario]):
         all_samples = []
 
         # generate all combinations of context terms (one from each category)
-        locations = ecocontext.get("locations", [""]) + [""]
-        ecosystems = ecocontext.get("ecosystems", [""]) + [""]
-        species = ecocontext.get("species", [""])+ [""]
-        challenges = ecocontext.get("challenges", [""])+ [""]
+        locations = ecothemes.get("locations", [""]) + [""]
+        ecosystems = ecothemes.get("ecosystems", [""]) + [""]
+        species = ecothemes.get("species", [""])+ [""]
+        challenges = ecothemes.get("challenges", [""])+ [""]
 
-        for loc in locations:
-            for eco in ecosystems:
-                for sp in species:
-                    for ch in challenges:
-                        for persona_name in personas:
-                            all_samples.append(
-                                {
-                                    "node": node,
-                                    "persona": persona_name,
-                                    "location": loc,
-                                    "ecosystem": eco,
-                                    "specie": sp,
-                                    "challenge": ch,
-                                    "styles": list(QueryStyle),
-                                    "lengths": list(QueryLength),
-                                }
-                            )
+        for persona_name in personas:
+                all_samples.append(
+                    {
+                        "node": node,
+                        "persona": persona_name,
+                        "locations": locations,
+                        "ecosystems": ecosystems,
+                        "species": species,
+                        "challenges": challenges,
+                        "themes" : themes,
+                        "styles": list(QueryStyle),
+                        "lengths": list(QueryLength),
+                        
+                    }
+                )
         return all_samples
 
     def sample_combinations(self, data: t.List[t.Dict[str, t.Any]], num_samples: int):
         selected_samples = []
-
         all_combinations = []
         for entry in data:
             node = entry["node"]
             for style in entry["styles"]:
                 for length in entry["lengths"]:
-                    all_combinations.append(
-                        {
-                            "node": node,
-                            "persona": entry["persona"],
-                            "location": entry["location"],
-                            "ecosystem": entry["ecosystem"],
-                            "specie": entry["specie"],
-                            "challenge": entry["challenge"],
-                            "style": style,
-                            "length": length,
-                        }
-                    )
+                    for theme in entry["themes"]:
+                        all_combinations.append(
+                            {
+                                "node": node,
+                                "persona": entry["persona"],
+                                "locations": entry["locations"],
+                                "ecosystems": entry["ecosystems"],
+                                "species": entry["species"],
+                                "challenges": entry["challenges"],
+                                "theme": theme,
+                                "style": style,
+                                "length": length,
+                            }
+                        )
 
         random.shuffle(all_combinations)
         for sample in all_combinations:
@@ -107,16 +108,18 @@ class SingleHopScenarioEco(BaseSynthesizer[Scenario]):
     def convert_to_scenario(self, data: t.Dict[str, t.Any]) -> SingleHopScenario_eco:
         return SingleHopScenario_eco(
             nodes=[data["node"]],
-            ecocontext={
-                "location": [data.get("location", "")],
-                "ecosystem": [data.get("ecosystem", "")],
-                "specie": [data.get("specie", "")],
-                "challenge": [data.get("challenge", "")],
+            ecothemes={
+                "locations": data.get("locations", [""]),
+                "ecosystems": data.get("ecosystems", [""]),
+                "species": data.get("species", [""]),
+                "challenges": data.get("challenge", [""]),
             },
+            concept = data["theme"],
             persona=data["persona"],
             style=data["style"],
             length=data["length"],
         )
+        
     async def _generate_scenarios(self, n, knowledge_graph, persona_list, callbacks):
 
         property_name = "ecocontext"
@@ -131,10 +134,12 @@ class SingleHopScenarioEco(BaseSynthesizer[Scenario]):
         for node in nodes:
             if len(scenarios) >= n:
                 break
-            ecocontext = node.properties.get(property_name, [""])
+            ecothemes = node.properties.get(property_name, [""])
+            themes = node.properties.get("themes", [])
             base_scenarios = self.prepare_combinations(
                 node,
-                ecocontext,
+                ecothemes,
+                themes,
                 personas=persona_list,
             )
             scenarios.extend(
@@ -147,11 +152,12 @@ class SingleHopScenarioEco(BaseSynthesizer[Scenario]):
         self, scenario: Scenario, callbacks: Callbacks
     ) -> SingleTurnSample:
         if not isinstance(scenario, SingleHopScenario_eco):
-            raise TypeError("scenario type should be SingleHopScenario with ecocontext")
+            raise TypeError("scenario type should be SingleHopScenario with ecothemes")
         reference_context = scenario.nodes[0].properties.get("page_content", "")
         prompt_input = QueryConditionEco(
             persona=scenario.persona,
-            ecocontext=scenario.ecocontext,
+            ecothemes=scenario.ecothemes,
+            concept = scenario.concept,
             context=reference_context,
             query_length=scenario.length.value,
             query_style=scenario.style.value,
