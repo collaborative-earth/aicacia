@@ -17,7 +17,7 @@ class AppConfig:
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "aicacia")
 
     # Filesystem configuration
-    SOURCE_FILESYSTEM: str = os.getenv("SOURCE_FILESYSTEM", "s3")  # Options: local | s3 | etc.
+    SOURCE_FILESYSTEM: str = os.getenv("SOURCE_FILESYSTEM", "s3")    # Options: local | s3 | etc.
     TMP_LOCAL_FOLDER: str = os.path.join(CWD, os.getenv("TMP_LOCAL_FOLDER", "data/tmp"))
     PARSED_OUTPUTS_FOLDER: str = os.getenv("PARSED_OUTPUTS_FOLDER", "data/parsed_outputs")
     # Grobid
@@ -34,6 +34,7 @@ class AppConfig:
     QDRANT_COLLECTION: str = os.getenv("QDRANT_COLLECTION", "aicacia")
 
     # Model configuration
+    # TODO: separate configs into proper .env and config.yml depending on usage.
     EMBEDDING_MODEL_NAME: str = os.getenv("EMBEDDING_MODEL_NAME", "BAAI/bge-m3")
 
     @classmethod
@@ -44,6 +45,11 @@ class AppConfig:
             f"@{cls.POSTGRES_HOST}:{cls.POSTGRES_PORT}/{cls.POSTGRES_DB}"
         )
 
+    # def _load_config(file_path: str):
+    #     with open(file_path, 'r') as file:
+    #         return yaml.safe_load(file)
 
+
+# TODO: Instance not needed
 # Create a singleton instance for easy access
 configs = AppConfig()

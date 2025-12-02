@@ -1,19 +1,10 @@
 from typing import Sequence
 from pathlib import Path
-from data_ingestion.parsing.types import AbstractParser, ParsedFile
+from data_ingestion.parsing.doc_loaders.tei_doc_loader import TEIDocumentLoader
+from data_ingestion.parsing.parsers.abstract_parser import AbstractParser
 from grobid_client.grobid_client import GrobidClient
 
 from core.app_config import configs
-
-
-class GrobidTEIParsedFile(ParsedFile):
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
-        self.metadata['parser'] = 'grobid_tei_parser'
-
-    @classmethod
-    def from_filepath(cls, filepath: str) -> "GrobidTEIParsedFile":
-        return cls()
 
 
 class GrobidParser(AbstractParser):
@@ -43,7 +34,7 @@ class GrobidParser(AbstractParser):
 
     def parse_files(
             self, filepaths: list[str]
-    ) -> Sequence[GrobidTEIParsedFile]:
+    ) -> Sequence[TEIDocumentLoader]:
         """Parse multiple files using GROBID's batch processing.
         Args:
             filepaths: Sequence of file paths to parse.
@@ -72,9 +63,9 @@ class GrobidParser(AbstractParser):
             for fp in filepaths
         )
         return [
-            GrobidTEIParsedFile(
+            TEIDocumentLoader(
                 filepath=str(output_filepath),
-                metadata={'source_filepath': str(filepaths[i])}
+                metadata={'source_filepath': str(filepaths[i]), 'parser': 'grobid_tei_parser'}
             )
             for i, output_filepath in enumerate(output_filepaths) if output_filepath.exists()
         ]
