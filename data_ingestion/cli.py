@@ -1,5 +1,6 @@
 
 import fsspec
+import logging
 
 from core.app_config import configs
 from core.db_manager import db_manager
@@ -7,6 +8,9 @@ from core.fs_manager import fs_manager
 from data_ingestion.parsing.parsing_handler import ParsingHandler
 from data_ingestion.ingestion.ingestion_handler import IngestionHandler
 from data_ingestion.parsing.parsers.grobid_parser import GrobidParser
+
+
+logger = logging.getLogger(__name__)
 
 
 def test_parsing(dry_run: bool = True) -> None:
@@ -31,7 +35,7 @@ def test_parsing(dry_run: bool = True) -> None:
         uploaded_paths = parsing_handler.parse_and_upload(filepaths, dest_dir=dest_dir) 
 
         for uploaded_path in uploaded_paths:
-            print(uploaded_path)
+            logger.info(uploaded_path)
 
 
 def test_ingestion(dry_run: bool = True) -> None:
@@ -46,10 +50,10 @@ def test_ingestion(dry_run: bool = True) -> None:
         for filepath in db_manager.get_ready_to_ingest_files()
     ]
 
-    documents = ingestion_handler.get_documents_from_filepaths(filepaths)
+    documents = ingestion_handler.get_documents_from_files(filepaths)
 
     for doc in documents:
-        print(f"--- Document length: {len(doc.text)} and metadata: {doc.metadata} ---")
+        logger.info(f"--- Document length: {len(doc.text)} and metadata: {doc.metadata} ---")
 
 
 # test_db_connection, test_s3_connection ?
@@ -57,6 +61,6 @@ def test_ingestion(dry_run: bool = True) -> None:
 
 # TODO: Create CLI.. WIP
 if __name__ == "__main__":
-    print("In the CLI!")
-    # test_parsing(dry_run=False) # dry-run should get you till parsing, but no uploads
-    test_ingestion(dry_run=True)  # dry-run should get you till the nodes, but no side-effects
+    logger.info("In the CLI!")
+    test_parsing(dry_run=False)  # dry-run should get you till parsing, but no uploads
+    # test_ingestion(dry_run=True)  # dry-run should get you till the nodes, but no side-effects

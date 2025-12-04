@@ -1,8 +1,12 @@
+import logging
 from typing import Sequence
 
 from core.app_config import configs
 from data_ingestion.parsing.parsers.abstract_parser import AbstractParser, BaseFileDocument
 from core.fs_manager import fs_manager
+
+
+logger = logging.getLogger(__name__)
 
 
 class ParsingHandler():
@@ -19,7 +23,7 @@ class ParsingHandler():
             self.default_parser.parse_files(downloaded_filepaths)
         )
 
-        print(
+        logger.info(
             f"Parsed {len(parsed_files)} out of {len(filepaths)} successfully."
         )
 

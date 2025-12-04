@@ -1,9 +1,12 @@
+import logging
 from typing import Any, Optional
 import fsspec
 from fsspec import AbstractFileSystem
 
 
-# TODO: make abstract base class
+logger = logging.getLogger(__name__)
+
+
 class BaseFileDocument:
     '''Base class for file document loaders/parsers.'''
 
@@ -40,7 +43,7 @@ class BaseFileDocument:
         if fs is None:
             fs: AbstractFileSystem = fsspec.filesystem('file')  # TODO: get filesystem from path
 
-        print("Loading document from filepath:", filepath)
+        logger.info(f"Loading file-document from filepath: {filepath}")
         with fs.open(filepath, 'r', encoding=encoding) as f:
             content = f.read()
         return cls(filepath=filepath, content=content)

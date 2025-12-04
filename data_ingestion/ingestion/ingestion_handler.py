@@ -1,3 +1,4 @@
+import logging
 from typing import Sequence
 
 import fsspec
@@ -7,14 +8,15 @@ from data_ingestion.parsing.document_loaders.tei_file_document import TEIFileDoc
 from data_ingestion.types.llama_reader_wrapper import LlamaReaderWrapper
 
 
+logger = logging.getLogger(__name__)
+
+
 class IngestionHandler():
     def __init__(self, source_fs: fsspec.AbstractFileSystem) -> None:
         self.source_fs: fsspec.AbstractFileSystem = source_fs
 
-    def get_documents_from_filepaths(self, filepaths: list[str]) -> Sequence[Document]:
+    def get_documents_from_files(self, filepaths: list[str]) -> Sequence[Document]:
         '''Ingest files from given filepaths into the LlamaIndex pipeline and return Documents.'''
-
-        print(f"Getting documents from filepaths: {filepaths}")
 
         directoryReader = SimpleDirectoryReader(
             input_files=filepaths,
@@ -28,10 +30,10 @@ class IngestionHandler():
 
         return documents
 
-    def ingest_filepaths(self, filepaths: list[str]) -> None:
+    def ingest_files(self, filepaths: list[str]) -> None:
         '''Ingest files from given filepaths into the LlamaIndex pipeline.'''
 
-        documents = self.get_documents_from_filepaths(filepaths)
+        documents = self.get_documents_from_files(filepaths)
 
         for doc in documents:
-            print(f"--- Document text: {doc.text} ---")
+            logger.info(f"--- Document text: {doc.text} ---")

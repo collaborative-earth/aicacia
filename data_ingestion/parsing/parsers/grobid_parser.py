@@ -1,3 +1,4 @@
+import logging
 from typing import Sequence
 from pathlib import Path
 from data_ingestion.parsing.document_loaders.tei_file_document import TEIFileDocument
@@ -5,6 +6,9 @@ from data_ingestion.parsing.parsers.abstract_parser import AbstractParser
 from grobid_client.grobid_client import GrobidClient
 
 from core.app_config import configs
+
+
+logger = logging.getLogger(__name__)
 
 
 class GrobidParser(AbstractParser):
@@ -55,7 +59,7 @@ class GrobidParser(AbstractParser):
                 force=True,
                 **self.PARSING_OPTIONS
             )
-        print(f"Processed: {processed_count}, Errors: {error_count}, Skipped: {skipped_count}")
+        logger.info(f"Processed: {processed_count}, Errors: {error_count}, Skipped: {skipped_count}")
 
         OUTPUT_EXTENSION = "grobid.tei.xml"
         output_filepaths = (

@@ -1,3 +1,4 @@
+import logging
 from typing import Type, Optional, Any, Dict, List
 from pathlib import Path
 import fsspec
@@ -5,6 +6,9 @@ from llama_index.core.readers.base import BaseReader
 from llama_index.core.schema import Document
 
 from data_ingestion.parsing.document_loaders import BaseFileDocument
+
+
+logger = logging.getLogger(__name__)
 
 
 # TODO: make it generic!
@@ -23,14 +27,15 @@ class LlamaReaderWrapper(BaseReader):
         """Uses a FileLoader to return the appropiate list of Documents.
         This method matches the expectations of `SimpleDirectoryReader.load_file`.
         """
-        print(f"Loading data from file: {input_file}")
+
+        logger.info(f"Loading data from file: {input_file}")
 
         # open file either using provided fs (fsspec) or local open
         if fs is None:
             fs = fsspec.filesystem('file')  # TODO: get filesystem from path
 
         # DocumentLoader from filepath
-        file_document_loader = self.file_loader_cls.from_filepath(
+        file_document_loader: BaseFileDocument = self.file_loader_cls.from_filepath(
             filepath=str(input_file),
             fs=fs,
             **kwargs

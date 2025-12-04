@@ -2,12 +2,16 @@
 
 import os
 from pathlib import Path
+import logging
 
 
 class AppConfig:
     """Centralized configuration class for accessing environment variables."""
 
     CWD = Path(os.getcwd())
+
+    # Configure logging
+    logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 
     # Database configuration
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
