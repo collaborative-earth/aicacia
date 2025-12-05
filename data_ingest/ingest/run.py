@@ -7,7 +7,7 @@ import psycopg
 from psycopg.types.json import Json
 from sqlmodel import Session, SQLModel, and_, create_engine, select
 
-from api.server.db.models.sourced_documents import SourcedDocument, SourceLink
+from db.models.sourced_documents import SourcedDocument, SourceLink
 from data_ingest.entities.Document import SourcedDocumentMetadata
 from data_ingest.postprocess.page_layout_detection import detect_pages_layout
 from data_ingest.postprocess.pdf_to_images import convert

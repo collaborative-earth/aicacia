@@ -3,10 +3,10 @@ import uuid
 from typing import List, TYPE_CHECKING
 from sqlalchemy import Column, ForeignKeyConstraint, PrimaryKeyConstraint
 from sqlmodel import JSON, Field, Relationship
-from server.db.models.base import Base
+from db.models.base import Base
 
 if TYPE_CHECKING:
-    from server.db.models.user import User
+    from db.models.user import User
 
 
 class ThreadMessages(Base, table=True):

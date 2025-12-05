@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any, List, Optional
 
-from server.db.models.base import Base
+from db.models.base import Base
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import JSON, JSONB
 from sqlmodel import Field, Relationship

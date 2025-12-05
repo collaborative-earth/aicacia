@@ -3,12 +3,12 @@ import uuid
 from typing import List, TYPE_CHECKING
 from sqlalchemy import Column
 from sqlmodel import JSON, Field, Relationship
-from server.db.models.base import Base
+from db.models.base import Base
 
 if TYPE_CHECKING:
-    from server.db.models.query import Query
-    from server.db.models.feedback import Feedback
-    from server.db.models.thread_messages import ThreadMessages, ThreadMessageFeedback
+    from db.models.query import Query
+    from db.models.feedback import Feedback
+    from db.models.thread_messages import ThreadMessages, ThreadMessageFeedback
 
 
 class User(Base, table=True):

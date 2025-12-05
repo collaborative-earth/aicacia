@@ -5,9 +5,9 @@ from sqlmodel import Session, func, select
 from server.auth.dependencies import get_current_user
 from server.dtos.chat import ChatResponse, ChatRequest, ThreadListResponse, ThreadSummary
 from server.entities.chat import ChatMessage, Actor
-from server.db.models.thread_messages import ThreadMessages
-from server.db.models.user import User
-from server.db.session import get_db_session
+from db.models.thread_messages import ThreadMessages
+from db.models.user import User
+from core.db_manager import get_db_session
 from server.core.ai_agent import get_chat_response
 
 chat_router = APIRouter()

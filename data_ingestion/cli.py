@@ -44,11 +44,7 @@ def test_ingestion(dry_run: bool = True) -> None:
 
     ingestion_handler = IngestionHandler(source_fs=source_fs)
 
-    # TODO: Check proper path handling (llamaindex's SimpleDirectoryReader issue with protocol)
-    filepaths = [
-        filepath.removeprefix("s3://")
-        for filepath in db_manager.get_ready_to_ingest_files()
-    ]
+    filepaths = db_manager.get_ready_to_ingest_files()
 
     documents = ingestion_handler.get_documents_from_files(filepaths)
 

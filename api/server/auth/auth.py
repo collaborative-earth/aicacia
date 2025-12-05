@@ -3,7 +3,7 @@ from typing import Optional
 
 import jwt
 from server.core.config import settings
-from server.db.models.user import User
+from db.models.user import User
 
 ONE_MONTH = 30 * 24 * 60 * 60
 

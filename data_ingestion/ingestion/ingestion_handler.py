@@ -18,11 +18,14 @@ class IngestionHandler():
     def get_documents_from_files(self, filepaths: list[str]) -> Sequence[Document]:
         '''Ingest files from given filepaths into the LlamaIndex pipeline and return Documents.'''
 
+        # Removes protocol prefix for SimpleDirectoryReader(fails otherwise), fs argument handles it
+        just_filepaths = [fsspec.core.split_protocol(f)[1] for f in filepaths]  # 1 == path part
         directoryReader = SimpleDirectoryReader(
-            input_files=filepaths,
+            input_files=just_filepaths,
             file_extractor={
                 ".xml": LlamaReaderWrapper(TEIFileDocument)
             },
+            required_exts=[".xml"],
             fs=self.source_fs
         )
 

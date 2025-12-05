@@ -1,3 +1,16 @@
+from sqlmodel import create_engine, Session
+from core.app_config import configs
+
+
+# Reference: originally from api.server.db.session.py
+engine = create_engine(configs.get_database_url(), echo=True)
+
+
+def get_db_session():
+    with Session(engine) as session:
+        yield session
+
+
 class DBManager:
     # TODO. Implement actual DB manager
     def __init__(self) -> None:

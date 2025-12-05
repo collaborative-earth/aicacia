@@ -3,9 +3,9 @@ import uuid
 from fastapi import HTTPException, APIRouter, Depends
 from sqlmodel import Session, select
 from server.auth.dependencies import get_current_user
-from server.db.models.thread_messages import ThreadMessages, ThreadMessageFeedback
-from server.db.models.user import User
-from server.db.session import get_db_session
+from db.models.thread_messages import ThreadMessages, ThreadMessageFeedback
+from db.models.user import User
+from core.db_manager import get_db_session
 from server.dtos.feedback import ChatFeedbackPostRequest, ChatFeedbackPostResponse
 from server.entities.thread_message import ThreadMessageFeedbackDetails
 

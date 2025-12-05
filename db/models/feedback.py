@@ -3,11 +3,11 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Column
 from sqlmodel import JSON, Field, Relationship
-from server.db.models.base import Base
+from db.models.base import Base
 
 if TYPE_CHECKING:
-    from server.db.models.user import User
-    from server.db.models.query import Query
+    from db.models.user import User
+    from db.models.query import Query
 
 
 class Feedback(Base, table=True):

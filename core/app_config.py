@@ -5,6 +5,7 @@ from pathlib import Path
 import logging
 
 
+# TODO: Use pydantic for settings management
 class AppConfig:
     """Centralized configuration class for accessing environment variables."""
 

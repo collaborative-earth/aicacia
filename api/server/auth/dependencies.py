@@ -1,8 +1,8 @@
 from fastapi import Header, Depends, HTTPException
 from sqlmodel import Session, select
 from server.auth.auth import verify_jwt_token
-from server.db.models.user import User
-from server.db.session import get_db_session
+from db.models.user import User
+from core.db_manager import get_db_session
 
 
 def get_current_user(aicacia_api_token: str = Header(None), session: Session = Depends(get_db_session)) -> User:
