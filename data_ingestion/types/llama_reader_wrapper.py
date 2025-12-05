@@ -11,11 +11,11 @@ from data_ingestion.parsing.document_loaders import BaseFileDocument
 logger = logging.getLogger(__name__)
 
 
-# TODO: make it generic!
+# TODO: make it generic?
 class LlamaReaderWrapper(BaseReader):
-    def __init__(self, file_loader_cls: Type[BaseFileDocument]) -> None:
+    def __init__(self, file_document_cls: Type[BaseFileDocument]) -> None:
         super().__init__()
-        self.file_loader_cls: Type[BaseFileDocument] = file_loader_cls
+        self.file_document_cls: Type[BaseFileDocument] = file_document_cls
 
     def load_data(
             self,
@@ -35,7 +35,7 @@ class LlamaReaderWrapper(BaseReader):
             fs = fsspec.filesystem('file')  # TODO: get filesystem from path
 
         # DocumentLoader from filepath
-        file_document_loader: BaseFileDocument = self.file_loader_cls.from_filepath(
+        file_document_loader: BaseFileDocument = self.file_document_cls.from_filepath(
             filepath=str(input_file),
             fs=fs,
             **kwargs
