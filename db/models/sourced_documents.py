@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any, List, Optional
 
+from data_ingestion.types.current_status_enum import CurrentStatusEnum
 from db.models.base import Base
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import JSON, JSONB
@@ -26,6 +27,20 @@ class SourcedDocument(Base, table=True):
     references: list[str] = Field(default_factory=list, sa_column=Column(JSONB))
     other_metadata: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSONB))
     is_relevant: bool = Field(default=False)
+    current_status: str = Field(default=CurrentStatusEnum.NEW.value, nullable=True)  # NEW, DOWNLOADED, TEXT_PARSED, INDEXED
+    s3_path: Optional[str] = Field(nullable=True)
+
+    textual_representation: "TextualRepresentation" = Relationship(back_populates="document")
+
+
+class TextualRepresentation(Base, table=True):
+    __tablename__ = "textual_representation"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    doc_id: uuid.UUID = Field(foreign_key="sourced_documents.doc_id", nullable=False)
+    file_path: str = Field(nullable=False)
+    parser: str = Field(nullable=False)  # e.g., 'grobid', 'pdfminer', etc.
+
+    document: "SourcedDocument" = Relationship(back_populates="textual_representation")
 
 
 class SourceLink(Base, table=True):

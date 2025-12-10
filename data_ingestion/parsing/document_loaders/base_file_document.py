@@ -36,7 +36,7 @@ class BaseFileDocument:
     def from_filepath(
         cls, filepath: str, fs: Optional[AbstractFileSystem] = None, **kwargs: Any
     ) -> "BaseFileDocument":
-        '''Method to instantiate a FileDocumentLoader from a filepath. 
+        '''Method to instantiate a FileDocument from a filepath. 
         'utf-8' encoding using fsspec if not specified.'''
 
         encoding = kwargs.get('encoding', 'utf-8')

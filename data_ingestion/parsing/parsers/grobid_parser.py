@@ -1,6 +1,7 @@
 import logging
 from typing import Sequence
 from pathlib import Path
+from core.fs_manager import fs_manager
 from data_ingestion.parsing.document_loaders.tei_file_document import TEIFileDocument
 from data_ingestion.parsing.parsers.abstract_parser import AbstractParser
 from grobid_client.grobid_client import GrobidClient
@@ -46,7 +47,11 @@ class GrobidParser(AbstractParser):
             Sequence of GrobidTEIParsedFile instances.
         """
 
-        # Create output directory if it doesn't exist
+        # Grobid uses files downloaded locally before processing
+        local_folder: str = configs.TMP_LOCAL_FOLDER
+        downloaded_filepaths: list[str] = fs_manager.download_filepaths(filepaths, local_folder)
+
+        # Create output directory to store GROBID results (TEI XML files)
         output_path = Path(self.TMP_LOCAL_FOLDER).joinpath("grobid_outputs")
         output_path.mkdir(parents=True, exist_ok=True)
 
@@ -54,7 +59,7 @@ class GrobidParser(AbstractParser):
             self.grobid_client.process_batch(
                 "processFulltextDocument",
                 input_path="",
-                input_files=filepaths,
+                input_files=downloaded_filepaths,
                 output=str(output_path),
                 force=True,
                 **self.PARSING_OPTIONS
@@ -62,9 +67,10 @@ class GrobidParser(AbstractParser):
         logger.info(f"Processed: {processed_count}, Errors: {error_count}, Skipped: {skipped_count}")
 
         OUTPUT_EXTENSION = "grobid.tei.xml"
+        # Generates output file paths based on the original filepaths by changing extension
         output_filepaths = (
-            output_path.joinpath(Path(fp).stem + f".{OUTPUT_EXTENSION}")
-            for fp in filepaths
+            output_path.joinpath(Path(filepath).stem + f".{OUTPUT_EXTENSION}")
+            for filepath in filepaths
         )
         return [
             TEIFileDocument(
@@ -72,4 +78,4 @@ class GrobidParser(AbstractParser):
                 metadata={'source_filepath': str(filepaths[i]), 'parser': 'grobid_tei_parser'}
             )
             for i, output_filepath in enumerate(output_filepaths) if output_filepath.exists()
-        ]
+        ]  # if the parsed file was created

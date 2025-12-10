@@ -22,6 +22,12 @@ class FilesystemManager:
         self.fs.put(local_filepaths, dest_paths)
         return dest_paths
 
+    def upload_filepath(self, local_filepath: str, dest_dir: str) -> str:
+        '''Upload a single local file to the destination directory.'''
+        dest_path = f"{dest_dir}/{Path(local_filepath).name}"
+        self.fs.put(local_filepath, dest_path)
+        return dest_path
+
 
 # TODO. Load filesystem config from env or config file
 fs_manager = FilesystemManager(configs.SOURCE_FILESYSTEM)  # 's3' or 'local' for local filesystem

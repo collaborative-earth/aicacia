@@ -1,7 +1,5 @@
 
-
 from typing import Any, Generic, TypeVar
-
 from sqlmodel import SQLModel
 
 
