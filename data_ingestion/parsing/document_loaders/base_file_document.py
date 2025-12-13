@@ -1,10 +1,21 @@
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, TypedDict
 import fsspec
 from fsspec import AbstractFileSystem
 
 
 logger = logging.getLogger(__name__)
+
+
+class MetadataDict(TypedDict, total=False):
+    source_filepath: str  # filepath of the source_document used to generate this doc representation
+    parser: str
+
+    title: str
+    authors: list[str]
+    doi: str
+    abstract: str
+    keywords: list[str]
 
 
 class BaseFileDocument:
@@ -14,7 +25,7 @@ class BaseFileDocument:
         self,
         content: Optional[str] = None,  # TODO: Load lazyly?
         filepath: str = ':memory:',
-        metadata: Optional[dict] = None,
+        metadata: Optional[MetadataDict] = None,
     ) -> None:
         self.filepath = filepath
         self.content = content
@@ -28,7 +39,7 @@ class BaseFileDocument:
         # Subclasses may implement this method to return their own textual representation
         return self.content or ""
 
-    def get_metadata(self) -> dict:
+    def get_metadata(self) -> MetadataDict:
         # Subclasses may implement this method to return their own metadata
         return self.metadata
 
@@ -41,9 +52,12 @@ class BaseFileDocument:
 
         encoding = kwargs.get('encoding', 'utf-8')
         if fs is None:
-            fs: AbstractFileSystem = fsspec.filesystem('file')  # TODO: get filesystem from path
+            fs_name: str = fsspec.core.split_protocol(filepath)[0] or 'file'
+            fs: AbstractFileSystem = fsspec.filesystem(fs_name)
 
         logger.info(f"Loading file-document from filepath: {filepath}")
         with fs.open(filepath, 'r', encoding=encoding) as f:
             content = f.read()
-        return cls(filepath=filepath, content=content)
+        return cls(
+            filepath=filepath, content=content, metadata=MetadataDict(source_filepath=filepath)
+        )

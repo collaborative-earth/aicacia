@@ -13,6 +13,7 @@ class AppConfig:
 
     # Configure logging
     logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
+    logging.getLogger('sqlalchemy').setLevel(logging.WARNING)
 
     # Database configuration
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")

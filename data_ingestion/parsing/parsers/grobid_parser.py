@@ -64,18 +64,26 @@ class GrobidParser(AbstractParser):
                 force=True,
                 **self.PARSING_OPTIONS
             )
-        logger.info(f"Processed: {processed_count}, Errors: {error_count}, Skipped: {skipped_count}")
+        logger.info(
+            f"Processed: {processed_count}, Errors: {error_count}, Skipped: {skipped_count}"
+        )
 
         OUTPUT_EXTENSION = "grobid.tei.xml"
-        # Generates output file paths based on the original filepaths by changing extension
-        output_filepaths = (
-            output_path.joinpath(Path(filepath).stem + f".{OUTPUT_EXTENSION}")
-            for filepath in filepaths
-        )
-        return [
-            TEIFileDocument(
-                filepath=str(output_filepath),
-                metadata={'source_filepath': str(filepaths[i]), 'parser': 'grobid_tei_parser'}
-            )
-            for i, output_filepath in enumerate(output_filepaths) if output_filepath.exists()
-        ]  # if the parsed file was created
+        parsed_docs: Sequence[TEIFileDocument] = []
+
+        for filepath in filepaths:
+            parsed_path = output_path.joinpath(Path(filepath).stem + f".{OUTPUT_EXTENSION}")
+            if parsed_path.exists():  # Check if the parsed file exists
+                parsed_docs.append(
+                    TEIFileDocument(
+                        filepath=str(parsed_path),
+                        metadata={
+                            'source_filepath': str(filepath),
+                            'parser': 'grobid_tei_parser'
+                        }
+                    )
+                )
+            else:
+                logger.error(f"MISSING parsed file {parsed_path} for doc {filepath}.")
+
+        return parsed_docs

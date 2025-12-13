@@ -1,7 +1,6 @@
 
 from typing import Sequence
-from sqlmodel import Session, select
-from core.db_manager import get_db_session
+from sqlmodel import Session, select, col
 from data_ingestion.types.current_status_enum import CurrentStatusEnum
 from db.models.sourced_documents import SourcedDocument
 from db.repositories.base_model_repo import BaseModelRepository
@@ -47,3 +46,20 @@ class SourcedDocumentRepository(BaseModelRepository[SourcedDocument]):
 
         sourced_document = session.exec(stmt).first()
         return sourced_document
+
+    def get_documents_by_filepaths(
+        self,
+        session: Session,
+        filepaths: Sequence[str | None]
+    ) -> Sequence[SourcedDocument]:
+
+        if not filepaths:
+            return []
+
+        stmt = (
+            select(SourcedDocument)
+            .where(col(SourcedDocument.s3_path).in_(filepaths))
+        )
+
+        sourced_documents = session.exec(stmt).all()
+        return sourced_documents

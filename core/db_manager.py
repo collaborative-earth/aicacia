@@ -4,7 +4,7 @@ from core.app_config import configs
 
 
 # Reference: originally from api.server.db.session.py
-engine = create_engine(configs.get_database_url(), echo=True)
+engine = create_engine(configs.get_database_url(), echo=False)
 
 
 def get_db_session():

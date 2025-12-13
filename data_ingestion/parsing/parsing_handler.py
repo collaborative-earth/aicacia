@@ -5,7 +5,7 @@ from core.db_manager import session_scope
 from data_ingestion.parsing.parsers.abstract_parser import AbstractParser, BaseFileDocument
 from core.fs_manager import fs_manager
 from data_ingestion.types.current_status_enum import CurrentStatusEnum
-from db.models.sourced_documents import TextualRepresentation
+from db.models.sourced_documents import SourcedDocument, TextualRepresentation
 from db.repositories.sourced_document_repo import SourcedDocumentRepository
 
 
@@ -30,45 +30,78 @@ class ParsingHandler():
 
         return parsed_files
 
-    def parse_and_upload(self, filepaths: list[str], dest_dir: str) -> list[str]:  # TODO: IMPROVE
+    def parse_and_upload(
+            self, filepaths: list[str], dest_dir: str, batch_size: int = 100
+    ) -> list[str]:
         '''Parse files from given filepaths and upload parsed results to destination directory.'''
 
-        parsed_files: Sequence[BaseFileDocument] = self.parse_filepaths(filepaths)
+        source_document_repo = SourcedDocumentRepository()
+        all_uploaded_paths = []
+        # Process files in batches
+        for batch_no, batch in enumerate(range(0, len(filepaths), batch_size)):
+            logger.info(f"Processing batch {batch_no + 1}...")
+            batch_filepaths = filepaths[batch: batch + batch_size]
 
-        uploaded_filepaths: list[str] = []
-        if parsed_files:
-            self.sourcedocument_repo = SourcedDocumentRepository()
+            # Parse files in the current batch
+            logger.info(f"Parsing files for batch. {batch_no + 1}")
+            parsed_files: Sequence[BaseFileDocument] = self.parse_filepaths(batch_filepaths)
+            if not parsed_files:
+                logger.warning(f"No files were successfully parsed in batch {batch_no + 1}.")
+
+            parsed_filename_to_info = {
+                parsed_file.filepath:
+                {
+                    'parsed_file': parsed_file,
+                    'source_filepath': parsed_file.metadata['source_filepath'],
+                    'uploaded_filepath': None
+                }
+                for parsed_file in parsed_files
+                if "source_filepath" in parsed_file.metadata
+            }
+
+            # Get all parsed filespaths to upload
+            parsed_paths_to_upload = list(parsed_filename_to_info.keys())
+            uploaded_filepaths = fs_manager.upload_filepaths_in_parallel(
+                local_filepaths=parsed_paths_to_upload,
+                dest_dir=dest_dir
+            )
+            logger.info(f"Uploaded {len(uploaded_filepaths)} files in batch {batch_no + 1}.")
+
+            for up_fp, parsed_fp in zip(uploaded_filepaths, parsed_paths_to_upload):
+                parsed_filename_to_info[parsed_fp]['uploaded_filepath'] = up_fp
+                all_uploaded_paths.append(up_fp)
+
+            # Update the DB with the uploaded filepaths and statuses
+            source_to_info_map = {
+                parsed_file_info['source_filepath']: {
+                    'up_fp': parsed_file_info['uploaded_filepath'],
+                    'parser': parsed_file_info['parsed_file'].metadata.get("parser")
+                }
+                for parsed_file_info in parsed_filename_to_info.values()
+                if parsed_file_info['uploaded_filepath'] is not None
+                # uploaded_filepath will be None if its upload failed
+            }
 
             with session_scope() as session:
-                for parsed_file in parsed_files:
-                    try:
-                        logger.info(f"Source filepath in metadata: {parsed_file.metadata}")
-                        if parsed_file.metadata.get("source_filepath") is not None:
-                            original_file_path = parsed_file.metadata.get("source_filepath")
-                            # Update the status in DB
-                            document = self.sourcedocument_repo.get_document_by_s3_path(
-                                session=session,
-                                s3_path=original_file_path              # TODO: CREATE TYPED dict for metadata
-                            )
+                sourced_documents: Sequence[SourcedDocument] = \
+                    source_document_repo.get_documents_by_filepaths(
+                        session=session,
+                        filepaths=list(source_to_info_map.keys())
+                    )
 
-                            if document:
-                                document.current_status = CurrentStatusEnum.TEXT_PARSED.value
-
-                                uploaded_filepath = fs_manager.upload_filepath(
-                                    local_filepath=parsed_file.filepath,
-                                    dest_dir=dest_dir
-                                )
-                                document.textual_representation = TextualRepresentation(
-                                    doc_id=document.doc_id,
-                                    file_path=uploaded_filepath,
-                                    parser=parsed_file.metadata.get("parser") # TODO: CREATE TYPED dict for metadata
-                                )
-                                session.add(document)
-                                session.commit()
-                    except Exception as e:
-                        logger.error(
-                            f"Error while updating parsed file for {parsed_file.filepath}: {e}"
+                for doc in sourced_documents:
+                    doc_updated_info = source_to_info_map[doc.s3_path]
+                    doc.current_status = CurrentStatusEnum.TEXT_PARSED.value
+                    doc.textual_representation = \
+                        TextualRepresentation(
+                            doc_id=doc.doc_id,
+                            file_path=doc_updated_info['up_fp'],
+                            parser=doc_updated_info['parser']
                         )
-                        session.rollback()
+                session.commit()
 
-        return uploaded_filepaths
+                logger.info(
+                    f"Updated {len(sourced_documents)}/{len(batch_filepaths)} in batch {batch_no + 1}"
+                )
+
+        return all_uploaded_paths

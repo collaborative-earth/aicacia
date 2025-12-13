@@ -1,7 +1,8 @@
 # Reference: Logic taken from _build_combined_text and _build_metadata in GrobidReader
-from typing import List, Dict, Any
+from typing import List
 
 from data_ingestion.parsing.document_loaders import BaseFileDocument
+from data_ingestion.parsing.document_loaders.base_file_document import MetadataDict
 from data_ingestion.types.tei_document import TEIDocument
 
 
@@ -44,8 +45,8 @@ class TEIFileDocument(BaseFileDocument):
 
         return "\n".join(parts).strip()
 
-    def get_metadata(self) -> dict:
-        md: Dict[str, Any] = {}
+    def get_metadata(self) -> MetadataDict:
+        md: MetadataDict = {}
         if self.tei_object.title:
             md["title"] = self.tei_object.title
         if self.tei_object.authors:
