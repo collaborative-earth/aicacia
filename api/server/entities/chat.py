@@ -1,11 +1,13 @@
 import enum
-
 from typing import Optional
+
 from pydantic import BaseModel
+
 
 class Actor(enum.Enum):
     USER = "user"
     AGENT = "agent"
+
 
 class ChatMessage(BaseModel):
     message: str

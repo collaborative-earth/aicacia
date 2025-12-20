@@ -17,6 +17,7 @@ class ThreadMessages(Base, table=True):
     message_from: str = Field(nullable=False)
     message: str = Field(nullable=False)
     thread_message_json: dict = Field(sa_column=Column(JSON))
+    references: list[dict] = Field(default_factory=list, sa_column=Column(JSON))
 
     user: "User" = Relationship(back_populates="thread_messages")
     thread_message_feedback: List["ThreadMessageFeedback"] = Relationship(
