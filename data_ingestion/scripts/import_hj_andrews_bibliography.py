@@ -106,6 +106,7 @@ def download_and_upload_pdf(
     import tempfile
     import time
     import urllib.request
+
     from core.fs_manager import fs_manager
 
     temp_file_path = None
@@ -311,7 +312,52 @@ def import_csv_to_database(
                     })
                     continue
 
-                # Add document
+                # Upload to S3 first (unless --skip-s3-upload is set)
+                s3_path = None
+                if not skip_s3_upload:
+                    # Find PDF link from source_links
+                    pdf_link = None
+                    pdf_source_link = None
+                    for link in source_links:
+                        if link.type == "pdf" or "pdf" in link.link.lower():
+                            pdf_link = link.link
+                            pdf_source_link = link
+                            break
+
+                    if not pdf_link:
+                        # No PDF link - skip this document entirely
+                        logger.error(
+                            f"Skipping document '{doc.title}' - no PDF link found"
+                        )
+                        failed_documents.append(
+                            {
+                                "doc_id": str(doc.doc_id),
+                                "title": doc.title,
+                                "reason": "No PDF link found",
+                            }
+                        )
+                        continue
+
+                    # Download and upload to S3
+                    s3_path = download_and_upload_pdf(doc, pdf_link, s3_bucket)
+                    if not s3_path:
+                        # S3 upload failed - skip this document entirely
+                        logger.error(
+                            f"Skipping document '{doc.title}' due to S3 upload failure"
+                        )
+                        failed_documents.append(
+                            {
+                                "doc_id": str(doc.doc_id),
+                                "title": doc.title,
+                                "reason": "S3 upload failed",
+                            }
+                        )
+                        continue
+
+                    # Update document with S3 path
+                    doc.s3_path = s3_path
+
+                # Add document to session only after S3 upload succeeds
                 session.add(doc)
                 session.flush()  # Flush to get doc_id
 
@@ -321,54 +367,10 @@ def import_csv_to_database(
                 # Add source links
                 for link in source_links:
                     link.doc_id = doc.doc_id
+                    # Update PDF link with S3 location if available
+                    if s3_path and (link.type == "pdf" or "pdf" in link.link.lower()):
+                        link.s3_location = s3_path
                     session.add(link)
-
-                session.flush()  # Ensure links are committed before S3 upload
-
-                # Upload to S3 by default (unless --skip-s3-upload is set)
-                if not skip_s3_upload:
-                    # Find PDF link
-                    pdf_link = None
-                    pdf_source_link = None
-                    for link in source_links:
-                        if link.type == "pdf" or "pdf" in link.link.lower():
-                            pdf_link = link.link
-                            pdf_source_link = link
-                            break
-
-                    if pdf_link:
-                        s3_path = download_and_upload_pdf(doc, pdf_link, s3_bucket)
-                        if s3_path:
-                            # Update document with S3 path (keep status as NEW)
-                            doc.s3_path = s3_path
-                            session.add(doc)
-
-                            # Update source link with S3 location
-                            if pdf_source_link:
-                                pdf_source_link.s3_location = s3_path
-                                session.add(pdf_source_link)
-                        else:
-                            # S3 upload failed - rollback and skip this document
-                            logger.error(
-                                f"Skipping document '{doc.title}' due to S3 upload failure"
-                            )
-                            failed_documents.append({
-                                'doc_id': str(doc.doc_id),
-                                'title': doc.title,
-                                'reason': 'S3 upload failed'
-                            })
-                            session.rollback()
-                            continue
-                    else:
-                        # No PDF link - rollback and skip this document
-                        logger.error(f"Skipping document '{doc.title}' - no PDF link found")
-                        failed_documents.append({
-                            'doc_id': str(doc.doc_id),
-                            'title': doc.title,
-                            'reason': 'No PDF link found'
-                        })
-                        session.rollback()
-                        continue
 
                 # Commit in batches
                 if (i + 1) % batch_size == 0:
