@@ -9,6 +9,7 @@ from server.db.models.thread_messages import ThreadMessages
 from server.db.models.user import User
 from server.db.session import get_db_session
 from server.core.ai_agent import get_chat_response
+from server.core.rag_utils import get_rag_references
 
 chat_router = APIRouter()
 
@@ -28,11 +29,15 @@ def generate_chat_response(
     chat_history = [
         ChatMessage(
             message=thread_message.message,
-            message_from=thread_message.message_from,
+            message_from=Actor(thread_message.message_from),
             message_id=str(thread_message.message_id),
+            references=thread_message.references if thread_message.references else None,
         )
         for thread_message in thread_messages
     ]
+
+    # Fetch RAG references for the user's message
+    references = get_rag_references(request.message, db)
 
     response = get_chat_response(
         message=request.message,
@@ -50,6 +55,7 @@ def generate_chat_response(
         ChatMessage(
             message=response,
             message_from=Actor.AGENT,
+            references=references if references else None,
         )
     )
 
@@ -60,6 +66,7 @@ def generate_chat_response(
             message=request.message,
             message_from=Actor.USER.value,
             user_id=user.user_id,
+            references=[],
         )
     )
 
@@ -70,6 +77,7 @@ def generate_chat_response(
             message=response,
             message_from=Actor.AGENT.value,
             user_id=user.user_id,
+            references=references,
         )
     )
 
@@ -80,8 +88,9 @@ def generate_chat_response(
     chat_history = [
         ChatMessage(
             message=thread_message.message,
-            message_from=thread_message.message_from,
+            message_from=Actor(thread_message.message_from),
             message_id=str(thread_message.message_id),
+            references=thread_message.references if thread_message.references else None,
         )
         for thread_message in thread_messages
     ]
@@ -156,8 +165,9 @@ def get_thread_messages(
     chat_messages = [
         ChatMessage(
             message=thread_message.message,
-            message_from=thread_message.message_from,
+            message_from=Actor(thread_message.message_from),
             message_id=str(thread_message.message_id),
+            references=thread_message.references if thread_message.references else None,
         )
         for thread_message in thread_messages
     ]

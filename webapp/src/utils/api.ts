@@ -113,6 +113,7 @@ export interface ChatMessage {
   message: string;
   message_from: 'user' | 'agent';
   message_id?: string;
+  references?: Reference[];
 }
 
 export interface ChatResponse {
