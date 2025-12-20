@@ -9,11 +9,6 @@ from server.auth.dependencies import get_current_user
 from server.controllers.user_controller import get_admin_user
 from server.core.ai_summary import generate_summary
 from server.core.config import settings
-from db.models.feedback import Feedback
-from db.models.query import Query
-from db.models.sourced_documents import SourcedDocument
-from db.models.user import User
-from core.db_manager import get_db_session
 from server.dtos.query import (
     QueryListResponse,
     QueryRequest,
@@ -23,6 +18,12 @@ from server.dtos.query import (
 )
 from sqlalchemy import func
 from sqlmodel import Session, select
+
+from core.db_manager import get_db_session
+from db.models.feedback import Feedback
+from db.models.query import Query
+from db.models.sourced_documents import SourcedDocument
+from db.models.user import User
 
 query_router = APIRouter()
 

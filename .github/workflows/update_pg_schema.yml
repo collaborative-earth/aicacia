@@ -40,6 +40,5 @@ jobs:
 
       - name: Run migrations
         run: |
-          cd ./api
-          alembic -x db_url=postgresql://postgres:${{ steps.get-pass.outputs.pass }}@${{ secrets.EC2_PUBLIC_IP }}:5432/aicacia_db upgrade head
+          alembic -c alembic.ini -x db_url=postgresql://postgres:${{ steps.get-pass.outputs.pass }}@${{ secrets.EC2_PUBLIC_IP }}:5432/aicacia_db upgrade head
 

@@ -1,8 +1,16 @@
 """Application configuration module for loading environment variables."""
 
+import logging
 import os
 from pathlib import Path
-import logging
+
+from dotenv import load_dotenv
+
+# Load .env file from project root
+# Find project root by going up from this file's location
+project_root = Path(__file__).parent.parent
+dotenv_path = project_root / '.env'
+load_dotenv(dotenv_path=dotenv_path)
 
 
 # TODO: Use pydantic for settings management

@@ -1,7 +1,8 @@
 from contextlib import contextmanager
-from sqlmodel import create_engine, Session
-from core.app_config import configs
 
+from sqlmodel import Session, create_engine
+
+from core.app_config import configs
 
 # Reference: originally from api.server.db.session.py
 engine = create_engine(configs.get_database_url(), echo=False)
