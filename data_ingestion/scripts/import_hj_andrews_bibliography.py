@@ -169,13 +169,203 @@ def download_and_upload_pdf(
     return None
 
 
+def download_and_upload_pdf_worker(
+    doc_and_url: tuple[SourcedDocument, str],
+    bucket: str,
+    max_retries: int = 3,
+    download_only: bool = False
+) -> dict:
+    """
+    Worker function for parallel PDF download and upload.
+
+    Args:
+        doc_and_url: Tuple of (SourcedDocument, pdf_url)
+        bucket: S3 bucket name
+        max_retries: Number of retry attempts
+        download_only: If True, skip S3 upload (for testing)
+
+    Returns dict with keys:
+        - 'doc': SourcedDocument
+        - 's3_path': str or None
+        - 'success': bool
+        - 'error': str or None
+        - 'download_time': float (seconds)
+        - 'file_size': int (bytes)
+    """
+    import ssl
+    import tempfile
+    import time as time_module
+    import urllib.request
+
+    from core.fs_manager import fs_manager
+
+    doc, pdf_url = doc_and_url
+
+    # Create SSL context once per worker
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+
+    temp_file_path = None
+    download_start = time_module.time()
+
+    for attempt in range(max_retries):
+        try:
+            # Download PDF
+            temp_dir = Path(tempfile.gettempdir())
+            temp_file_path = temp_dir / f"{doc.doc_id}.pdf"
+
+            logger.info(f"Downloading PDF for {doc.doc_id} from {pdf_url}")
+
+            with urllib.request.urlopen(pdf_url, context=ssl_context, timeout=30) as response:
+                with open(temp_file_path, 'wb') as out_file:
+                    out_file.write(response.read())
+
+            # Verify file
+            if not temp_file_path.exists() or temp_file_path.stat().st_size == 0:
+                raise Exception("Downloaded file is empty or missing")
+
+            file_size = temp_file_path.stat().st_size
+            download_time = time_module.time() - download_start
+
+            # Upload to S3 (unless download-only mode)
+            s3_path = None
+            if not download_only:
+                dest_dir = f"s3://{bucket}/{doc.source_corpus}"
+                s3_path = fs_manager.upload_filepath(str(temp_file_path), dest_dir)
+                logger.info(f"Uploaded to {s3_path}")
+
+            # Cleanup
+            temp_file_path.unlink()
+
+            return {
+                'doc': doc,
+                's3_path': s3_path,
+                'success': True,
+                'error': None,
+                'download_time': download_time,
+                'file_size': file_size
+            }
+
+        except Exception as e:
+            # Cleanup
+            if temp_file_path and temp_file_path.exists():
+                temp_file_path.unlink()
+
+            if attempt == max_retries - 1:
+                logger.error(
+                    f"Failed to download/upload {doc.doc_id} "
+                    f"after {max_retries} attempts: {e}"
+                )
+                return {
+                    'doc': doc,
+                    's3_path': None,
+                    'success': False,
+                    'error': str(e),
+                    'download_time': time_module.time() - download_start,
+                    'file_size': 0
+                }
+
+            # Exponential backoff
+            logger.warning(f"Retry {attempt + 1}/{max_retries - 1} for {doc.doc_id}")
+            time_module.sleep(2 ** attempt)
+
+    return {
+        'doc': doc,
+        's3_path': None,
+        'success': False,
+        'error': 'Max retries exceeded',
+        'download_time': time_module.time() - download_start,
+        'file_size': 0
+    }
+
+
+def process_documents_parallel(
+    documents: list[tuple[SourcedDocument, list[SourceLink]]],
+    bucket: str,
+    workers: int,
+    max_retries: int = 3,
+    download_only: bool = False
+) -> tuple[list[dict], list[dict]]:
+    """
+    Process documents in parallel: download PDFs and optionally upload to S3.
+
+    Args:
+        download_only: If True, skip S3 upload (for testing)
+
+    Returns:
+        (successful_results, failed_results)
+    """
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+    from itertools import repeat
+
+    # Prepare work items
+    work_items = []
+    failed = []
+
+    for doc, source_links in documents:
+        # Find PDF link
+        pdf_link = None
+        for link in source_links:
+            if link.type == "pdf" or "pdf" in link.link.lower():
+                pdf_link = link.link
+                break
+
+        if not pdf_link:
+            logger.warning(f"No PDF link for {doc.title}")
+            failed.append({'doc': doc, 'reason': 'No PDF link found'})
+            continue
+
+        work_items.append((doc, pdf_link))
+
+    mode = "download-only" if download_only else "download and upload"
+    logger.info(f"Processing {len(work_items)} documents with {workers} workers ({mode})")
+
+    # Process in parallel
+    successful = []
+    start_time = time.time()
+
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        results = executor.map(
+            download_and_upload_pdf_worker,
+            work_items,
+            repeat(bucket),
+            repeat(max_retries),
+            repeat(download_only)
+        )
+
+        for result in results:
+            if result['success']:
+                successful.append(result)
+            else:
+                failed.append({'doc': result['doc'], 'reason': result['error']})
+
+    elapsed = time.time() - start_time
+
+    # Print statistics
+    logger.info(f"Completed: {len(successful)} successful, {len(failed)} failed")
+    logger.info(f"Total time: {elapsed:.1f}s")
+
+    if successful:
+        avg_time = sum(r['download_time'] for r in successful) / len(successful)
+        total_size = sum(r['file_size'] for r in successful)
+        logger.info(f"Average download time: {avg_time:.2f}s per document")
+        logger.info(f"Total data downloaded: {total_size / (1024*1024):.1f} MB")
+        logger.info(f"Throughput: {len(successful) / elapsed:.2f} docs/sec")
+
+    return successful, failed
+
+
 def import_csv_to_database(
     csv_path: str,
     source_corpus: str = "hj_andrews_bibliography",
     dry_run: bool = False,
     limit: Optional[int] = None,
     skip_s3_upload: bool = False,
-    s3_bucket: str = "aicacia-extracted-data"
+    s3_bucket: str = "aicacia-extracted-data",
+    workers: int = 10,
+    download_only: bool = False
 ) -> None:
     """Import CSV file into sourced_documents table.
 
@@ -289,86 +479,97 @@ def import_csv_to_database(
     failed_documents = []
     duplicate_documents = []
 
+    # Query existing documents BEFORE parallel processing
     with session_scope() as session:
-        batch_size = 50
-        inserted_count = 0
-
-        # Get existing titles for this source_corpus for deduplication
         existing_titles = set(
             title for (title,) in session.query(SourcedDocument.title)
             .filter(SourcedDocument.source_corpus == source_corpus)
             .all()
         )
-        logger.info(f"Found {len(existing_titles)} existing documents in corpus '{source_corpus}'")
 
-        for i, (doc, source_links) in enumerate(documents):
+    logger.info(
+        f"Found {len(existing_titles)} existing documents in "
+        f"corpus '{source_corpus}'"
+    )
+
+    # Filter out duplicates
+    filtered_documents = []
+
+    for doc, source_links in documents:
+        if doc.title in existing_titles:
+            logger.info(f"Skipping duplicate document: '{doc.title}'")
+            duplicate_documents.append({
+                'title': doc.title,
+                'reason': 'Duplicate title in corpus'
+            })
+        else:
+            filtered_documents.append((doc, source_links))
+
+    logger.info(
+        f"Processing {len(filtered_documents)} new documents "
+        f"(skipped {len(duplicate_documents)} duplicates)"
+    )
+
+    # Process PDFs in parallel (unless --skip-s3-upload)
+    if not skip_s3_upload:
+        successful_results, failed_docs = process_documents_parallel(
+            documents=filtered_documents,
+            bucket=s3_bucket,
+            workers=workers,
+            max_retries=3,
+            download_only=download_only
+        )
+        failed_documents.extend(failed_docs)
+
+        # If download-only mode, stop here (don't insert to DB)
+        if download_only:
+            logger.info("=" * 80)
+            logger.info("DOWNLOAD-ONLY MODE SUMMARY")
+            logger.info("=" * 80)
+            logger.info(f"Successfully downloaded: {len(successful_results)} PDFs")
+            logger.info(f"Failed: {len(failed_documents)}")
+            logger.info("Skipping database insertion (--download-only mode)")
+            return
+    else:
+        # Skip S3, treat all as successful
+        successful_results = [
+            {'doc': doc, 's3_path': None, 'success': True}
+            for doc, _ in filtered_documents
+        ]
+
+    # Insert successful documents to database
+    logger.info("Inserting documents into database...")
+
+    with session_scope() as session:
+        batch_size = 50
+        inserted_count = 0
+
+        for i, result in enumerate(successful_results):
             try:
-                # Check for duplicate title
-                if doc.title in existing_titles:
-                    logger.info(f"Skipping duplicate document: '{doc.title}'")
-                    duplicate_documents.append({
-                        'title': doc.title,
-                        'reason': 'Duplicate title in corpus'
-                    })
-                    continue
+                doc = result['doc']
+                s3_path = result.get('s3_path')
 
-                # Upload to S3 first (unless --skip-s3-upload is set)
-                s3_path = None
-                if not skip_s3_upload:
-                    # Find PDF link from source_links
-                    pdf_link = None
-                    pdf_source_link = None
-                    for link in source_links:
-                        if link.type == "pdf" or "pdf" in link.link.lower():
-                            pdf_link = link.link
-                            pdf_source_link = link
-                            break
-
-                    if not pdf_link:
-                        # No PDF link - skip this document entirely
-                        logger.error(
-                            f"Skipping document '{doc.title}' - no PDF link found"
-                        )
-                        failed_documents.append(
-                            {
-                                "doc_id": str(doc.doc_id),
-                                "title": doc.title,
-                                "reason": "No PDF link found",
-                            }
-                        )
-                        continue
-
-                    # Download and upload to S3
-                    s3_path = download_and_upload_pdf(doc, pdf_link, s3_bucket)
-                    if not s3_path:
-                        # S3 upload failed - skip this document entirely
-                        logger.error(
-                            f"Skipping document '{doc.title}' due to S3 upload failure"
-                        )
-                        failed_documents.append(
-                            {
-                                "doc_id": str(doc.doc_id),
-                                "title": doc.title,
-                                "reason": "S3 upload failed",
-                            }
-                        )
-                        continue
-
-                    # Update document with S3 path
+                # Update document with S3 path
+                if s3_path:
                     doc.s3_path = s3_path
 
-                # Add document to session only after S3 upload succeeds
+                # Add document
                 session.add(doc)
                 session.flush()  # Flush to get doc_id
 
-                # Add to existing titles to prevent duplicates within this batch
-                existing_titles.add(doc.title)
+                # Find original source_links from filtered_documents
+                original_links = next(
+                    (links for d, links in filtered_documents
+                     if d.doc_id == doc.doc_id),
+                    []
+                )
 
                 # Add source links
-                for link in source_links:
+                for link in original_links:
                     link.doc_id = doc.doc_id
                     # Update PDF link with S3 location if available
-                    if s3_path and (link.type == "pdf" or "pdf" in link.link.lower()):
+                    if s3_path and (link.type == "pdf" or
+                                    "pdf" in link.link.lower()):
                         link.s3_location = s3_path
                     session.add(link)
 
@@ -376,10 +577,16 @@ def import_csv_to_database(
                 if (i + 1) % batch_size == 0:
                     session.commit()
                     inserted_count += batch_size
-                    logger.info(f"Inserted {inserted_count}/{len(documents)} documents...")
+                    logger.info(
+                        f"Inserted {inserted_count}/{len(successful_results)} "
+                        f"documents..."
+                    )
 
             except Exception as e:
-                logger.error(f"Error inserting document '{doc.title}': {e}", exc_info=True)
+                logger.error(
+                    f"Error inserting document '{doc.title}': {e}",
+                    exc_info=True
+                )
                 failed_documents.append({
                     'doc_id': str(doc.doc_id),
                     'title': doc.title,
@@ -390,7 +597,7 @@ def import_csv_to_database(
 
         # Commit remaining
         session.commit()
-        successful_count = len(documents) - len(failed_documents) - len(duplicate_documents)
+        successful_count = len(successful_results)
         logger.info(f"Successfully inserted {successful_count} documents")
 
     # Print summary
@@ -416,8 +623,14 @@ def import_csv_to_database(
         logger.info("Failed Documents:")
         logger.info("-" * 80)
         for failed in failed_documents:
-            logger.info(f"Doc ID: {failed['doc_id']}")
-            logger.info(f"Title: {failed['title']}")
+            # Handle both formats: parallel processing failures and DB insertion failures
+            if 'doc' in failed:
+                doc = failed['doc']
+                logger.info(f"Doc ID: {doc.doc_id}")
+                logger.info(f"Title: {doc.title}")
+            else:
+                logger.info(f"Doc ID: {failed.get('doc_id', 'Unknown')}")
+                logger.info(f"Title: {failed.get('title', 'Unknown')}")
             logger.info(f"Reason: {failed['reason']}")
             logger.info("-" * 80)
 
@@ -460,6 +673,17 @@ def main():
         default='aicacia-extracted-data',
         help='S3 bucket name (default: aicacia-extracted-data)'
     )
+    parser.add_argument(
+        '--workers',
+        type=int,
+        default=10,
+        help='Number of parallel workers for PDF downloads (default: 10)'
+    )
+    parser.add_argument(
+        '--download-only',
+        action='store_true',
+        help='Dry-run: download PDFs in parallel but skip S3 upload and DB insertion (for testing)'
+    )
 
     args = parser.parse_args()
 
@@ -474,7 +698,9 @@ def main():
         dry_run=args.dry_run,
         limit=args.limit,
         skip_s3_upload=args.skip_s3_upload,
-        s3_bucket=args.s3_bucket
+        s3_bucket=args.s3_bucket,
+        workers=args.workers,
+        download_only=args.download_only
     )
 
 
