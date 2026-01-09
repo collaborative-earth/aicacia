@@ -7,6 +7,7 @@ from data_ingestion.parsing.parsers.abstract_parser import AbstractParser
 from grobid_client.grobid_client import GrobidClient
 
 from core.app_config import configs
+from data_ingestion.parsing.types import ParseFileInfo
 
 
 logger = logging.getLogger(__name__)
@@ -35,10 +36,11 @@ class GrobidParser(AbstractParser):
         super().__init__()
         self.grobid_client = GrobidClient(
             grobid_server=host_url,
+            timeout=1000,
         )
 
     def parse_files(
-            self, filepaths: list[str]
+            self, files_info: list[ParseFileInfo]
     ) -> Sequence[TEIFileDocument]:
         """Parse multiple files using GROBID's batch processing.
         Args:
@@ -49,6 +51,7 @@ class GrobidParser(AbstractParser):
 
         # Grobid uses files downloaded locally before processing
         local_folder: str = configs.TMP_LOCAL_FOLDER
+        filepaths = [file.source_filepath for file in files_info]
         downloaded_filepaths: list[str] = fs_manager.download_filepaths(filepaths, local_folder)
 
         # Create output directory to store GROBID results (TEI XML files)
@@ -69,21 +72,23 @@ class GrobidParser(AbstractParser):
         )
 
         OUTPUT_EXTENSION = "grobid.tei.xml"
-        parsed_docs: Sequence[TEIFileDocument] = []
+        outputs: Sequence[TEIFileDocument] = []
 
-        for filepath in filepaths:
-            parsed_path = output_path.joinpath(Path(filepath).stem + f".{OUTPUT_EXTENSION}")
+        for file_info in files_info:
+            parsed_filename = Path(file_info.source_filepath).stem + f".{OUTPUT_EXTENSION}"
+            parsed_path = output_path.joinpath(parsed_filename)
             if parsed_path.exists():  # Check if the parsed file exists
-                parsed_docs.append(
+                outputs.append(
                     TEIFileDocument(
                         filepath=str(parsed_path),
                         metadata={
-                            'source_filepath': str(filepath),
-                            'parser': 'grobid_tei_parser'
+                            'doc_id': file_info.doc_id,
+                            'source_filepath': str(file_info.source_filepath),
+                            'parser': 'grobid_tei_parser',
                         }
                     )
                 )
             else:
-                logger.error(f"MISSING parsed file {parsed_path} for doc {filepath}.")
+                logger.error(f"MISSING parsed file {parsed_path} for doc {file_info.source_filepath}.")
 
-        return parsed_docs
+        return outputs

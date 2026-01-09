@@ -11,10 +11,11 @@ class SourcedDocumentRepository(BaseModelRepository[SourcedDocument]):
         super().__init__(SourcedDocument)
 
     def get_ready_to_parse_files(self, session: Session) -> Sequence[SourcedDocument]:
+        '''Get all documents with status NEW and s3_path is not None'''
         stmt = (
             select(SourcedDocument)
             .where(
-                SourcedDocument.current_status == CurrentStatusEnum.DOWNLOADED.value,
+                SourcedDocument.current_status == CurrentStatusEnum.NEW.value,  # TODO: should it be DOWNLOADED?
                 SourcedDocument.s3_path is not None
             )
         )
@@ -63,3 +64,17 @@ class SourcedDocumentRepository(BaseModelRepository[SourcedDocument]):
 
         sourced_documents = session.exec(stmt).all()
         return sourced_documents
+
+
+    def get_documents_by_doc_ids(
+        self,
+        session: Session,
+        doc_ids: Sequence[str]
+    ) -> Sequence[SourcedDocument]:
+        stmt = (
+            select(SourcedDocument)
+            .where(col(SourcedDocument.doc_id).in_(doc_ids))
+        )
+        sourced_documents = session.exec(stmt).all()
+        return sourced_documents
+

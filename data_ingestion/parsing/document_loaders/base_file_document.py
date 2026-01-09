@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class MetadataDict(TypedDict, total=False):
+    doc_id: str
     source_filepath: str  # filepath of the source_document used to generate this doc representation
     parser: str
 
