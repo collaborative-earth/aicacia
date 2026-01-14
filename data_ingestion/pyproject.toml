@@ -1,0 +1,21 @@
+[project]
+name = "data-ingestion"
+version = "0.1.0"
+dependencies = [
+    "core>=0.1.0",
+    "db>=0.1.0",
+    "grobid-client-python>=0.1.4",
+    "beautifulsoup4>=4.14.3",
+    "llama_index>=0.6.16",
+]
+
+[project.scripts]
+data-ingestion-cli = "data_ingestion.cli:main"
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/data_ingestion"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

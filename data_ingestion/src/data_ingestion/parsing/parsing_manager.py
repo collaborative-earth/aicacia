@@ -1,11 +1,11 @@
 import logging
 from typing import Sequence
 from pathlib import Path
-from core.db_manager import session_scope
+from db.db_manager import session_scope
 from data_ingestion.parsing.parsers.abstract_parser import AbstractParser, BaseFileDocument
 from core.fs_manager import fs_manager
 from data_ingestion.parsing.types import ParseFileInfo
-from data_ingestion.types.current_status_enum import CurrentStatusEnum
+from data_ingestion.custom_types.current_status_enum import CurrentStatusEnum
 from db.models.sourced_documents import SourcedDocument, TextualRepresentation
 from db.repositories.sourced_document_repo import SourcedDocumentRepository
 

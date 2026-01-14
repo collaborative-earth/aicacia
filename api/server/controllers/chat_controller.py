@@ -7,7 +7,7 @@ from server.dtos.chat import ChatResponse, ChatRequest, ThreadListResponse, Thre
 from server.entities.chat import ChatMessage, Actor
 from db.models.thread_messages import ThreadMessages
 from db.models.user import User
-from core.db_manager import get_db_session
+from db.db_manager import get_db_session
 from server.core.ai_agent import get_chat_response
 
 chat_router = APIRouter()

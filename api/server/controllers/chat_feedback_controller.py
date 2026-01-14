@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 from server.auth.dependencies import get_current_user
 from db.models.thread_messages import ThreadMessages, ThreadMessageFeedback
 from db.models.user import User
-from core.db_manager import get_db_session
+from db.db_manager import get_db_session
 from server.dtos.feedback import ChatFeedbackPostRequest, ChatFeedbackPostResponse
 from server.entities.thread_message import ThreadMessageFeedbackDetails
 

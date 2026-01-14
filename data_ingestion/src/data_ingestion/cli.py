@@ -1,4 +1,3 @@
-from typing import Sequence
 import logging
 
 from core.app_config import configs
@@ -47,24 +46,16 @@ def test_document_parsing(dry_run) -> None:
         logger.info(f"Parsed document: {parsed_document}")
 
 
-# def test_ingestion(dry_run: bool = True) -> None:
-#     # Configure parameters
-#     source_fs = fsspec.filesystem(configs.SOURCE_FILESYSTEM)  # 's3' or 'file' for local filesystem
+def main():
+    logger.info("In the CLI!")
 
-#     ingestion_handler = IngestionHandler(source_fs=source_fs)
-#     filepaths = db_manager.get_ready_to_ingest_files()
-#     documents = ingestion_handler.get_documents_from_files(filepaths)
-
-#     for doc in documents:
-#         logger.info(f"--- Document length: {len(doc.text)} and metadata: {doc.metadata} ---")
+    # test_parsing(dry_run=True)  # dry-run should get you till parsing, but no uploads
+    test_document_parsing(dry_run=True)  # dry-run should get you till parsing, but no uploads
+    # test_ingestion(dry_run=True)  # dry-run should get you till the nodes, but no side-effects
+    logger.info("Done!")
 
 
 # TODO: Create CLI.. WIP
 if __name__ == "__main__":
-    logger.info("In the CLI!")
-
-    # test_parsing(dry_run=True)  # dry-run should get you till parsing, but no uploads
-    test_document_parsing(dry_run=False)  # dry-run should get you till parsing, but no uploads
-    # test_ingestion(dry_run=True)  # dry-run should get you till the nodes, but no side-effects
-    logger.info("Done!")
+    main()
 

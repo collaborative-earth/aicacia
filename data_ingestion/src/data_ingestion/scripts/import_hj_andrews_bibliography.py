@@ -28,8 +28,8 @@ from typing import Optional
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from core.db_manager import session_scope
-from data_ingestion.types.current_status_enum import CurrentStatusEnum
+from db.db_manager import session_scope
+from data_ingestion.custom_types.current_status_enum import CurrentStatusEnum
 from db.models.sourced_documents import SourcedDocument, SourceLink
 
 logger = logging.getLogger(__name__)

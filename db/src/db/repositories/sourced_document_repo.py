@@ -1,7 +1,7 @@
 
 from typing import Sequence
 from sqlmodel import Session, select, col
-from data_ingestion.types.current_status_enum import CurrentStatusEnum
+from data_ingestion.custom_types.current_status_enum import CurrentStatusEnum
 from db.models.sourced_documents import SourcedDocument
 from db.repositories.base_model_repo import BaseModelRepository
 

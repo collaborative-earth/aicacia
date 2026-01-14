@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any, List, Optional
 
-from data_ingestion.types.current_status_enum import CurrentStatusEnum
+from data_ingestion.custom_types.current_status_enum import CurrentStatusEnum
 from db.models.base import Base
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import JSON, JSONB

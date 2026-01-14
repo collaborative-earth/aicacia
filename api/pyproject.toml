@@ -1,0 +1,37 @@
+[project]
+name = "api"
+version = "0.1.0"
+dependencies = [
+    "core>=0.1.0",
+    "db>=0.1.0",
+    "arrow",
+    "alembic",
+    "bcrypt",
+    "psycopg2-binary",
+    "sqlmodel",
+    "fastapi",
+    "fastapi-utils",
+    "typing-inspect",
+    "pydantic",
+    "uvicorn",
+    "pydantic-settings",
+    "python-dotenv",
+    "pyjwt",
+    "qdrant_client",
+    "llama_index",
+    "llama-index-embeddings-huggingface",
+    "llama-index-vector-stores-qdrant",
+    "langchain",
+    "langchain-openai",
+    "langchain-community",
+    "langchain-core",
+    "s3fs"
+]
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["server"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

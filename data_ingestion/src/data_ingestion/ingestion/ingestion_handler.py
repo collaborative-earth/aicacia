@@ -5,7 +5,7 @@ import fsspec
 from llama_index.core.readers import SimpleDirectoryReader
 from llama_index.core.schema import Document
 from data_ingestion.parsing.document_loaders.tei_file_document import TEIFileDocument
-from data_ingestion.types.llama_reader_wrapper import LlamaReaderWrapper
+from data_ingestion.custom_types.llama_reader_wrapper import LlamaReaderWrapper
 
 
 logger = logging.getLogger(__name__)

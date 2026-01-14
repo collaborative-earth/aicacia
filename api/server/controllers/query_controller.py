@@ -19,7 +19,7 @@ from server.dtos.query import (
 from sqlalchemy import func
 from sqlmodel import Session, select
 
-from core.db_manager import get_db_session
+from db.db_manager import get_db_session
 from db.models.feedback import Feedback
 from db.models.query import Query
 from db.models.sourced_documents import SourcedDocument

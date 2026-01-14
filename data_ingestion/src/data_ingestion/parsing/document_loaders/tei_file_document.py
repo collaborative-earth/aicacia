@@ -3,7 +3,7 @@ from typing import List
 
 from data_ingestion.parsing.document_loaders import BaseFileDocument
 from data_ingestion.parsing.document_loaders.base_file_document import MetadataDict
-from data_ingestion.types.tei_document import TEIDocument
+from data_ingestion.custom_types.tei_document import TEIDocument
 
 
 class TEIFileDocument(BaseFileDocument):
