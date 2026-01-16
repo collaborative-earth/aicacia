@@ -93,12 +93,15 @@ class ParsingManager():
         updated_document_ids: list[str] = []
 
         # Process files in batches
+        logger.info(f"Processing files in batches of size: {batch_size}.")
         for batch_no, batch in enumerate(range(0, len(files_info), batch_size)):
-            logger.info(f"Processing batch {batch_no + 1}...")
+            logger.info(
+                f"--- Processing batch: [ {batch_no + 1} of {len(files_info)//batch_size + 1} ] ---"
+                )
             batch_files_info: list[ParseFileInfo] = files_info[batch: batch + batch_size]
 
             # Parse files in the current batch
-            logger.info(f"Parsing files for batch. {batch_no + 1}")
+            logger.info(f"Starting parsing of {len(batch_files_info)} files.")
             parsed_files: Sequence[BaseFileDocument] = self.parse_files(batch_files_info)
 
             if not parsed_files:
@@ -141,15 +144,22 @@ class ParsingManager():
                         doc_ids=doc_id_to_textual_representation.keys()
                     )
 
+                logger.info(
+                    f"Updating DB status of successfully parsed documents in batch ({len(parsed_sourced_documents)}) to {CurrentStatusEnum.TEXT_PARSED.value}."
+                )
                 for doc in parsed_sourced_documents:
                     doc.current_status = CurrentStatusEnum.TEXT_PARSED.value
                     doc.textual_representation = doc_id_to_textual_representation[doc.doc_id]
+
+                    logger.debug(
+                        f"Updating document (doc_id: {doc.doc_id}) with its parsing info."
+                    )
+
                 session.commit()
 
             updated_document_ids.extend(doc_id_to_textual_representation.keys())
             logger.info(
-                f"Updated {len(parsed_sourced_documents)}/{len(batch_files_info)} sourced_documents in batch {batch_no + 1}"
+                f"Finished updating {len(parsed_sourced_documents)}/{len(batch_files_info)} sourced_documents in batch {batch_no + 1}"
             )
 
         return updated_document_ids
-

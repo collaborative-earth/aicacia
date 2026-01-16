@@ -35,7 +35,7 @@ class TempDirectoryContext:
             logger.info("Temporary directory not initialized. Skipping cleanup.")
             return
 
-        logger.info(f"Cleaning up {self.path}...")
+        logger.info(f"Cleaning up temporary directory: {self.path}")
         self._tmp_obj.cleanup()  # Explicitly triggers deletion
         self._tmp_obj = None
         self._path = None

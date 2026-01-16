@@ -43,7 +43,9 @@ class AppConfig:
     CWD = Path(os.getcwd())
 
     # Configure logging
-    logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "WARNING")
+    logger.info(f"Config LOG_LEVEL set to: {LOG_LEVEL}")
+    logging.basicConfig(level=os.getenv("LOG_LEVEL", LOG_LEVEL), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logging.getLogger('sqlalchemy').setLevel(logging.WARNING)
 
     APP_NAME: str = os.getenv("APP_NAME", "aicacia")
@@ -65,7 +67,8 @@ class AppConfig:
 
     # Grobid
     GROBID_URL: str = os.getenv("GROBID_URL", "http://localhost:8070")
-    # GROBID_CONFIG_FILE: str = os.path.join(CWD, os.getenv("GROBID_CONFIG_FILE", "grobid.yaml"))
+    GROBID_NB_WORKERS: int = int(os.getenv("GROBID_NB_WORKERS", "10"))
+    GROBID_TIMEOUT: int = int(os.getenv("GROBID_TIMEOUT", "300"))
 
     # API keys
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")

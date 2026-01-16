@@ -31,7 +31,7 @@ def main() -> None:
     "--batch-size",
     type=int,
     default=100,
-    help="Batch size for processing documents"
+    help="Batch size for processing documents (Download, Parsing, uploading etc. Default: 100)"
 )
 @click.option(
     "-outfolder",
@@ -48,7 +48,12 @@ def parse_documents(
     """Parse documents from configured directory."""
     logger.info("Starting document parsing...")
 
-    default_parser = GrobidParser(host_url=configs.GROBID_URL)
+    default_parser = GrobidParser(
+        host_url=configs.GROBID_URL,
+        nb_workers=configs.GROBID_NB_WORKERS,
+        timeout=configs.GROBID_TIMEOUT,
+        verbose=(configs.LOG_LEVEL == "INFO")
+    )
     parsing_manager = ParsingManager(default_parser=default_parser)
 
     s3_bucket = configs.S3_BUCKET
@@ -66,5 +71,16 @@ def parse_documents(
     count = len(parsed_documents)
 
     logger.info(f"✓ Successfully processed {count} document(s)")
+
+
 if __name__ == "__main__":
     main()
+"""
+Sample usage:
+(From the root of the repository)
+
+Commands:
+
+uv run data-ingestion-cli parse-documents -outfolder hj_andrews_parsing_output --dry-run
+
+"""

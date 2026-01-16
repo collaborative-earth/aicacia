@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Sequence
 from pathlib import Path
 from core.fs_manager import fs_manager
@@ -16,7 +17,6 @@ logger = logging.getLogger(__name__)
 class GrobidParser(AbstractParser):
 
     PARSING_OPTIONS = {
-        "n": 10,
         "generateIDs": False,
         "consolidate_header": False,
         "consolidate_header": False,
@@ -30,13 +30,22 @@ class GrobidParser(AbstractParser):
         "verbose": True
     }
 
-    def __init__(self, host_url: str) -> None:
+    def __init__(
+            self, host_url: str, nb_workers: int = 10, timeout: int = 300, verbose: bool = False
+    ) -> None:
         super().__init__()
         self.grobid_client = GrobidClient(
             grobid_server=host_url,
-            timeout=1000,
+            timeout=timeout,
+            verbose=verbose
         )
         self.tmp_dir_path = tmp_dir_context.path
+        self.nb_workers = nb_workers
+
+        logger.info(f"GROBID server: {host_url}.")
+        logger.info(f"GROBID number of workers: {nb_workers}")
+        logger.info(f"GROBID timeout: {timeout}s")
+        logger.info(f"GROBID verbose: {verbose}")
 
     def parse_files(
             self, files_info: list[ParseFileInfo]
@@ -49,6 +58,7 @@ class GrobidParser(AbstractParser):
         """
 
         # Grobid uses files downloaded locally before processing
+        logger.info(f"Downloading {len(files_info)} files to the local file system.")
         temp_dir_str: str = str(self.tmp_dir_path)
         filepaths = [file.source_filepath for file in files_info]
         downloaded_filepaths: list[str] = fs_manager.download_filepaths(filepaths, temp_dir_str)
@@ -64,6 +74,8 @@ class GrobidParser(AbstractParser):
             output_path.rmdir()
             output_path.mkdir(parents=True, exist_ok=False)
 
+        logger.info(f"Sending {len(downloaded_filepaths)} files to GROBID for parsing...")
+        start = time.perf_counter()
         processed_count, error_count, skipped_count =\
             self.grobid_client.process_batch(
                 "processFulltextDocument",
@@ -71,10 +83,12 @@ class GrobidParser(AbstractParser):
                 input_files=downloaded_filepaths,
                 output=str(output_path),
                 force=True,
+                n=self.nb_workers,
                 **self.PARSING_OPTIONS
             )
+        elapsed = time.perf_counter() - start
         logger.info(
-            f"Processed: {processed_count}, Errors: {error_count}, Skipped: {skipped_count}"
+            f"GROBID parser parsed: {processed_count}, Errors: {error_count}, Skipped: {skipped_count} in {elapsed:.2f}s"
         )
 
         OUTPUT_EXTENSION = "grobid.tei.xml"
@@ -94,7 +108,8 @@ class GrobidParser(AbstractParser):
                         }
                     )
                 )
+                logger.info(f"Successfully parsed file: {file_info.source_filepath}.")
             else:
-                logger.error(f"MISSING parsed file {parsed_path} for doc {file_info.source_filepath}.")
+                logger.error(f"ERROR parsing file: {file_info.source_filepath}. \nMissing parsed file: {parsed_path}.")
 
         return outputs
