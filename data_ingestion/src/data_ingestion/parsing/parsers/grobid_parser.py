@@ -6,16 +6,14 @@ from data_ingestion.parsing.document_loaders.tei_file_document import TEIFileDoc
 from data_ingestion.parsing.parsers.abstract_parser import AbstractParser
 from grobid_client.grobid_client import GrobidClient
 
-from core.app_config import configs
 from data_ingestion.parsing.types import ParseFileInfo
+from data_ingestion.parsing.temp_dir_handler import tmp_dir_context
 
 
 logger = logging.getLogger(__name__)
 
 
 class GrobidParser(AbstractParser):
-
-    TMP_LOCAL_FOLDER = configs.TMP_LOCAL_FOLDER
 
     PARSING_OPTIONS = {
         "n": 10,
@@ -38,6 +36,7 @@ class GrobidParser(AbstractParser):
             grobid_server=host_url,
             timeout=1000,
         )
+        self.tmp_dir_path = tmp_dir_context.path
 
     def parse_files(
             self, files_info: list[ParseFileInfo]
@@ -50,18 +49,25 @@ class GrobidParser(AbstractParser):
         """
 
         # Grobid uses files downloaded locally before processing
-        local_folder: str = configs.TMP_LOCAL_FOLDER
+        temp_dir_str: str = str(self.tmp_dir_path)
         filepaths = [file.source_filepath for file in files_info]
-        downloaded_filepaths: list[str] = fs_manager.download_filepaths(filepaths, local_folder)
+        downloaded_filepaths: list[str] = fs_manager.download_filepaths(filepaths, temp_dir_str)
 
         # Create output directory to store GROBID results (TEI XML files)
-        output_path = Path(self.TMP_LOCAL_FOLDER).joinpath("grobid_outputs")
-        output_path.mkdir(parents=True, exist_ok=True)
+        output_path = self.tmp_dir_path.joinpath("grobid_outputs")
+
+        try:
+            output_path.mkdir(parents=True, exist_ok=False)
+        except FileExistsError:
+            logger.warning(f"Output directory {output_path} already exists. Could indicate there was an issue with previous run/cleanup.")
+            logger.info("Deleting it and creating a new one.")
+            output_path.rmdir()
+            output_path.mkdir(parents=True, exist_ok=False)
 
         processed_count, error_count, skipped_count =\
             self.grobid_client.process_batch(
                 "processFulltextDocument",
-                input_path="",
+                input_path=temp_dir_str,
                 input_files=downloaded_filepaths,
                 output=str(output_path),
                 force=True,

@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class FilesystemManager:
-    def __init__(self, filesystem: str) -> None:  # Options: local | s3 | etc.
+    def __init__(self, fs_protocol: str) -> None:  # Options: local | s3 | etc.
         # S3 uses .env keys (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) if available.
-        self.fs: fsspec.AbstractFileSystem = fsspec.filesystem(filesystem)  # TODO: Handle in-memory. REMOVE?
+        self.fs: fsspec.AbstractFileSystem = fsspec.filesystem(fs_protocol)
 
     def download_filepaths(self, filepaths: list[str], local_dir: str) -> list[str]:
         '''Download files from given filepaths to local directory.'''
@@ -63,5 +63,8 @@ class FilesystemManager:
         return list(results)
 
 
-# TODO. Load filesystem config from env or config file
-fs_manager = FilesystemManager(configs.SOURCE_FILESYSTEM)  # 's3' or 'local' for local filesystem
+# protocol is None for local paths; using "file" as default
+filesystem_protocol = fsspec.core.split_protocol(configs.S3_BUCKET)[0] or "file"
+logger.info(f"Source filesystem protocol set to: {filesystem_protocol}")
+
+fs_manager = FilesystemManager(filesystem_protocol)

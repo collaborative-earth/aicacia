@@ -23,9 +23,10 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+from core.app_config import aicacia_project_root
 
 # Add project root to Python path for imports
-project_root = Path(__file__).parent.parent.parent
+project_root = aicacia_project_root
 sys.path.insert(0, str(project_root))
 
 from db.db_manager import session_scope
@@ -465,14 +466,14 @@ def import_csv_to_database(
 
     # Log database connection info (without password)
     from core.app_config import configs
-    logger.info(f"Database Host: {configs.POSTGRES_HOST}")
-    logger.info(f"Database Port: {configs.POSTGRES_PORT}")
-    logger.info(f"Database User: {configs.POSTGRES_USER}")
-    logger.info(f"Database Name: {configs.POSTGRES_DB}")
-    logger.info(f"Password length: {len(configs.POSTGRES_PASSWORD)} chars")
+    logger.info(f"Database Host: {configs.DB_HOST}")
+    logger.info(f"Database Port: {configs.DB_PORT}")
+    logger.info(f"Database User: {configs.DB_USER}")
+    logger.info(f"Database Name: {configs.DB_NAME}")
+    logger.info(f"Password length: {len(configs.DB_PASSWORD)} chars")
     logger.info(
-        f"Password (masked): {configs.POSTGRES_PASSWORD[:2]}..."
-        f"{configs.POSTGRES_PASSWORD[-2:]}"
+        f"Password (masked): {configs.DB_PASSWORD[:2]}..."
+        f"{configs.DB_PASSWORD[-2:]}"
     )
 
     # Track failures and duplicates

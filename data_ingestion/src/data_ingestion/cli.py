@@ -1,61 +1,70 @@
+"""
+Parsing CLI commands for the data_ingestion package.
+"""
+
 import logging
+import click
 
 from core.app_config import configs
-from data_ingestion.parsing.document_loaders import BaseFileDocument
 from data_ingestion.parsing.parsing_manager import ParsingManager
-from data_ingestion.ingestion.ingestion_handler import IngestionHandler
 from data_ingestion.parsing.parsers.grobid_parser import GrobidParser
 
 
 logger = logging.getLogger(__name__)
 
 
-def test_parsing(dry_run: bool = True, filepaths: list[str] = []) -> None:
-    # Configure parameters
-    default_parser = GrobidParser(host_url=configs.GROBID_URL)
+@click.group()
+def main() -> None:
+    """Commands for the data_ingestion module."""
+    pass
 
-    dest_dir: str = configs.PARSED_OUTPUTS_FOLDER
+
+@main.command(name="parse-documents")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Run without uploading parsed documents"
+)
+@click.option(
+    "-bz",
+    "--batch-size",
+    type=int,
+    default=100,
+    help="Batch size for processing documents"
+)
+@click.option(
+    "-outfolder",
+    "--output-folder",
+    type=str,
+    default="hj_andrews_bibliography_parsed",
+    help="Bucket folder name for organized output"
+)
+def parse_documents(
+    dry_run: bool,
+    batch_size: int,
+    output_folder: str
+) -> None:
+    """Parse documents from configured directory."""
+    logger.info("Starting document parsing...")
+
+    default_parser = GrobidParser(host_url=configs.GROBID_URL)
     parsing_manager = ParsingManager(default_parser=default_parser)
 
-    if not filepaths:
-        logger.info("No files ready to parse.")
-        return
+    s3_bucket = configs.S3_BUCKET
+    output_folder_full_path = f"{s3_bucket}/{output_folder}"
 
-    logger.info(f"Found {len(filepaths)} files ready to parse.")
+    logger.info(f"Parsing documents to {output_folder}")
+    logger.info(f"Batch size: {batch_size}, Dry run: {dry_run}")
 
-    # Parse files
-    parsed_files = parsing_manager.parse_files(filepaths)
-    for parsed_file in parsed_files:
-        logger.info(f"Parsed file: {parsed_file.metadata.get('source_filepath', '')} - {parsed_file.filepath}")
-
-
-def test_document_parsing(dry_run) -> None:
-    # Configure parameters
-    default_parser = GrobidParser(host_url=configs.GROBID_URL)
-
-    dest_dir: str = configs.PARSED_OUTPUTS_FOLDER
-    parsing_manager = ParsingManager(default_parser=default_parser)
-
-    bucket_folder_name = "hj_andrews_bibliography_parsed"   # TODO: make this a parameter
-    parsed_documents: list[str] = parsing_manager.parse_documents(
-        dest_dir=dest_dir, 
+    parsed_documents = parsing_manager.parse_documents(
+        dest_dir=output_folder_full_path,
         dry_run=dry_run,
-        batch_size=100
+        batch_size=batch_size
     )
-    for parsed_document in parsed_documents:
-        logger.info(f"Parsed document: {parsed_document}")
 
+    count = len(parsed_documents)
 
-def main():
-    logger.info("In the CLI!")
-
-    # test_parsing(dry_run=True)  # dry-run should get you till parsing, but no uploads
-    test_document_parsing(dry_run=True)  # dry-run should get you till parsing, but no uploads
-    # test_ingestion(dry_run=True)  # dry-run should get you till the nodes, but no side-effects
-    logger.info("Done!")
-
-
-# TODO: Create CLI.. WIP
+    logger.info(f"✓ Successfully processed {count} document(s)")
 if __name__ == "__main__":
     main()
-

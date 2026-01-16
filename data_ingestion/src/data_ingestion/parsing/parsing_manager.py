@@ -1,4 +1,5 @@
 import logging
+from functools import wraps
 from typing import Sequence
 from pathlib import Path
 from db.db_manager import session_scope
@@ -8,9 +9,21 @@ from data_ingestion.parsing.types import ParseFileInfo
 from data_ingestion.custom_types.current_status_enum import CurrentStatusEnum
 from db.models.sourced_documents import SourcedDocument, TextualRepresentation
 from db.repositories.sourced_document_repo import SourcedDocumentRepository
+from data_ingestion.parsing.temp_dir_handler import tmp_dir_context
 
 
 logger = logging.getLogger(__name__)
+
+
+def cleanup_tmp_dir_after_call(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        finally:
+            # Cleanup the temporary directory after the function call.
+            tmp_dir_context.teardown()
+    return wrapper
 
 
 class ParsingManager():
@@ -47,13 +60,14 @@ class ParsingManager():
 
         return parsed_files
 
-    def get_id_and_filepath_from_filepath(self, filepath: str) -> dict[str, str]:
+    def _get_id_and_filepath_from_filepath(self, filepath: str) -> dict[str, str]:
         '''Get the ID from the filepath.'''
         return {
             'doc_id': Path(filepath).stem,
             'source_filepath': filepath
         }
 
+    @cleanup_tmp_dir_after_call
     def parse_documents(
             self, dest_dir: str, dry_run: bool = False, batch_size: int = 100
     ) -> list[str]:
@@ -64,7 +78,10 @@ class ParsingManager():
         with session_scope() as session:
             sourced_document_repo = SourcedDocumentRepository()
             parsed_sourced_documents = sourced_document_repo.get_ready_to_parse_files(session)
-            files_info = [ParseFileInfo(doc_id=doc.doc_id, source_filepath=doc.s3_path) for doc in parsed_sourced_documents]
+            files_info = [
+                ParseFileInfo(doc_id=doc.doc_id, source_filepath=doc.s3_path)
+                for doc in parsed_sourced_documents
+            ]
 
         if not files_info:
             logger.info("No documents to parse.")
