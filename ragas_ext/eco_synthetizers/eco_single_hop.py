@@ -29,11 +29,10 @@ class SingleHopScenario_eco(BaseScenario):
     """
 
     ecothemes: t.Dict[str, t.List[str]]
-    concept: str
+    theme: str
     
     def __repr__(self) -> str:
-        return f"SingleHopScenario(\nnodes={len(self.nodes)}\necothemes={self.ecothemes}\npersona={self.persona}\nstyle={self.style}\nlength={self.length})"
-
+        return f"SingleHopScenario(\nnodes={len(self.nodes)}\necothemes={self.ecothemes}\ntheme={self.theme}\npersona={self.persona}\nstyle={self.style}\nlength={self.length})"
 
 class SingleHopScenarioEco(BaseSynthesizer[Scenario]):
 
@@ -114,7 +113,7 @@ class SingleHopScenarioEco(BaseSynthesizer[Scenario]):
                 "species": data.get("species", [""]),
                 "challenges": data.get("challenge", [""]),
             },
-            concept = data["theme"],
+            theme = data["theme"],
             persona=data["persona"],
             style=data["style"],
             length=data["length"],
@@ -135,7 +134,7 @@ class SingleHopScenarioEco(BaseSynthesizer[Scenario]):
             if len(scenarios) >= n:
                 break
             ecothemes = node.properties.get(property_name, [""])
-            themes = node.properties.get("themes", [])
+            themes = node.properties.get("themes", [""])
             base_scenarios = self.prepare_combinations(
                 node,
                 ecothemes,
@@ -157,7 +156,7 @@ class SingleHopScenarioEco(BaseSynthesizer[Scenario]):
         prompt_input = QueryConditionEco(
             persona=scenario.persona,
             ecothemes=scenario.ecothemes,
-            concept = scenario.concept,
+            theme = scenario.theme,
             context=reference_context,
             query_length=scenario.length.value,
             query_style=scenario.style.value,
