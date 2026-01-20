@@ -1,4 +1,5 @@
 from logging.config import fileConfig
+import os
 
 from alembic import context
 from db.models import Base  # This will import all models
@@ -26,8 +27,12 @@ cmd_opts = context.get_x_argument(as_dictionary=True)
 if "db_url" in cmd_opts:
     config.set_main_option("sqlalchemy.url", cmd_opts["db_url"])
 else:
-    print("----------------- Loading database URL from core config settings... -----------------")
-    config.set_main_option("sqlalchemy.url", configs.get_database_url())
+    ini_db_url = config.get_alembic_option("sqlalchemy.url")
+    if not ini_db_url or ini_db_url.strip() == "":
+        print("Alembic will use sqlalchemy.url from DB_URL environment variable.")
+        config.set_main_option("sqlalchemy.url", os.getenv("DB_URL", ""))
+    else:
+        print("Alembic will use sqlalchemy.url from alembic.ini")
 
 
 # other values from the config, defined by the needs of env.py,

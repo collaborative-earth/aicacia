@@ -56,6 +56,10 @@ class AppConfig:
     DB_USER: str = os.getenv("DB_USER", "postgres")
     DB_NAME: str = os.getenv("DB_NAME", "aicacia_db")
     DB_PASSWORD: str = os.getenv("DB_PASSWORD", "")
+    os.environ["DB_URL"] = (
+            f"postgresql://{DB_USER}:{DB_PASSWORD}"
+            f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+        )
 
     # Filesystem configuration
     S3_BUCKET: str = os.getenv("S3_BUCKET", "data/parsed_outputs")
@@ -63,7 +67,6 @@ class AppConfig:
     if TMP_LOCAL_DIR:
         if TMP_LOCAL_DIR.startswith('./') or TMP_LOCAL_DIR.startswith('../'):
             TMP_LOCAL_DIR = str(CWD.joinpath(TMP_LOCAL_DIR).resolve())  # if relative force CWD
-        logger.info(f"Temporary local directory set to: {TMP_LOCAL_DIR}")
 
     # Grobid
     GROBID_URL: str = os.getenv("GROBID_URL", "http://localhost:8070")
@@ -86,10 +89,7 @@ class AppConfig:
     @classmethod
     def get_database_url(cls) -> str:
         """Construct PostgreSQL database URL."""
-        return (
-            f"postgresql://{cls.DB_USER}:{cls.DB_PASSWORD}"
-            f"@{cls.DB_HOST}:{cls.DB_PORT}/{cls.DB_NAME}"
-        )
+        return os.getenv("DB_URL", "")
 
 
 # singleton instance for easy access
