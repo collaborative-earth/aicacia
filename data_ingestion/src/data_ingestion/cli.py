@@ -37,7 +37,6 @@ def main() -> None:
     "-outfolder",
     "--output-folder",
     type=str,
-    default="hj_andrews_bibliography_parsed",
     help="Bucket folder name for organized output"
 )
 def parse_documents(

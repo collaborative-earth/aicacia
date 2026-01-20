@@ -43,6 +43,15 @@ class TextualRepresentation(Base, table=True):
     document: "SourcedDocument" = Relationship(back_populates="textual_representation")
 
 
+class DataPipelineErrorLog(Base, table=True):
+    __tablename__ = "data_pipeline_error_logs"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    doc_id: uuid.UUID = Field(foreign_key="sourced_documents.doc_id", nullable=False)
+    doc_err_status: str = Field(nullable=False)
+    error_msg: str = Field(nullable=False)
+    parser: str = Field(nullable=True)
+
+
 class SourceLink(Base, table=True):
     __tablename__ = "source_links"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)

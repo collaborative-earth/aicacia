@@ -1,6 +1,6 @@
 
 from typing import Sequence
-from sqlmodel import Session, select, col
+from sqlmodel import Session, select, col, update
 from data_ingestion.custom_types.current_status_enum import CurrentStatusEnum
 from db.models.sourced_documents import SourcedDocument
 from db.repositories.base_model_repo import BaseModelRepository
@@ -65,7 +65,6 @@ class SourcedDocumentRepository(BaseModelRepository[SourcedDocument]):
         sourced_documents = session.exec(stmt).all()
         return sourced_documents
 
-
     def get_documents_by_doc_ids(
         self,
         session: Session,
@@ -77,4 +76,19 @@ class SourcedDocumentRepository(BaseModelRepository[SourcedDocument]):
         )
         sourced_documents = session.exec(stmt).all()
         return sourced_documents
+
+    def bulk_update_status_by_doc_ids(
+        self,
+        session: Session,
+        doc_ids: Sequence[str],
+        new_status: str
+    ) -> int:
+        stmt = (
+            update(SourcedDocument)
+            .where(col(SourcedDocument.doc_id).in_(doc_ids))
+            .values(current_status=new_status)
+        )
+        res = session.exec(stmt)
+        return res.rowcount or 0
+        # session.commit()  # Commit should be handled by the caller
 

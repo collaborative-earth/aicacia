@@ -53,7 +53,10 @@ class FilesystemManager:
     def upload_filepaths_in_parallel(
         self, local_filepaths: list[str], dest_dir: str
     ) -> List[str | None]:
-        '''Upload local files to the destination directory in parallel.'''
+        '''Upload local files to the destination directory in parallel.
+        Returns list of destination paths or None for failed uploads.
+        Output order corresponds to input order.
+        '''
 
         with ThreadPoolExecutor() as exec:
             results = exec.map(

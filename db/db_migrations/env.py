@@ -4,6 +4,8 @@ from alembic import context
 from db.models import Base  # This will import all models
 from sqlalchemy import engine_from_config, pool
 
+from core.app_config import configs
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -23,6 +25,9 @@ cmd_opts = context.get_x_argument(as_dictionary=True)
 
 if "db_url" in cmd_opts:
     config.set_main_option("sqlalchemy.url", cmd_opts["db_url"])
+else:
+    print("----------------- Loading database URL from core config settings... -----------------")
+    config.set_main_option("sqlalchemy.url", configs.get_database_url())
 
 
 # other values from the config, defined by the needs of env.py,

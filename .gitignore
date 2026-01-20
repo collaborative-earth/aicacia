@@ -46,3 +46,6 @@ finetuning/results/*
 # Notebooks
 *.ipynb
 
+# Environment files
+.env
+.env.*
