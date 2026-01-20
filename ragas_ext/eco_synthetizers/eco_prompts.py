@@ -17,43 +17,48 @@ class QueryConditionEco(BaseModel):
 
 class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, GeneratedQueryAnswer]):
     instruction: str = ("""
+            # Task overview
+            You are a worker in ecological restoration.
+
             Generate a single-hop query and its answer using only the provided context.
-            You must strictly follow all the constraints below.
-            ────────────────────────────────────────
-            1. PERSONA: style, vocabulary, perspective
-            ────────────────────────────────────────
-            Write the query exactly as this persona would:
-            - Volunteer → informal, friendly, very simple words, no technical and scientifical phrasing.
-            - Manager → planning-oriented, decision-focused, mentions priorities, constraints and strategy.
-            - Technician → quantitative, mentions thresholds, values, metrics.
-            - Researcher → analytical, causal, comparative, evidence-based wording.
-            ────────────────────────────────────────
-            2. THEME + ECOTHEMES
-            ────────────────────────────────────────
-            Your query must:
-            - Center on the given theme, but might paraphrise.
-            - Include at least one ecological theme (locations, ecosystems, species, or challenges).
-            - Avoid copying more than 3–4 words from the context.
-            ────────────────────────────────────────
-            3. QUERY STYLE AND LENGTH
-            ────────────────────────────────────────
-            After generating the query, adjust it if necessary so that both style and length constraints 
-            are satisfied exactly.
-            `query_style`:
-            - If WEB_SEARCH → keyword-like query; remove function words (the, for, and, which, how, etc.).
-            - If MISSPELLED → include natural misspellings, swap close letters, miss ones; sentence still understandable.
-            - If PERFECT_GRAMMAR → fully standard grammar, formal.
-            `query_length`:
-            - Short → fewer than 10 words.
-            - Medium → 10–20 words.
-            - Long → 20–30 words.
-            ────────────────────────────────────────
-            4. ANSWER
-            ────────────────────────────────────────
-            Generate an answer that:
-            - Uses only the information from the context.
-            - Contains no external knowledge.
-            - Is concise, factual, and consistent with the context.
+            Follow the steps below in order and respect all constraints exactly.
+
+            # Persona
+            Write the query exactly as the given persona would.
+            - Volunteer: informal, friendly, very simple words; no technical or scientific terms.
+            - Manager: planning-oriented, decision-focused; mentions priorities, constraints, or strategy.
+            - Technician: quantitative; mentions thresholds, values, or measurable criteria.
+            - Researcher: analytical, causal, comparative; evidence-based wording.
+
+            # Content constraints
+            - Center the query on the given theme, if the context allows (paraphrasing allowed).
+            - Include at least one ecological element (location, ecosystem, species, or challenge).
+            - Avoid copying more than four consecutive words from the context.
+            - When the context allows, frame the query so it implies a concrete action, decision, or next step
+            (e.g., what to do, what to prioritize, what threshold to use). If no actionable framing is supported by the context, produce a factual query instead.
+
+            # Query style
+            Apply the required query style exactly.
+            - WEB_SEARCH: keyword-like; remove function words.
+            - MISSPELLED: include natural misspellings while keeping the meaning clear.
+            - PERFECT_GRAMMAR: fully grammatical and formal.
+
+            # Query length
+            Ensure the final query matches the required length.
+            - Short: fewer than 10 words.
+            - Medium: 10–20 words.
+            - Long: 20–30 words.
+
+            # Answer
+            Generate a concise answer that:
+            - Uses only information from the provided context.
+            - Adds no external knowledge or assumptions.
+            - Directly answers the query.
+
+            If the query implies a decision, next step, priority, or threshold, state the supported action or condition using only context evidence.  
+            If no action is supported by the context, provide a factual answer instead.
+            
+            Reason using the context and requirement to produce the query and then the answer using only the context.
             """
     )
 
@@ -189,58 +194,54 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
     
 class QueryAnswerGenerationPromptMultiEco(PydanticPrompt[QueryConditions, GeneratedQueryAnswer]):
     instruction: str = ("""
+        # Task overview
+        You are a worker in ecological restoration.
+       
         Generate a multi-hop query and its answer using only the provided multi-segment context.
         You must strictly follow all constraints below.
-        ────────────────────────────────────────
-        1. PERSONA: style, vocabulary, perspective
-        ────────────────────────────────────────
-        Write the query exactly as this persona would:
 
-        - Volunteer → informal, friendly, very simple words; no technical or scientific phrasing.
-        - Manager → planning-oriented, decision-focused; mentions priorities, constraints, and strategy.
-        - Technician → quantitative; mentions thresholds, values, metrics, comparisons.
-        - Researcher → analytical, causal, comparative; evidence-based wording.
-
-        ────────────────────────────────────────
-        2. THEME + ECOLOGICAL CONTEXT
-        ────────────────────────────────────────
-        Your query must:
+        # Persona
+        Write the query exactly as the given persona would.
+        - Volunteer: informal, friendly, very simple words; no technical or scientific terms.
+        - Manager: planning-oriented, decision-focused; mentions priorities, constraints, or strategy.
+        - Technician: quantitative; mentions thresholds, values, or measurable criteria.
+        - Researcher: analytical, causal, comparative; evidence-based wording.
+        
+        # Content constraints
+        - Use the provided context segments and themes to form a query that requires combining information from multiple segments (e.g., `<1-hop>` and `<2-hop>`)
         - Center on the provided theme(s), possibly paraphrased.
-        - Explicitly include ecological elements such as locations, ecosystems, species, or environmental challenges.
-        - Connect information across multiple context segments (e.g., <1-hop> and <2-hop>).
-        - Avoid copying more than 3–4 consecutive words from any context segment.
+        - Include at least one ecological element (location, ecosystem, species, or challenge).
+        - Avoid copying more than four consecutive words from the context.
+        - When the context allows, frame the query so it implies a concrete action, decision, or next step
+        (e.g., what to do, what to prioritize, what threshold to use). If no actionable framing is supported by the context, produce a factual query instead.
 
-        ────────────────────────────────────────
-        3. MULTI-HOP LOGIC
-        ────────────────────────────────────────
+        # Multi-hop logic
         - Each context segment is tagged as `<1-hop>`, `<2-hop>`, etc.
         - The query must require reasoning across at least two context segments.
         - Each hop should contribute distinct information (e.g., cause → effect, constraint → outcome, location → intervention).
-        - The connection between hops must be explicit or logically necessary to answer the query.
 
-        ────────────────────────────────────────
-        4. QUERY STYLE AND LENGTH
-        ────────────────────────────────────────
-        After generating the query, revise it so both constraints are satisfied exactly.
+        # Query style
+        Apply the required query style exactly.
+        - WEB_SEARCH: keyword-like; remove function words.
+        - MISSPELLED: include natural misspellings while keeping the meaning clear.
+        - PERFECT_GRAMMAR: fully grammatical and formal.
 
-        query_style:
-        - WEB_SEARCH → keyword-like query; remove function words (the, and, for, how, which, etc.).
-        - MISSPELLED → include natural misspellings or swapped letters; sentence still understandable.
-        - PERFECT_GRAMMAR → fully standard grammar and formal structure.
-
-        query_length:
-        - Short → fewer than 10 words.
-        - Medium → 10–20 words.
-        - Long → 20–30 words.
-
-        ────────────────────────────────────────
-        5. ANSWER
-        ────────────────────────────────────────
-        Generate an answer that:
+        # Query length
+        Ensure the final query matches the required length.
+        - Short: fewer than 10 words.
+        - Medium: 10–20 words.
+        - Long: 20–30 words.
+        
+        # Answer
+        Generate a concise answer that:
         - Uses only information from the provided context segments.
-        - Integrates evidence from all required hops.
-        - Adds no external knowledge or unsupported inference.
-        - Is concise, factual, and internally consistent with the context.
+        - Adds no external knowledge or assumptions.
+        - Directly answers the query.
+
+        If the query implies a decision, next step, priority, or threshold, state the supported action or condition using only context evidence.  
+        If no action is supported by the context, provide a factual answer instead.
+        
+        Reason using the context and requirement to produce the query and then the answer using only the context.
         """
     )
 
