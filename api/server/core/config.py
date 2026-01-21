@@ -18,7 +18,7 @@ class Settings(BaseSettings):
 
     EMBEDDING_MODEL_NAME: str = "BAAI/bge-m3"
 
-    model_config = SettingsConfigDict()
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
 settings = Settings()

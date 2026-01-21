@@ -77,10 +77,16 @@ interface ReferenceFeedback {
   feedback_reason: string;
 }
 
-interface QuestionResponse {
-  query_id: string;
+export interface ConfigurationResponse {
+  configuration_id: string;
   references: Reference[];
-  summary: string;
+  summary: string | null;
+}
+
+export interface ExperimentQueryResponse {
+  query_id: string;
+  experiment_id: string;
+  responses: ConfigurationResponse[];
 }
 
 interface FeedbackRequest {
@@ -90,7 +96,7 @@ interface FeedbackRequest {
   feedback: string;
 }
 
-export async function askQuestion(query: string): Promise<QuestionResponse> {
+export async function askQuestion(query: string): Promise<ExperimentQueryResponse> {
   try {
     const response = await api.post('/user_query', { question: query });
     return response.data;

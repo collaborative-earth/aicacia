@@ -17,6 +17,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: aicacia-api-dev
     environment:
+      POSTGRES_HOST: aicacia-postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aicacia}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       QDRANT_URL: ${QDRANT_URL}
