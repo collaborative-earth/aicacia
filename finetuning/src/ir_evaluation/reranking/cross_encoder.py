@@ -3,9 +3,11 @@ Cross-encoder reranker for improving retrieval results.
 """
 import logging
 from typing import Dict, List, Optional
+from collections import defaultdict
 
 import numpy as np
 from sentence_transformers import CrossEncoder
+
 
 from .base_reranker import BaseReranker
 
@@ -77,11 +79,8 @@ class CrossEncoderReranker(BaseReranker):
             query_doc_pairs.append([query, doc_text])
         
         # Compute relevance scores in batches
-        scores = []
-        for i in range(0, len(query_doc_pairs), self.batch_size):
-            batch_pairs = query_doc_pairs[i:i + self.batch_size]
-            batch_scores = self.model.predict(batch_pairs)
-            scores.extend(batch_scores)
+
+        scores = self.model.predict(batch_pairs,batch_size = self.batch_size)
         
         # Create list of (doc_id, score) tuples
         doc_scores = list(zip(candidate_docs, scores))
@@ -97,6 +96,55 @@ class CrossEncoderReranker(BaseReranker):
             reranked_docs = reranked_docs[:top_k]
         
         return reranked_docs
+    
+    def rerank_all(
+        self,
+        queries: Dict[str, str],
+        base_results: Dict[str, List[str]],
+        doc_texts: Dict[str, str],
+        top_k_candidates: int = 100,
+        top_k_output: int = None,
+    ) -> Dict[str, List[str]]:
+        """
+        Efficiently rerank all queries in global batches.
+
+        Args:
+            queries: dict of {query_id: query_text}
+            base_results: dict of {query_id: [doc_ids]} (top candidates per query)
+            doc_texts: dict of {doc_id: document text}
+            top_k_candidates: number of top docs per query to rerank
+            top_k_output: number of top docs to keep per query (optional)
+
+        Returns:
+            dict {query_id: [reranked_doc_ids]}
+        """
+        # === Build all pairs in one go ===
+        all_pairs = []
+        query_doc_index = []  # (query_id, doc_id)
+
+        for qid, query in queries.items():
+            for doc_id in base_results[qid][:top_k_candidates]:
+                doc_text = doc_texts.get(doc_id, "")
+                all_pairs.append([query, doc_text])
+                query_doc_index.append((qid, doc_id))
+
+        # === Compute scores in batches ===
+        scores = self.model.predict(all_pairs, batch_size=self.batch_size)
+        # === Group results back by query ===
+        reranked_results = defaultdict(list)
+        for (qid, doc_id), score in zip(query_doc_index, scores):
+            reranked_results[qid].append((doc_id, score))
+
+        # === Sort within each query ===
+        for qid in reranked_results:
+            reranked_results[qid].sort(key=lambda x: x[1], reverse=True)
+            if top_k_output:
+                reranked_results[qid] = [doc for doc, _ in reranked_results[qid][:top_k_output]]
+            else:
+                reranked_results[qid] = [doc for doc, _ in reranked_results[qid]]
+
+        return dict(reranked_results)
+    
     
     def get_method_info(self) -> Dict:
         """Get information about the cross-encoder reranker."""

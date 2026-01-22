@@ -80,6 +80,26 @@ class BaseEvaluator(ABC):
         logger.info(f"Completed profiling for {self.method_name}: {execution_time:.2f}s, {memory_usage:.2f}MB")
         return execution_time, memory_usage
     
+    def _get_query_results(self, top_k: int = 100) -> Dict[str, List[str]]:
+        """
+        Retrieve all top-k documents for all queries in the datasets.
+        
+        Args:
+            top_k: Number of documents to retrieve for each query
+            
+        Returns:
+            List of document IDs ranked by relevance
+        """
+        query_results = {}
+        for query_id, query in self.queries.items():
+            if self.show_progress and len(self.queries) > 10:
+                if query_id == list(self.queries.keys())[0]:
+                    logger.info(f"Processing {len(self.queries)} queries...")
+            
+            retrieved_docs = self._retrieve(query, top_k)
+            query_results[query_id] = retrieved_docs
+        return query_results
+    
     @abstractmethod
     def _retrieve(self, query: str, top_k: int = 100) -> List[str]:
         """
@@ -108,15 +128,15 @@ class BaseEvaluator(ABC):
         self._start_profiling()
         
         # Retrieve documents for all queries
-        query_results = {}
-        for query_id, query in self.queries.items():
-            if self.show_progress and len(self.queries) > 10:
-                if query_id == list(self.queries.keys())[0]:
-                    logger.info(f"Processing {len(self.queries)} queries...")
-            
-            retrieved_docs = self._retrieve(query, top_k)
-            query_results[query_id] = retrieved_docs
-        
+        #query_results = {}
+        #for query_id, query in self.queries.items():
+        #    if self.show_progress and len(self.queries) > 10:
+        #        if query_id == list(self.queries.keys())[0]:
+        #            logger.info(f"Processing {len(self.queries)} queries...")
+        #    
+        #    retrieved_docs = self._retrieve(query, top_k)
+        #   query_results[query_id] = retrieved_docs
+        query_results = self._get_query_results(top_k)
         # Calculate metrics
         metrics = self._calculate_metrics(query_results)
         

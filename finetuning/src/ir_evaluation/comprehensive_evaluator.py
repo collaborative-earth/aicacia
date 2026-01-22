@@ -6,11 +6,12 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import yaml
+import pandas as pd
 from llama_index.core.evaluation import EmbeddingQAFinetuneDataset
 
 from .base.config import EvaluationConfig, create_default_config
 from .base.evaluator import EvaluationResult
-from .dense import BGEM3Evaluator, CustomDenseEvaluator, JinaV3Evaluator
+from .dense import BGEM3Evaluator, CustomDenseEvaluator, JinaV3Evaluator, STDenseEvaluator
 from .hybrid import BGEM3HybridEvaluator
 from .reranking import CrossEncoderReranker
 from .sparse import BGEM3SparseEvaluator, BM25Evaluator
@@ -93,43 +94,18 @@ class ComprehensiveEvaluator:
     
     def _create_dense_evaluator(self, model_config) -> Any:
         """Create a dense evaluator based on model configuration."""
-        if "bge-m3" in model_config.name.lower():
-            return BGEM3Evaluator(
-                queries=self.dataset.queries,
-                corpus=self.dataset.corpus,
-                relevant_docs=self.dataset.relevant_docs,
-                model_id=model_config.model_id,
-                trust_remote_code=model_config.trust_remote_code,
-                device=model_config.device,
-                batch_size=model_config.batch_size,
-                k_values=self.config.k_values,
-                show_progress=self.config.show_progress
-            )
-        elif "jina" in model_config.name.lower():
-            return JinaV3Evaluator(
-                queries=self.dataset.queries,
-                corpus=self.dataset.corpus,
-                relevant_docs=self.dataset.relevant_docs,
-                model_id=model_config.model_id,
-                trust_remote_code=model_config.trust_remote_code,
-                device=model_config.device,
-                batch_size=model_config.batch_size,
-                k_values=self.config.k_values,
-                show_progress=self.config.show_progress
-            )
-        else:
-            return CustomDenseEvaluator(
-                queries=self.dataset.queries,
-                corpus=self.dataset.corpus,
-                relevant_docs=self.dataset.relevant_docs,
-                model_id=model_config.model_id,
-                method_name=model_config.name,
-                trust_remote_code=model_config.trust_remote_code,
-                device=model_config.device,
-                batch_size=model_config.batch_size,
-                k_values=self.config.k_values,
-                show_progress=self.config.show_progress
-            )
+        return STDenseEvaluator(
+            queries=self.dataset.queries,
+            corpus=self.dataset.corpus,
+            relevant_docs=self.dataset.relevant_docs,
+            model_id=model_config.model_id,
+            method_name=model_config.name,
+            trust_remote_code=model_config.trust_remote_code,
+            device=model_config.device,
+            batch_size=model_config.batch_size,
+            k_values=self.config.k_values,
+            show_progress=self.config.show_progress
+        )
     
     def _create_sparse_evaluator(self, model_config) -> Any:
         """Create a sparse evaluator based on model configuration."""
@@ -148,11 +124,12 @@ class ComprehensiveEvaluator:
                 corpus=self.dataset.corpus,
                 relevant_docs=self.dataset.relevant_docs,
                 model_id=model_config.model_id,
+                method_name = model_config.name,
                 trust_remote_code=model_config.trust_remote_code,
                 device=model_config.device,
                 batch_size=model_config.batch_size,
                 k_values=self.config.k_values,
-                show_progress=self.config.show_progress
+                show_progress=self.config.show_progress,
             )
         else:
             raise ValueError(f"Unknown sparse method: {model_config.name}")
@@ -166,6 +143,7 @@ class ComprehensiveEvaluator:
                 relevant_docs=self.dataset.relevant_docs,
                 model_id=model_config.model_id,
                 trust_remote_code=model_config.trust_remote_code,
+                method_name=model_config.name,
                 device=model_config.device,
                 batch_size=model_config.batch_size,
                 k_values=self.config.k_values,
@@ -190,27 +168,20 @@ class ComprehensiveEvaluator:
         if not existing_results:
             raise ValueError("No existing results available for reranking")
         
-        # Use the first result as base for reranking
         base_method_name = list(existing_results.keys())[0]
         base_result = existing_results[base_method_name]
         
         # Get top-k candidates for reranking
         top_k_candidates = model_config.additional_params.get('top_k_candidates', 100)
-        
-        # Rerank for each query
-        reranked_results = {}
-        for query_id, query in self.dataset.queries.items():
-            # Get top candidates from base method
-            top_candidates = base_result.query_results[query_id][:top_k_candidates]
-            
-            # Rerank using cross-encoder
-            reranked_docs = reranker.rerank(
-                query=query,
-                candidate_docs=top_candidates,
-                doc_texts=self.dataset.corpus
-            )
-            
-            reranked_results[query_id] = reranked_docs
+        top_k_output = model_config.additional_params.get('top_k_output', None)
+
+        reranked_results = reranker.rerank_all(
+            queries=self.dataset.queries,
+            base_results=base_result.query_results,
+            doc_texts=self.dataset.corpus,
+            top_k_candidates=top_k_candidates,
+            top_k_output=top_k_output,
+        )
         
         # Calculate metrics for reranked results
         from .base.metrics import MetricsCalculator
@@ -243,7 +214,9 @@ class ComprehensiveEvaluator:
             Report text
         """
         if output_path is None:
-            output_path = str(Path(self.config.results_dir) / "evaluation_report.txt")
+            output_path = Path(self.config.results_dir) / "evaluation_report.txt"
+        else:
+            output_path = Path(output_path)
         
         report_lines = []
         report_lines.append("=" * 80)
@@ -283,12 +256,24 @@ class ComprehensiveEvaluator:
         report_lines.append("DETAILED METRICS")
         report_lines.append("=" * 80)
         
+        # Create a dataframe with metrics
+        rows = []
         for method_name, result in results.items():
             report_lines.append(f"\n{method_name.upper()}:")
             report_lines.append("-" * len(method_name))
             
+            row = {'method':method_name}
+            
             for metric_name, value in result.metrics.items():
                 report_lines.append(f"  {metric_name}: {value:.4f}")
+                row[metric_name] = value
+            row["execution_time_s"] = getattr(result, "execution_time", float("nan"))
+            row["memory_usage_mb"] = getattr(result, "memory_usage", float("nan"))
+            qps = getattr(result, "performance", {}).get("queries_per_second", float("nan"))
+            row["queries_per_second"] = qps
+            rows.append(row)    
+            
+        df = pd.DataFrame(rows)
         
         # Performance comparison
         report_lines.append("\n" + "=" * 80)
@@ -313,6 +298,11 @@ class ComprehensiveEvaluator:
         # Save report
         with open(output_path, 'w') as f:
             f.write(report_text)
-        
+            
+        table_path = output_path.with_suffix(".csv")
+        df.to_csv(table_path, index=False)
+        logger.info(f"Structured results saved to {table_path}")
+            
         logger.info(f"Report saved to {output_path}")
+            
         return report_text

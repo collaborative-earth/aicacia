@@ -22,6 +22,7 @@ class BGEM3Evaluator(BaseEvaluator):
         corpus: Dict[str, str],
         relevant_docs: Dict[str, set],
         model_id: str = "BAAI/bge-m3",
+        method_name: Optional[str] = "bge-m3",
         trust_remote_code: bool = True,
         device: Optional[str] = None,
         batch_size: int = 32,
@@ -39,7 +40,7 @@ class BGEM3Evaluator(BaseEvaluator):
             device: Device to run the model on
             batch_size: Batch size for encoding
         """
-        super().__init__(queries, corpus, relevant_docs, "BGE-M3", **kwargs)
+        super().__init__(queries, corpus, relevant_docs, method_name, **kwargs)
         
         self.model_id = model_id
         self.trust_remote_code = trust_remote_code
@@ -65,7 +66,7 @@ class BGEM3Evaluator(BaseEvaluator):
         embeddings = []
         for i in range(0, len(doc_texts), self.batch_size):
             batch_texts = doc_texts[i:i + self.batch_size]
-            batch_embeddings = self.model.encode(batch_texts, show_progress_bar=self.show_progress)
+            batch_embeddings = self.model.encode(batch_texts, show_progress_bar=self.show_progress) 
             embeddings.append(batch_embeddings)
         
         # Concatenate all embeddings

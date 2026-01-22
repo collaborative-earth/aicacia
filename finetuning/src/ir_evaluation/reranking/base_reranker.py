@@ -48,6 +48,31 @@ class BaseReranker(ABC):
         """
         pass
     
+    
+    def rerank_all(
+        self,
+        queries: Dict[str, str],
+        base_results: Dict[str, List[str]],
+        doc_texts: Dict[str, str],
+        top_k_candidates: int = 100,
+        top_k_output: int = None,
+    ) -> Dict[str, List[str]]:
+        """Rerank documents for multiple queries."""
+        
+        for query_id, query in queries.items():
+            # Get top candidates from base method
+            top_candidates = base_results[query_id][:top_k_candidates]
+            # Rerank using cross-encoder
+            reranked_docs = self.rerank(
+                query=query,
+                candidate_docs=top_candidates,
+                doc_texts= doc_texts
+            )
+            
+            reranked_results[query_id] = reranked_docs
+        
+        return reranked_docs
+    
     def get_method_info(self) -> Dict:
         """Get information about the reranking method."""
         return {
