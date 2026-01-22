@@ -16,6 +16,7 @@ def build_ecocontext_sets(kg):
         return s
     
     vocab = defaultdict(set)
+    EXPECTED_KEYS = ("locations", "ecosystems", "species", "challenges")
 
     for node in kg.nodes:
         ctx = node.properties.get("ecocontext", {}) or {}
@@ -26,7 +27,7 @@ def build_ecocontext_sets(kg):
                     vocab[key].add(normalize_term(v.strip()))
 
     # Cast defaultdict -> dict but keep values as sets
-    return {k: v for k, v in vocab.items()}
+    return {k: vocab.get(k, set()) for k in EXPECTED_KEYS}
 
 
 def merge_synonyms(term_set, score_cutoff=90):

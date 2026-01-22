@@ -9,7 +9,7 @@ from ragas_ext.utils.eco_personas import *
 class QueryConditionEco(BaseModel):
     persona: Persona
     ecothemes: t.Dict[str, t.List[str]]
-    concept : str
+    theme : str
     query_style: str
     query_length: str
     context: str
@@ -17,44 +17,48 @@ class QueryConditionEco(BaseModel):
 
 class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, GeneratedQueryAnswer]):
     instruction: str = ("""
-            Generate a single-hop query and its answer using only the provided context.
-            You must strictly follow all the constraints below.
-            ────────────────────────────────────────
-            1. PERSONA: style, vocabulary, perspective
-            ────────────────────────────────────────
-            Write the query exactly as this persona would:
-            - Volunteer → informal, friendly, very simple words, no technical and scientifical phrasing.
-            - Manager → planning-oriented, decision-focused, mentions priorities, constraints and strategy.
-            - Technician → quantitative, mentions thresholds, values, metrics.
-            - Researcher → analytical, causal, comparative, evidence-based wording.
-            ────────────────────────────────────────
-            2. CONCEPT + ECOTHEMES
-            ────────────────────────────────────────
-            Your query must:
-            - Center on the given concept, but might paraphrise.
-            - Include at least one ecological theme (locations, ecosystems, species, or challenges).
-            - Avoid copying more than 3–4 words from the context.
-            ────────────────────────────────────────
-            3. QUERY STYLE AND LENGTH
-            ────────────────────────────────────────
-            After generating the query, adjust it if necessary so that both style and length constraints 
-            are satisfied exactly.
-            `query_style`:
-            - If WEB_SEARCH → keyword-like query; remove function words (the, for, and, which, how, etc.).
-            - If MISSPELLED → include natural misspellings, swap close letters, miss ones; sentence still understandable.
-            - If PERFECT_GRAMMAR → fully standard grammar, formal.
-            `query_length`:
-            - Short → fewer than 10 words.
-            - Medium → 10–20 words.
-            - Long → 20–30 words.
-            ────────────────────────────────────────
-            4. ANSWER
-            ────────────────────────────────────────
-            Generate an answer that:
-            - Uses only the information from the context.
-            - Contains no external knowledge.
-            - Is concise, factual, and consistent with the context.
+            # Task overview
+            You are a worker in ecological restoration.
 
+            Generate a single-hop query and its answer using only the provided context.
+            Follow the steps below in order and respect all constraints exactly.
+
+            # Persona
+            Write the query exactly as the given persona would.
+            - Volunteer: informal, friendly, very simple words; no technical or scientific terms.
+            - Manager: planning-oriented, decision-focused; mentions priorities, constraints, or strategy.
+            - Technician: quantitative; mentions thresholds, values, or measurable criteria.
+            - Researcher: analytical, causal, comparative; evidence-based wording.
+
+            # Content constraints
+            - Center the query on the given theme, if the context allows (paraphrasing allowed).
+            - Include at least one ecological element (location, ecosystem, species, or challenge).
+            - Avoid copying more than four consecutive words from the context.
+            - When the context allows, frame the query so it implies a concrete action, decision, or next step
+            (e.g., what to do, what to prioritize, what threshold to use). If no actionable framing is supported by the context, produce a factual query instead.
+
+            # Query style
+            Apply the required query style exactly.
+            - WEB_SEARCH: keyword-like; remove function words.
+            - MISSPELLED: include natural misspellings while keeping the meaning clear.
+            - PERFECT_GRAMMAR: fully grammatical and formal.
+
+            # Query length
+            Ensure the final query matches the required length.
+            - Short: fewer than 10 words.
+            - Medium: 10–20 words.
+            - Long: 20–30 words.
+
+            # Answer
+            Generate a concise answer that:
+            - Uses only information from the provided context.
+            - Adds no external knowledge or assumptions.
+            - Directly answers the query.
+
+            If the query implies a decision, next step, priority, or threshold, state the supported action or condition using only context evidence.  
+            If no action is supported by the context, provide a factual answer instead.
+            
+            Reason using the context and requirement to produce the query and then the answer using only the context.
             """
     )
 
@@ -72,7 +76,7 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
                     "species": [],
                     "challenges": ["forest restoration"]
                 },
-                concept = "seedling density",
+                theme = "seedling density",
                 query_style="PERFECT_GRAMMAR",
                 query_length="Medium",
                 context=(
@@ -105,7 +109,7 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
                     "species": [],
                     "challenges": ["reforestation"]
                 },
-                concept = "forest regeneration",
+                theme = "forest regeneration",
                 query_style="CONVERSATIONAL",
                 query_length="Short",
                 context=(
@@ -136,7 +140,7 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
                     "species": ["Pinus ponderosa"],
                     "challenges": ["wildfire", "replanting"]
                 },
-                concept = "site prioritization",
+                theme = "site prioritization",
                 query_style="MISSPELLED",
                 query_length="Medium",
                 context=(
@@ -168,7 +172,7 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
                     "species": ["roses"],
                     "challenges": ["bare root planting"]
                 },
-                concept = "bare root storage",
+                theme = "bare root storage",
                 query_style="Web Search",
                 query_length="Short",
                 context=(
@@ -189,26 +193,56 @@ class QueryAnswerGenerationPromptEco(PydanticPrompt[QueryConditionEco, Generated
     ]
     
 class QueryAnswerGenerationPromptMultiEco(PydanticPrompt[QueryConditions, GeneratedQueryAnswer]):
-    instruction: str = (
-        "Generate a multi-hop query and answer based on the provided conditions "
-        "(persona, ecological context with locations, ecosystems, species, and challenges) "
-        "and the provided multi-segment node context and the themes they share.\n\n"
-        "### Instructions:\n"
-        "1. **Generate a Multi-Hop Query**: Use the provided context segments and themes to form a query that requires combining "
-        "information from multiple segments (e.g., `<1-hop>` and `<2-hop>`). Ensure the query explicitly incorporates one or more "
-        "themes and reflects their relevance to the context. Formulate question with analytical or actionable intent.\n"
-        "2. **Generate an Answer**: Use only the content from the provided context to create a detailed and faithful answer to "
-        "the query. Avoid adding information that is not directly present or inferable from the given context.\n"
-        "3. **Multi-Hop Context Tags**:\n"
-        "   - Each context segment is tagged as `<1-hop>`, `<2-hop>`, etc.\n"
-        "   - Ensure the query uses information from at least two segments and connects them meaningfully."
-        "### Style\n"
-        "- Reduce lexical overlap of the query from the contexts whenever possible, while preserving meaning.\n"
-        "- Avoid **copying long sequences of words** from the context (no more than 3–4 consecutive identical words).\n"
-        "- You may **paraphrase key terms** (e.g., 'drought' → 'water scarcity', 'restoration project' → 'rehabilitation effort') "
-        "as long as the meaning remains faithful.\n"
-        "- Formulate the question naturally using varied starters (How, What, Why, Which) depending on the persona."
+    instruction: str = ("""
+        # Task overview
+        You are a worker in ecological restoration.
+       
+        Generate a multi-hop query and its answer using only the provided multi-segment context.
+        You must strictly follow all constraints below.
 
+        # Persona
+        Write the query exactly as the given persona would.
+        - Volunteer: informal, friendly, very simple words; no technical or scientific terms.
+        - Manager: planning-oriented, decision-focused; mentions priorities, constraints, or strategy.
+        - Technician: quantitative; mentions thresholds, values, or measurable criteria.
+        - Researcher: analytical, causal, comparative; evidence-based wording.
+        
+        # Content constraints
+        - Use the provided context segments and themes to form a query that requires combining information from multiple segments (e.g., `<1-hop>` and `<2-hop>`)
+        - Center on the provided theme(s), possibly paraphrased.
+        - Include at least one ecological element (location, ecosystem, species, or challenge).
+        - Avoid copying more than four consecutive words from the context.
+        - When the context allows, frame the query so it implies a concrete action, decision, or next step
+        (e.g., what to do, what to prioritize, what threshold to use). If no actionable framing is supported by the context, produce a factual query instead.
+
+        # Multi-hop logic
+        - Each context segment is tagged as `<1-hop>`, `<2-hop>`, etc.
+        - The query must require reasoning across at least two context segments.
+        - Each hop should contribute distinct information (e.g., cause → effect, constraint → outcome, location → intervention).
+
+        # Query style
+        Apply the required query style exactly.
+        - WEB_SEARCH: keyword-like; remove function words.
+        - MISSPELLED: include natural misspellings while keeping the meaning clear.
+        - PERFECT_GRAMMAR: fully grammatical and formal.
+
+        # Query length
+        Ensure the final query matches the required length.
+        - Short: fewer than 10 words.
+        - Medium: 10–20 words.
+        - Long: 20–30 words.
+        
+        # Answer
+        Generate a concise answer that:
+        - Uses only information from the provided context segments.
+        - Adds no external knowledge or assumptions.
+        - Directly answers the query.
+
+        If the query implies a decision, next step, priority, or threshold, state the supported action or condition using only context evidence.  
+        If no action is supported by the context, provide a factual answer instead.
+        
+        Reason using the context and requirement to produce the query and then the answer using only the context.
+        """
     )
 
     input_model: t.Type[QueryConditions] = QueryConditions
@@ -217,54 +251,45 @@ class QueryAnswerGenerationPromptMultiEco(PydanticPrompt[QueryConditions, Genera
     examples: t.List[t.Tuple[QueryConditions, GeneratedQueryAnswer]] = [
         (
             QueryConditions(
-                persona=Persona(
-                    name="Restoration Ecologist",
-                    role_description="Focuses on the ecological mechanisms and practical strategies behind habitat recovery.",
-                ),
-                themes=["Soil Reclamation", "Native Species Establishment"],
-                query_style="Analytical",
+                persona=technician,
+                themes=["seedling density", "canopy closure"],
+                query_style="PERFECT_GRAMMAR",
                 query_length="Medium",
                 context=[
-                    "<1-hop> In degraded tropical areas, soil reclamation often involves amendments such as compost or biochar to improve nutrient cycling.",
-                    "<2-hop> The establishment of native tree species depends strongly on improved soil fertility and microbial activity following such interventions.",
+                    "<1-hop> In the humid tropics such as the Amazon, around 800 well-distributed natural seedlings per hectare are sufficient to achieve canopy cover within three years without planting.",
+                    "<2-hop> In seasonally dry tropical forests, higher seedling densities are required because water stress slows early growth. Densities between 1,600 and 3,000 seedlings per hectare determine whetherbasic forest structure or rapid canopy closure is achieved.",
                 ],
             ),
             GeneratedQueryAnswer(
                 query=(
-                    "How does soil reclamation using organic amendments support the establishment of native species in degraded tropical ecosystems?"
+                    "What seedling density thresholds are needed for canopy closure in tropical dry forest restoration compared to humid Amazon forests?"
                 ),
                 answer=(
-                    "Soil reclamation using organic amendments like compost or biochar enhances nutrient cycling and microbial activity, "
-                    "which improves soil fertility. This enriched soil environment, in turn, supports the establishment and growth "
-                    "of native tree species in degraded tropical ecosystems by providing better rooting conditions and nutrient availability."
+                    "Humid Amazon forests can reach canopy cover with about 800 well-distributed seedlings per hectare "
+                    "within three years. In contrast, tropical dry forests require higher densities, ranging from "
+                    "1,600 seedlings per hectare for basic structure to around 3,000 per hectare to achieve faster canopy closure."
                 ),
             ),
         ),
         (
             QueryConditions(
-                persona=Persona(
-                    name="Ecological Restoration Manager'r",
-                    role_description="Designs and evaluates ecosystem restoration projects, focusing on target definition and reference ecosystem selection.",
-                ),
+                persona= volunteer,
                 themes=["Restoration Planning", "Ecosystem Targeting"],
-                query_style="Analytical",
-                query_length="Medium",
-                context=[
-                    "<1-hop> Forest restoration aims to accelerate natural succession toward a self-sustaining climax forest ecosystem — the target ecosystem.",
-                    "<2-hop> Defining this target requires identifying reference sites that represent the desired end-state of restoration. These sites should match the project's conditions in terms of climate, topography, and forest type.",
-                    "<3-hop> Existing tools like GIS mapping platforms (e.g., Google Earth) and ecological databases (e.g., GBIF, vegetation classification maps) can support the identification and characterization of suitable reference ecosystems."
+                query_style="CONVERSATIONAL",
+                query_length="Short",
+                context=[   
+                    "<1-hop> Natural regeneration can restore forest cover within a few years if enough seedlings are alreadypresent, particularly in humid tropical forests like the Amazon.",
+                    "<2-hop> In drier tropical areas, natural seedlings are not likely to survive without help, and forest recovery may stall unless planting or protection is added.",     
                 ],
             ),
             GeneratedQueryAnswer(
                 query=(
-                    "What is a good way to set a restoration target for an ecosystem type, and are there existing off-the-shelf tools that can help with this?"
+                    "Can forest grow back on its own in dry and humid tropical areas"
                 ),
                 answer=(
-                    "A good way to set a restoration target is to define a reference ecosystem that represents the desired end-state of the project. "
-                    "This involves surveying relatively undisturbed remnants of the same climax forest type and ensuring they share similar environmental "
-                    "conditions—such as elevation, slope, and aspect—with the restoration site. "
-                    "Tools like topographic maps, Google Earth, vegetation classification systems, and global biodiversity databases such as GBIF "
-                    "can be used to locate and characterize these reference sites effectively."
+                    "In humid tropical places like the Amazon, forests can grow back on their own if enough young trees "
+                    "are already there. In drier tropical areas, recovery is harder, and the forest often needs extra "
+                    "help like planting or protection."
                 ),
             )
         ),

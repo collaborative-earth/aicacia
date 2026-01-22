@@ -2,6 +2,7 @@ from __future__ import annotations
 # Multihop
 from dataclasses import dataclass
 import typing as t
+import random
 from ragas.testset.persona import Persona
 from ragas.testset.synthesizers.base import BaseScenario,Scenario,QueryLength,QueryStyle
 from ragas.dataset_schema import SingleTurnSample
@@ -54,7 +55,7 @@ class MultiHopQueryEco(MultiHopQuerySynthesizer):
         # query and get (node_a, rel, node_b) to create multi-hop queries
         results = knowledge_graph.find_two_nodes_single_rel(
             relationship_condition=lambda rel: (
-                True if rel.type == "ecocontext_overlap" else False
+                True if (rel.type == "ecocontext_overlap") | (rel.type == "cosine_sim") else False
             )
         )
 
@@ -64,13 +65,13 @@ class MultiHopQueryEco(MultiHopQuerySynthesizer):
         for triplet in results:
             if len(scenarios) < n:
                 node_a, node_b = triplet[0], triplet[-1]
-                overlapped_keywords = triplet[1].properties["overlapped_items"]
+                overlapped_keywords = triplet[1].properties.get("overlapped_items")
                 if overlapped_keywords:
-
+                    # If relationship is ecocontext_overlap, extract themes
                     themes = []
                     for key, pairs in overlapped_keywords.items():
                         themes.extend([[x] for x, _ in pairs])
-
+                    
                     if not themes:
                         continue
 
@@ -88,7 +89,31 @@ class MultiHopQueryEco(MultiHopQuerySynthesizer):
                     )
 
                     scenarios.extend(base_scenarios)
+                if triplet[1].properties.get("cosine_sim") is not None:
+                    # If relationship is cosine_sim, use generic themes
+                    themes = []
+                    for node in (node_a, node_b):
+                        themes_node= node.properties.get("themes", {})
+                        sampled = random.sample(
+                            themes_node,
+                            k=min(len(themes_node), 1),
+                        )
+                    if sampled:
+                        themes.extend([[v] for v in sampled])
+                    # prepare and sample possible combinations
+                    base_scenarios = self.prepare_combinations(
+                        [node_a, node_b],
+                        themes,
+                        personas=persona_list,
+                        property_name="ecocontext",
+                    )
 
+                    # get number of required samples from this triplet
+                    base_scenarios = self.sample_diverse_combinations(
+                        base_scenarios, num_sample_per_triplet
+                    )
+
+                    scenarios.extend(base_scenarios)
         return scenarios
     
     async def _generate_sample(
@@ -111,7 +136,10 @@ class MultiHopQueryEco(MultiHopQuerySynthesizer):
             user_input=response.query,
             reference=response.answer,
             reference_contexts=reference_context,
-            reference_context_ids = node_ids
+            reference_context_ids = node_ids,
+            persona_name=scenario.persona.name,
+            query_style=scenario.style.value,
+            query_length = scenario.length.value
         )
 
     def make_contexts(self, scenario: MultiHopScenario) -> t.List[str]:
