@@ -12,8 +12,8 @@ from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core import SimpleDirectoryReader
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import MarkdownNodeParser, MarkdownElementNodeParser
-from finetuning.src.node_filters import *
-from vectordb.custom_parsers import *
+from finetuning.src.qa_generation.node_filters import *
+from data_io.custom_parsers import TEINodeParser
 
 ## Llama index to BEIR format
 

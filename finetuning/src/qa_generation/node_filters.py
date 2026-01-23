@@ -23,7 +23,7 @@ class TEINodeFilter(TransformComponent):
         description="Whether to show progress during filtering."
     )
     reverse: bool = Field(
-        default=False,
+        default=True,
         description="If True, keeps nodes without the valid tags instead of filtering them out."
     )
     
