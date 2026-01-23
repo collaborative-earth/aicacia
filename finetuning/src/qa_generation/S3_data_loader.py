@@ -102,10 +102,18 @@ class S3CorpusLoader:
         transformations = [parser]
         if node_filter:
             transformations.append(node_filter)
-        transformations.append(splitter)
-
         pipeline = IngestionPipeline(transformations=transformations)
         nodes = pipeline.run(documents=documents, show_progress=True)
+        # TERRIBLE HACK MUST BE FIXED AT THE LEVEL OF PARSING
+        for n in nodes:
+            tag = n.metadata.get("tag")
+            if isinstance(tag, str) and len(tag) > 100:
+                # keep only first line / label
+                n.metadata["tag"] = tag.split("\n", 1)[0][:50]
+                
+        transformations2 = [splitter]
+        pipeline2 = IngestionPipeline(transformations=transformations2)
+        nodes = pipeline2.run(documents=nodes, show_progress=True)
         if self.config.min_len:
             print(f"Filtering nodes with length < {self.config.min_len}")
             nodes = [node for node in nodes if len(node.get_text()) >= self.config.min_len]
