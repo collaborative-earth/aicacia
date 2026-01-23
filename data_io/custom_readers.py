@@ -1,3 +1,4 @@
+from tqdm import tqdm
 import os
 import boto3
 from llama_index.core.schema import Document
@@ -23,7 +24,7 @@ class S3ReaderBase:
 
     def load_documents(self) -> list[Document]:
         documents = []
-        for key in self.list_keys():
+        for key in tqdm(self.list_keys(), desc="Downloading S3 documents"):
             raw = self.read_bytes(key)
             filename = os.path.basename(key)
             doc_id, *_ = filename.split(".", 1)
