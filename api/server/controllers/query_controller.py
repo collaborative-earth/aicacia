@@ -228,7 +228,7 @@ def get_user_query_with_feedback_admin(
                 }
                 for response in experiment_responses:
                     config_id = response.get("configuration_id")
-                    if config_id and config_id in config_map:
+                    if config_id and config_id in config_map and "configuration" not in response:
                         response["configuration"] = config_map[config_id]
 
     return QueryWithFeedbackResponse(
