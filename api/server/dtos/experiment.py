@@ -24,6 +24,8 @@ class ConfigurationResponse(BaseModel):
     configuration_id: str
     references: list[Reference]  # Empty if no vectordb results
     summary: Optional[str] = None  # None if no LLM configured
+    # Full configuration details (for admin view)
+    configuration: Optional[dict] = None
 
 
 class ExperimentQueryResponse(BaseModel):

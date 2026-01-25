@@ -212,14 +212,24 @@ def get_user_query_with_feedback_admin(
         .where(Feedback.user_id == user_id)
     ).first()
 
-    # Get feedback_config from experiment if query is associated with one
+    # Get feedback_config and configurations from experiment if query is associated with one
     feedback_config = None
+    experiment_responses = query.experiment_responses
     if query.experiment_id:
         experiment = db.exec(
             select(Experiment).where(Experiment.experiment_id == query.experiment_id)
         ).first()
         if experiment:
             feedback_config = experiment.feedback_config
+            # Enrich experiment_responses with configuration details
+            if experiment_responses and experiment.configurations:
+                config_map = {
+                    c["configuration_id"]: c for c in experiment.configurations
+                }
+                for response in experiment_responses:
+                    config_id = response.get("configuration_id")
+                    if config_id and config_id in config_map:
+                        response["configuration"] = config_map[config_id]
 
     return QueryWithFeedbackResponse(
         query_id=str(query.query_id),
@@ -227,6 +237,6 @@ def get_user_query_with_feedback_admin(
         references=query.references,
         summary=query.summary,
         feedback=feedback.feedback_json if feedback else None,
-        experiment_responses=query.experiment_responses,
+        experiment_responses=experiment_responses,
         feedback_config=feedback_config,
     )

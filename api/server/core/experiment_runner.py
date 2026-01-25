@@ -68,6 +68,7 @@ class ConfigurationRunner:
             configuration_id=self.config.configuration_id,
             references=references,
             summary=summary,
+            configuration=self.config.model_dump(),
         )
 
     def _search_vectordb(

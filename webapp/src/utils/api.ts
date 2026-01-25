@@ -77,10 +77,21 @@ interface ReferenceFeedback {
   feedback_reason: string;
 }
 
+export interface ExperimentConfiguration {
+  configuration_id: string;
+  name: string;
+  llm_model: string | null;
+  embedding_model: string;
+  collection_name: string;
+  temperature: number;
+  limit: number;
+}
+
 export interface ConfigurationResponse {
   configuration_id: string;
   references: Reference[];
   summary: string | null;
+  configuration?: ExperimentConfiguration;
 }
 
 // Feedback configuration types
