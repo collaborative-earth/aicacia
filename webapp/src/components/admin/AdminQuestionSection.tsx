@@ -5,7 +5,6 @@ import {
   ConfigurationResponse,
   ExperimentFeedbackConfig,
   FeedbackFieldConfig,
-  ExperimentConfiguration,
 } from '../../utils/api';
 import ReactMarkdown from 'react-markdown';
 
