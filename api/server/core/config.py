@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     QDRANT_URL: str = "localhost:6333"
     QDRANT_API_KEY: str = "Hello!"
-    QDRANT_COLLECTION: str = "aicacia"
+    QDRANT_COLLECTION: str = "aicacia--bge-m3"
 
     EMBEDDING_MODEL_NAME: str = "BAAI/bge-m3"
 

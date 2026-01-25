@@ -16,3 +16,4 @@ class Experiment(Base, table=True):
     description: Optional[str] = Field(default=None)
     is_active: bool = Field(default=False)
     configurations: list[dict] = Field(default_factory=list, sa_column=Column(JSONB))
+    feedback_config: Optional[dict] = Field(default=None, sa_column=Column(JSONB))

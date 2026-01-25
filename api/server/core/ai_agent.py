@@ -48,12 +48,12 @@ def get_restoration_context_for_message(country: str, message: str) -> int:
                 url = sources.get("link", "")
             else:
                 url = ""
-            
+
             # Safely get other fields
             title = res.payload.get("title", "Unknown")
             node_content = res.payload.get("_node_content", "{}")
             text = json.loads(node_content).get("text", "")
-            
+
             rag_context.append(
                 {
                     "title": title,

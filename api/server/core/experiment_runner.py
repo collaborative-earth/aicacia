@@ -8,16 +8,12 @@ from langchain_openai import ChatOpenAI
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from openai import APIError
 from qdrant_client import QdrantClient
-from sqlmodel import Session, select
-
 from server.core.config import settings
 from server.db.models.experiment import Experiment
 from server.db.models.sourced_documents import SourcedDocument
-from server.dtos.experiment import (
-    ConfigurationResponse,
-    ExperimentConfiguration,
-)
+from server.dtos.experiment import ConfigurationResponse, ExperimentConfiguration
 from server.dtos.query import Reference
+from sqlmodel import Session, select
 
 # Global cache for embedding models (loaded once at first use)
 _embedding_model_cache: dict[str, HuggingFaceEmbedding] = {}
@@ -138,18 +134,14 @@ class ConfigurationRunner:
             (
                 "system",
                 f"""\
-You are an environment restoration expert. Users come to you with questions about the environment \
-and how to restore it.
-Using the context provided answer the users question
+You are an environment restoration expert. Users come to you with questions about \
+the environment and how to restore it.
+
+Using the context provided, answer the user's question comprehensively.
+If the context doesn't contain enough information to fully answer the question, \
+indicate what information is missing.
 
 Output should be in markdown format.
-
-Output format:
-#### Answer using the references
-Answer to the primary question only using the context provided,
-dont answer anything without using the context provided.
-#### Answer without using the references (LLM only)
-Answer to the primary question without using the context provided.
 
 context: {rag_context_str}
 """,
@@ -176,6 +168,14 @@ class ExperimentRunner:
 
         if not configs:
             return []
+
+        # Validate no duplicate configuration IDs
+        config_ids = [c.configuration_id for c in configs]
+        if len(config_ids) != len(set(config_ids)):
+            duplicates = [id for id in config_ids if config_ids.count(id) > 1]
+            raise ValueError(
+                f"Experiment '{experiment.name}' has duplicate configuration_ids: {set(duplicates)}"
+            )
 
         # Run configurations in parallel
         with ThreadPoolExecutor(max_workers=len(configs)) as executor:

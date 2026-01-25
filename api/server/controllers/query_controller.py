@@ -10,6 +10,7 @@ from server.db.models.query import Query
 from server.db.models.user import User
 from server.db.session import get_db_session
 from server.dtos.experiment import ExperimentQueryResponse
+from server.dtos.experiment_feedback import ExperimentFeedbackConfig
 from server.dtos.query import (
     QueryListResponse,
     QueryRequest,
@@ -60,10 +61,16 @@ def run_user_query(
     db.add(query)
     db.commit()
 
+    # Parse feedback config if present
+    feedback_config = None
+    if experiment.feedback_config:
+        feedback_config = ExperimentFeedbackConfig(**experiment.feedback_config)
+
     return ExperimentQueryResponse(
         query_id=query_id,
         experiment_id=str(experiment.experiment_id),
         responses=responses,
+        feedback_config=feedback_config,
     )
 
 
@@ -125,6 +132,15 @@ def get_query_with_feedback(
         .where(Feedback.user_id == user.user_id)
     ).first()
 
+    # Get feedback_config from experiment if query is associated with one
+    feedback_config = None
+    if query.experiment_id:
+        experiment = db.exec(
+            select(Experiment).where(Experiment.experiment_id == query.experiment_id)
+        ).first()
+        if experiment:
+            feedback_config = experiment.feedback_config
+
     return QueryWithFeedbackResponse(
         query_id=str(query.query_id),  # Convert UUID to string
         question=query.question,
@@ -132,6 +148,7 @@ def get_query_with_feedback(
         summary=query.summary,
         feedback=feedback.feedback_json if feedback else None,
         experiment_responses=query.experiment_responses,
+        feedback_config=feedback_config,
     )
 
 
@@ -195,6 +212,15 @@ def get_user_query_with_feedback_admin(
         .where(Feedback.user_id == user_id)
     ).first()
 
+    # Get feedback_config from experiment if query is associated with one
+    feedback_config = None
+    if query.experiment_id:
+        experiment = db.exec(
+            select(Experiment).where(Experiment.experiment_id == query.experiment_id)
+        ).first()
+        if experiment:
+            feedback_config = experiment.feedback_config
+
     return QueryWithFeedbackResponse(
         query_id=str(query.query_id),
         question=query.question,
@@ -202,4 +228,5 @@ def get_user_query_with_feedback_admin(
         summary=query.summary,
         feedback=feedback.feedback_json if feedback else None,
         experiment_responses=query.experiment_responses,
+        feedback_config=feedback_config,
     )

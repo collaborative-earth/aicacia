@@ -83,10 +83,41 @@ export interface ConfigurationResponse {
   summary: string | null;
 }
 
+// Feedback configuration types
+export interface FeedbackOption {
+  value: number;
+  label: string;
+}
+
+export interface FeedbackFieldConfig {
+  field_id: string;
+  field_type: 'radio' | 'text';
+  label: string;
+  required: boolean;
+  options?: FeedbackOption[];
+}
+
+export interface ExperimentFeedbackConfig {
+  fields: FeedbackFieldConfig[];
+}
+
 export interface ExperimentQueryResponse {
   query_id: string;
   experiment_id: string;
   responses: ConfigurationResponse[];
+  feedback_config?: ExperimentFeedbackConfig;
+}
+
+// Experiment feedback submission types
+export interface ExperimentFeedbackEntry {
+  configuration_id: string;
+  field_id: string;
+  value: number | string;
+}
+
+export interface ExperimentFeedbackRequest {
+  query_id: string;
+  feedbacks: ExperimentFeedbackEntry[];
 }
 
 interface FeedbackRequest {
@@ -112,6 +143,16 @@ export async function submitFeedback(feedback: FeedbackRequest): Promise<void> {
   } catch (error) {
     console.error('Failed to submit feedback:', error);
     throw new Error('Failed to submit feedback');
+  }
+}
+
+export async function submitExperimentFeedback(feedback: ExperimentFeedbackRequest): Promise<{ feedback_id: string }> {
+  try {
+    const response = await api.post('/feedback/experiment', feedback);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to submit experiment feedback:', error);
+    throw new Error('Failed to submit experiment feedback');
   }
 }
 

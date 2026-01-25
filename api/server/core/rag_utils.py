@@ -81,7 +81,7 @@ def get_rag_references_with_context(message: str, db: Session, limit: int = 3) -
 
         if (not url or url == "Unknown") and doi and doi != "Unknown":
             url = f"https://doi.org/{doi}"
-        
+
         # Ensure url is not None
         url = url or "Unknown"
 
@@ -106,4 +106,3 @@ def get_rag_references_with_context(message: str, db: Session, limit: int = 3) -
             print(f"Duplicate chunk found: {text} with count: {count}")
 
     return {"references": references, "rag_context": rag_context}
-

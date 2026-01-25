@@ -40,3 +40,4 @@ class QueryWithFeedbackResponse(BaseModel):
     summary: Optional[str]
     feedback: Optional[Dict]
     experiment_responses: Optional[list[dict]] = None
+    feedback_config: Optional[Dict] = None

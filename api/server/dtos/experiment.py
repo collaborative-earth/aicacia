@@ -2,6 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from server.dtos.experiment_feedback import ExperimentFeedbackConfig
 from server.dtos.query import Reference
 
 
@@ -31,3 +32,4 @@ class ExperimentQueryResponse(BaseModel):
     query_id: str
     experiment_id: str
     responses: list[ConfigurationResponse]  # Randomized order
+    feedback_config: Optional[ExperimentFeedbackConfig] = None
