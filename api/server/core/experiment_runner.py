@@ -36,7 +36,8 @@ def get_embedding_model(model_name: str) -> HuggingFaceEmbedding:
 
 def get_llm(model_name: str, temperature: float) -> ChatOpenAI:
     """Get cached LLM or create and cache it."""
-    cache_key = f"{model_name}:{temperature}"
+    rounded_temperature = round(temperature, 3)
+    cache_key = f"{model_name}:{rounded_temperature:.3f}"
     if cache_key not in _llm_cache:
         _llm_cache[cache_key] = ChatOpenAI(
             model=model_name,
