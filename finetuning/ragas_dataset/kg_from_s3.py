@@ -1,5 +1,7 @@
 import os
 import yaml
+import json
+import uuid
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 from dataclasses import dataclass, field
@@ -294,11 +296,33 @@ class KG_fromS3:
         
         print("Building and applying all other transforms...")
         transforms = self.build_transforms()
-        apply_transforms(self.kg, transforms=transforms)
+        apply_transforms(self.kg, transforms=transforms,run_config = RunConfig(max_workers=2))
         
         self.log_graph_info("KG after transforms")
         
         return self.kg
+    
+    def save_nodes_to_jsonl(self, output_dir: Optional[str] = None) -> str:
+        """Save nodes to a BEIR-compatible JSONL file."""
+        out_dir = Path(output_dir or self.config.output_dir)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        dataset_name = self.config.prefix.split('/')[0]
+        corpus_path = out_dir / f"corpus_{dataset_name}.jsonl"
+        def to_serializable(obj):
+            if isinstance(obj, uuid.UUID):
+                return str(obj)
+            return obj
+        
+        with open(corpus_path, "w", encoding="utf-8") as f:
+            for node in self.kg.nodes:
+                doc = {
+                    "_id": to_serializable(node.id),
+                    "title": "",
+                    "text": node.properties.get("page_content", ""),
+                }
+                f.write(json.dumps(doc, ensure_ascii=False) + "\n")
+
+        return str(corpus_path)
     
     def save(self, output_path: Optional[str] = None):
         """
@@ -313,6 +337,7 @@ class KG_fromS3:
         path = output_path or self._generate_output_path()
         self.kg.save(path)
         print(f"Saved knowledge graph to {path}")
+        self.save_nodes_to_jsonl()
         return path
     
     def load(self, path: str):

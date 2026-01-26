@@ -180,7 +180,7 @@ def save_ragasjsonl_to_llamaindexjson(file_path, kg_path=None, output_dir="."):
     """
     Convert a RAGAS JSONL dataset into a LlamaIndex-style JSON file.
 
-    Reads queries and reference contexts (optionally using a KG for the corpus)/
+    Reads queries and reference contexts (optionally using a KG for the corpus).
     Saves a JSON file with 'queries', 'relevant_docs', and 'corpus'.
     
     Args:
