@@ -1,0 +1,48 @@
+# S3 Configuration (optional - leave empty to use pre-loaded documents/nodes)
+bucket_name: "aicacia-extracted-data"
+prefix: "aer/tei_output_2"
+# aws_key and aws_secret will be loaded from environment variables if not specified
+aws_key: null
+aws_secret: null
+
+# Processing Configuration
+chunk_size: 256
+chunk_overlap: 40
+paragraph_separator: "\n\n"
+min_len: 50
+max_nodes: 10  # Set to a number to limit total nodes
+
+# Output Configuration
+output_dir: "data/corpus"
+auto_version: false  # Set to true to auto-increment version numbers
+
+# Filtering Configuration (optional)
+apply_filter: false
+valid_tags: null  # Example: ["p", "head", "div"]
+
+# Knowledge Graph Configuration
+generate_kg: true  # Set to true to generate knowledge graph
+kg_output_dir: "data/corpus/kg"
+
+# KG: Embedding Configuration
+embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+
+# KG: Relationship Building Configuration
+cosine_threshold: 0.7
+overlap_threshold: 0.24
+distance_threshold: 0.9
+
+# KG: LLM Configuration
+llm_provider: "openai"
+openai_async: false
+llm_model: "gpt-3.5-turbo"
+# openai_api_key will be loaded from environment variable if not specified
+openai_api_key: null
+
+# KG: Pipeline Configuration
+use_ecocontext_extractor: true
+use_themes_extractor: true
+use_embedding_extractor: true
+use_cosine_similarity: true
+use_ecocontext_overlap: true
+synonym_score_cutoff: 90
