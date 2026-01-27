@@ -32,6 +32,7 @@ eval/ann-benchmarks/results/*
 # FInetuning datasets and outputs
 finetuning/ir_results
 finetuning/qa_datasets
+finetuning/data/
 notebooks/*
 finetuning/**/*.json
 !finetuning/config.json
