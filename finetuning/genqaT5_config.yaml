@@ -1,0 +1,22 @@
+# Configuration for T5-based Question Generation
+# GenerateQAT5 Config File
+
+# Required: Input corpus and output directory
+corpus_path: "data/aer/corpus_aer.jsonl"  # Path to corpus file or directory with corpus.jsonl
+output_dir: "data/qa_dataset/AER_T5"  # Where to save generated queries
+
+# Query Generation Settings
+qgen_prefix: "qgen"  # Prefix for output files
+generator: "BeIR/query-gen-msmarco-t5-base-v1"  # T5 model for query generation
+queries_per_passage: 2  # -1 = auto (aims for ~250K total queries), or set specific number
+batch_size_generation: 32  # Batch size for query generation
+
+# Hard-Negative Mining Settings
+retrievers:
+  - "msmarco-distilbert-base-v3"
+retriever_score_functions:
+  - "cos_sim"
+negatives_per_query: 50  # Number of hard negatives to mine per query
+
+# Optional: Corpus Resizing
+new_size: null  # null = no resize, -1 = auto (~83K passages), or specific number
