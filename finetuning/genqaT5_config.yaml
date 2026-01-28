@@ -2,8 +2,8 @@
 # GenerateQAT5 Config File
 
 # Required: Input corpus and output directory
-corpus_path: "data/aer/corpus_aer.jsonl"  # Path to corpus file or directory with corpus.jsonl
-output_dir: "data/qa_dataset/AER_T5"  # Where to save generated queries
+corpus_path: "data/corpuses/hj_andrews/corpus_hj_andrews_bibliography_parsed.jsonl"  # Path to corpus file or directory with corpus.jsonl
+output_dir: "data/corpuses/hj_andrews/qa_dataset/hj_andrews"  # Where to save generated queries
 
 # Query Generation Settings
 qgen_prefix: "qgen"  # Prefix for output files

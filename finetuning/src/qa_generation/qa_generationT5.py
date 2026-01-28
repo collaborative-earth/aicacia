@@ -14,13 +14,10 @@ from typing import List, Dict, Optional, Any
 from dataclasses import dataclass, asdict
 
 from beir.datasets.data_loader import GenericDataLoader
-from gpl_xaicacia.gpl.toolkit import (
+from .gpl import (
     qgen,
     NegativeMiner,
     set_logger_format,
-    save_queries,
-    save_qrels,
-    extract_queries_split,
     resize,
 )
 
@@ -185,7 +182,7 @@ class GenerateQAT5:
                 generator_name_or_path=self.config.generator,
                 ques_per_passage=self.config.queries_per_passage,
                 bsz=self.config.batch_size_generation,
-                qgen_prefix=self.config.qgen_prefix
+                qgen_prefix=self.config.qgen_prefix,
             )
             
             corpus, self.queries, self.qrels = GenericDataLoader(
