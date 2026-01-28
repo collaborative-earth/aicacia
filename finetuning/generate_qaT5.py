@@ -3,7 +3,7 @@ from pathlib import Path
 import logging
 
 THIS_FILE = Path(__file__).resolve()
-PROJECT_ROOT = THIS_FILE.parents[2]  # adjust if needed
+PROJECT_ROOT = THIS_FILE.parents[2]  
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.qa_generation.qa_generationT5 import (
@@ -38,17 +38,15 @@ def main():
     # Query generation parameters
     parser.add_argument("--qgen_prefix", type=str, default="qgen")
     parser.add_argument("--generator", type=str, default="BeIR/query-gen-msmarco-t5-base-v1")
-    parser.add_argument("--queries_per_passage", type=int, default=-1)
+    parser.add_argument("--queries_per_passage", type=int, default=1)
     parser.add_argument("--batch_size_generation", type=int, default=32)
 
     # Negative mining parameters
+    parser.add_argument("--mine_negatives",action="store_false")
     parser.add_argument("--retrievers", nargs="+", default=None)
     parser.add_argument("--retriever_score_functions", nargs="+", default=None)
     parser.add_argument("--negatives_per_query", type=int, default=50)
 
-    # Optional features
-    parser.add_argument("--use_train_qrels", action="store_true")
-    parser.add_argument("--evaluation_data", type=str, default=None)
     parser.add_argument("--new_size", type=int, default=None)
 
     # Config file generation
@@ -75,12 +73,11 @@ def main():
             generator=args.generator,
             queries_per_passage=args.queries_per_passage,
             batch_size_generation=args.batch_size_generation,
-            retrievers=args.retrievers,
-            retriever_score_functions=args.retriever_score_functions,
-            negatives_per_query=args.negatives_per_query,
-            use_train_qrels=args.use_train_qrels,
-            evaluation_data=args.evaluation_data,
-            new_size=args.new_size,
+            mine_negatives= args.mine_negatives,
+            retrievers = args.retrievers,
+            retriever_score_functions =args.retriever_score_functions,
+            negatives_per_query = args.negatives_per_query,
+            new_size = args.new_size
         )
 
     # Save config and exit if requested

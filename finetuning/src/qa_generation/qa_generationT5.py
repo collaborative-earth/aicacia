@@ -51,9 +51,9 @@ class GenerateQAT5Config:
     def __post_init__(self):
         """Set defaults for list fields."""
         if self.retrievers is None:
-            self.retrievers = ["msmarco-distilbert-base-v3", "msmarco-MiniLM-L-6-v3"]
+            self.retrievers = ["msmarco-distilbert-base-v3"]
         if self.retriever_score_functions is None:
-            self.retriever_score_functions = ["cos_sim", "cos_sim"]
+            self.retriever_score_functions = ["cos_sim"]
         
         # Validate
         if len(self.retrievers) != len(self.retriever_score_functions):
