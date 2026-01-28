@@ -138,7 +138,8 @@ class GenerateQAT5:
                 logger.info(f"Resizing corpus to {new_size} passages")
                 resize(self.config.corpus_path, self.config.output_dir, new_size, self.config.use_train_qrels)
             else:
-                shutil.copy(corpus_file, corpus_dest)
+                if corpus_file != corpus_dest:
+                    shutil.copy(corpus_file, corpus_dest)
         else:
             raise ValueError(f"Invalid corpus_path: {self.config.corpus_path}")
         
