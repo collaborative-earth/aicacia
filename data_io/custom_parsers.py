@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any, List, Optional, Sequence
 from llama_index.core.bridge.pydantic import Field
 from llama_index.core.callbacks.base import CallbackManager
 from llama_index.core.node_parser.node_utils import build_nodes_from_splits
-from llama_index.core.schema import Node, BaseNode, MetadataMode, TextNode, NodeWithScore
+from llama_index.core.schema import Node, BaseNode, MetadataMode, TextNode, NodeWithScore, TransformComponent
 from llama_index.core.node_parser.interface import NodeParser
 from llama_index.core.utils import get_tqdm_iterable
 from data_ingest.entities.postprocess_models import PostprocessResult
