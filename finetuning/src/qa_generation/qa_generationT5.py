@@ -44,6 +44,7 @@ class GenerateQAT5Config:
     retrievers: List[str] = None
     retriever_score_functions: List[str] = None
     negatives_per_query: int = 50
+    filter_questions: bool = False
     
     # Corpus resizing
     new_size: Optional[int] = None  # None = no resize, -1 = auto
@@ -217,7 +218,8 @@ class GenerateQAT5:
             self.config.qgen_prefix,
             retrievers=self.config.retrievers,
             retriever_score_functions=self.config.retriever_score_functions,
-            nneg=self.config.negatives_per_query
+            nneg=self.config.negatives_per_query,
+            filter_questions = self.config.filter_questions
         )
         miner.run()
         

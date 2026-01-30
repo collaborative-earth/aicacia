@@ -46,7 +46,7 @@ def main():
     parser.add_argument("--retrievers", nargs="+", default=None)
     parser.add_argument("--retriever_score_functions", nargs="+", default=None)
     parser.add_argument("--negatives_per_query", type=int, default=50)
-
+    parser.add_argument("--filter_questions", action="store_true", help="Filter queries where negative distribution is too similar to positive.")
     parser.add_argument("--new_size", type=int, default=None)
 
     # Config file generation
@@ -77,7 +77,8 @@ def main():
             retrievers = args.retrievers,
             retriever_score_functions =args.retriever_score_functions,
             negatives_per_query = args.negatives_per_query,
-            new_size = args.new_size
+            new_size = args.new_size,
+            filter_questions = args.filter_questions
         )
 
     # Save config and exit if requested
