@@ -36,6 +36,8 @@ class QueryListResponse(BaseModel):
 class QueryWithFeedbackResponse(BaseModel):
     query_id: str
     question: str
-    references: list[Reference]
-    summary: str
+    references: list[dict]
+    summary: Optional[str]
     feedback: Optional[Dict]
+    experiment_responses: Optional[list[dict]] = None
+    feedback_config: Optional[Dict] = None

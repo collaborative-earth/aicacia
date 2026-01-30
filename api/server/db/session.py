@@ -1,5 +1,5 @@
-from sqlmodel import create_engine, Session
 from server.core.config import settings
+from sqlmodel import Session, create_engine
 
 user = settings.POSTGRES_USER
 password = settings.POSTGRES_PASSWORD

@@ -1,5 +1,6 @@
 # Import all models so they are registered with SQLAlchemy metadata
 from .base import Base
+from .experiment import Experiment
 from .feedback import Feedback
 from .query import Query
 from .sourced_documents import SourcedDocument, SourceLink, UserDocument
@@ -8,6 +9,7 @@ from .user import User
 
 __all__ = [
     "Base",
+    "Experiment",
     "User",
     "SourcedDocument",
     "SourceLink",

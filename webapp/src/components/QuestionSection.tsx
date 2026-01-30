@@ -1,23 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/QuestionSection.css';
-import { askQuestion, submitFeedback, getQueryWithFeedback } from '../utils/api';
+import {
+  askQuestion,
+  getQueryWithFeedback,
+  submitExperimentFeedback,
+  ConfigurationResponse,
+  ExperimentFeedbackConfig,
+  ExperimentFeedbackEntry,
+} from '../utils/api';
 import ReactMarkdown from 'react-markdown';
-
-interface Reference {
-  url: string;
-  title: string;
-  score: number;
-  chunk: string;
-}
-
-interface ReferenceFeedback {
-  feedback: number;
-  feedback_reason: string;
-}
-
-const USEFUL_FEEDBACK = 10;
-const NOT_USEFUL_FEEDBACK = 0;
-const DONT_KNOW_FEEDBACK = -1;
 
 interface QuestionSectionProps {
   selectedQueryId: string | null;
@@ -27,14 +18,12 @@ interface QuestionSectionProps {
 const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNewQuestionSubmitted }) => {
   const [query, setQuery] = useState('');
   const [queryId, setQueryId] = useState('');
-  const [references, setReferences] = useState<Reference[]>([]);
-  const [summary, setSummary] = useState<string>('');
+  const [responses, setResponses] = useState<ConfigurationResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [referencesFeedback, setReferencesFeedback] = useState<ReferenceFeedback[]>([]);
-  const [overallFeedback, setOverallFeedback] = useState<string>('');
-  const [summaryFeedback, setSummaryFeedback] = useState<number>(DONT_KNOW_FEEDBACK);
-  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
-  const feedbackRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
+  const [feedbackConfig, setFeedbackConfig] = useState<ExperimentFeedbackConfig | null>(null);
+  const [feedbackValues, setFeedbackValues] = useState<Record<string, number | string>>({});
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
 
   useEffect(() => {
     if (selectedQueryId) {
@@ -42,35 +31,22 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
     }
   }, [selectedQueryId]);
 
-  useEffect(() => {
-    referencesFeedback.forEach((_, idx) => {
-      const ref = feedbackRefs.current[idx];
-      if (ref) {
-        ref.style.height = 'auto';
-        ref.style.height = ref.scrollHeight + 'px';
-      }
-    });
-  }, [referencesFeedback]);
-
   const handleSearch = async (e: React.FormEvent) => {
     if (!query) {
       return;
     }
 
     e.preventDefault();
-    setReferences([]);
-    setSummary('');
+    setResponses([]);
     setLoading(true);
 
     try {
       const res = await askQuestion(query);
-      setReferences(res.references);
-      setSummary(res.summary);
+      setResponses(res.responses);
       setQueryId(res.query_id);
-      setReferencesFeedback(res.references.map(() => ({ feedback: DONT_KNOW_FEEDBACK, feedback_reason: '' })));
-      setSummaryFeedback(DONT_KNOW_FEEDBACK);
-      setOverallFeedback('');
-      // Notify parent that a new question was submitted
+      setFeedbackConfig(res.feedback_config || null);
+      setFeedbackValues({});
+      setFeedbackSubmitted(false);
       onNewQuestionSubmitted();
     } catch (error) {
       console.error('Failed to ask question:', error);
@@ -79,23 +55,56 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
     }
   };
 
-  const loadQueryData = async (queryId: string) => {
+  const loadQueryData = async (loadedQueryId: string) => {
     try {
       setLoading(true);
-      const data = await getQueryWithFeedback(queryId);
+      const data = await getQueryWithFeedback(loadedQueryId);
       setQuery(data.question);
-      setReferences(data.references);
-      setSummary(data.summary);
       setQueryId(data.query_id);
-      
-      if (data.feedback) {
-        setReferencesFeedback(data.feedback.references_feedback);
-        setSummaryFeedback(data.feedback.summary_feedback);
-        setOverallFeedback(data.feedback.feedback);
+
+      // Handle both old and new format for responses
+      let loadedResponses: ConfigurationResponse[];
+      if (data.experiment_responses && data.experiment_responses.length > 0) {
+        // New format - use experiment_responses directly
+        loadedResponses = data.experiment_responses;
       } else {
-        setReferencesFeedback(data.references.map(() => ({ feedback: DONT_KNOW_FEEDBACK, feedback_reason: '' })));
-        setSummaryFeedback(DONT_KNOW_FEEDBACK);
-        setOverallFeedback('');
+        // Old format - convert to single-response array
+        loadedResponses = [{
+          configuration_id: 'legacy',
+          references: data.references || [],
+          summary: data.summary || null
+        }];
+      }
+      setResponses(loadedResponses);
+
+      // Load feedback config if available
+      if (data.feedback_config) {
+        setFeedbackConfig(data.feedback_config as ExperimentFeedbackConfig);
+      } else {
+        setFeedbackConfig(null);
+      }
+
+      // Populate feedback values if feedback exists
+      if (data.feedback?.experiment_feedback?.configuration_feedbacks) {
+        const loadedValues: Record<string, number | string> = {};
+        const configFeedbacks = data.feedback.experiment_feedback.configuration_feedbacks;
+
+        // Map configuration feedbacks back to form values
+        loadedResponses.forEach((response, index) => {
+          const responseKey = `${index}_${response.configuration_id}`;
+          const feedbacksForConfig = configFeedbacks[response.configuration_id];
+          if (feedbacksForConfig) {
+            feedbacksForConfig.forEach((field: { field_id: string; value: number | string }) => {
+              loadedValues[`${responseKey}_${field.field_id}`] = field.value;
+            });
+          }
+        });
+
+        setFeedbackValues(loadedValues);
+        setFeedbackSubmitted(true);
+      } else {
+        setFeedbackValues({});
+        setFeedbackSubmitted(false);
       }
     } catch (error) {
       console.error('Failed to load query:', error);
@@ -107,11 +116,52 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
   const askForNewQuestion = () => {
     setQuery('');
     setQueryId('');
-    setReferences([]);
-    setReferencesFeedback([]);
-    setSummary('');
-    setOverallFeedback('');
-    setSummaryFeedback(DONT_KNOW_FEEDBACK);
+    setResponses([]);
+    setFeedbackConfig(null);
+    setFeedbackValues({});
+    setFeedbackSubmitted(false);
+  };
+
+  const handleFeedbackChange = (configurationId: string, fieldId: string, value: number | string) => {
+    setFeedbackValues((prev) => ({
+      ...prev,
+      [`${configurationId}_${fieldId}`]: value,
+    }));
+  };
+
+  const handleSubmitFeedback = async () => {
+    if (!queryId || !feedbackConfig) return;
+
+    setSubmittingFeedback(true);
+    try {
+      // Transform feedbackValues into ExperimentFeedbackEntry array
+      const feedbacks: ExperimentFeedbackEntry[] = [];
+      responses.forEach((response, index) => {
+        const responseKey = `${index}_${response.configuration_id}`;
+        for (const field of feedbackConfig.fields) {
+          const key = `${responseKey}_${field.field_id}`;
+          const value = feedbackValues[key];
+          if (value !== undefined && value !== '') {
+            feedbacks.push({
+              configuration_id: response.configuration_id,
+              field_id: field.field_id,
+              value: value,
+            });
+          }
+        }
+      });
+
+      await submitExperimentFeedback({
+        query_id: queryId,
+        feedbacks: feedbacks,
+      });
+
+      setFeedbackSubmitted(true);
+    } catch (error) {
+      console.error('Failed to submit feedback:', error);
+    } finally {
+      setSubmittingFeedback(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -120,47 +170,13 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
     }
   };
 
-  const handleFeedbackChange = (index: number, feedback: number) => {
-    const updatedReferencesFeedback = [...referencesFeedback];
-    updatedReferencesFeedback[index] = {
-      ...updatedReferencesFeedback[index],
-      feedback: feedback
-    };
-    setReferencesFeedback(updatedReferencesFeedback);
-  };
-
-  const handleFeedbackReasonChange = (index: number, reason: string) => {
-    const updatedReferencesFeedback = [...referencesFeedback];
-    updatedReferencesFeedback[index] = {
-      ...updatedReferencesFeedback[index],
-      feedback_reason: reason
-    };
-    setReferencesFeedback(updatedReferencesFeedback);
-  };
-
-  const handleOverallFeedbackChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setOverallFeedback(e.target.value);
-  };
-
-  const handleSubmitFeedback = async () => {
-    await submitFeedback({
-      query_id: queryId,
-      references_feedback: referencesFeedback,
-      summary_feedback: summaryFeedback,
-      feedback: overallFeedback,
-    });
-    setFeedbackSubmitted(true);
-    // Hide the notification after 3 seconds
-    setTimeout(() => setFeedbackSubmitted(false), 3000);
-  };
-
   return (
     <div className="question-section">
       <h2>Ask about Restoration Projects</h2>
-      
+
       <div className="action-buttons">
-        <button 
-          className="new-question-button" 
+        <button
+          className="new-question-button"
           onClick={askForNewQuestion}
         >
           New Question
@@ -181,132 +197,83 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
         </button>
       </form>
 
-      {summary && (
-        <div className="summary-section">
-          <h3>Summary</h3>
-          <div className="summary-output">
-            <ReactMarkdown>{summary}</ReactMarkdown>
+      {responses.length > 0 && (
+        <div className="responses-section">
+          <h3>Answers</h3>
+          {responses.map((response, index) => {
+            // Use index as part of key to handle duplicate configuration_ids
+            const responseKey = `${index}_${response.configuration_id}`;
+            return (
+              <div key={responseKey} className="response-card">
+                <div className="response-header">
+                  <span className="response-label">Answer {index + 1}</span>
+                </div>
+                {response.summary ? (
+                  <div className="response-content">
+                    <ReactMarkdown>{response.summary}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <div className="response-content no-summary">
+                    <p>No summary available for this configuration.</p>
+                  </div>
+                )}
 
-            <div className="feedback-divider"></div>
-            <div className="feedback-options">
-              <div className="feedback-radio-group">
-                <label>
-                  <input
-                    type="radio"
-                    name="summary-feedback"
-                    value="useful"
-                    checked={summaryFeedback === USEFUL_FEEDBACK}
-                    onChange={() => setSummaryFeedback(USEFUL_FEEDBACK)}
-                  />
-                  Useful
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="summary-feedback"
-                    value="not-useful"
-                    checked={summaryFeedback === NOT_USEFUL_FEEDBACK}
-                    onChange={() => setSummaryFeedback(NOT_USEFUL_FEEDBACK)}
-                  />
-                  Not Useful
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="summary-feedback"
-                    value="dont-know"
-                    checked={summaryFeedback === DONT_KNOW_FEEDBACK}
-                    onChange={() => setSummaryFeedback(DONT_KNOW_FEEDBACK)}
-                  />
-                  Don't Know
-                </label>
+                {/* Feedback form for this response - always show if feedbackConfig exists */}
+                {feedbackConfig && (
+                  <div className="feedback-section">
+                    <h4>Provide Feedback for Answer {index + 1}</h4>
+                    {feedbackConfig.fields.map((field) => (
+                      <div key={`${responseKey}_${field.field_id}`} className="feedback-field">
+                        <label>{field.label}{field.required && ' *'}</label>
+                        {field.field_type === 'radio' && field.options && (
+                          <div className="feedback-radio-group">
+                            {field.options.map((option) => (
+                              <label key={`${responseKey}_${field.field_id}_${option.value}`}>
+                                <input
+                                  type="radio"
+                                  name={`${responseKey}_${field.field_id}`}
+                                  value={option.value}
+                                  checked={feedbackValues[`${responseKey}_${field.field_id}`] === option.value}
+                                  onChange={() => handleFeedbackChange(responseKey, field.field_id, option.value)}
+                                />
+                                {option.label}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                        {field.field_type === 'text' && (
+                          <textarea
+                            className="feedback-reason-input"
+                            placeholder="Enter your feedback..."
+                            value={feedbackValues[`${responseKey}_${field.field_id}`] as string || ''}
+                            onChange={(e) => handleFeedbackChange(responseKey, field.field_id, e.target.value)}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            );
+          })}
 
-      {references.length > 0 && (
-        <div className="references-section">
-          <h3>References</h3>
-          <ul>
-            {references.map((ref, index) => (
-              <li key={index} className="reference-item">
-                <div className="reference-header">
-                  <div className="score-badge">
-                    <span className="score-label">Score:</span> {ref.score.toFixed(2)}
-                  </div>
-                  <a href={ref.url} target="_blank" rel="noopener noreferrer" className="reference-title">
-                    {ref.title}
-                  </a>
-                </div>
-                <div className="reference-chunk">{ref.chunk}</div>
-                <div className="feedback-options" style={{ marginTop: '8px' }}>
-                  <div className="feedback-radio-group">
-                    <label>
-                      <input
-                        type="radio"
-                        name={`feedback-${index}`}
-                        value="useful"
-                        checked={referencesFeedback[index]?.feedback === USEFUL_FEEDBACK}
-                        onChange={() => handleFeedbackChange(index, USEFUL_FEEDBACK)}
-                      />
-                      Useful
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name={`feedback-${index}`}
-                        value="not-useful"
-                        checked={referencesFeedback[index]?.feedback === NOT_USEFUL_FEEDBACK}
-                        onChange={() => handleFeedbackChange(index, NOT_USEFUL_FEEDBACK)}
-                      />
-                      Not Useful
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name={`feedback-${index}`}
-                        value="not-useful"
-                        checked={referencesFeedback[index]?.feedback === DONT_KNOW_FEEDBACK}
-                        onChange={() => handleFeedbackChange(index, DONT_KNOW_FEEDBACK)}
-                      />
-                      Don't Know
-                    </label>
-                  </div>
-                  <textarea
-                    ref={el => feedbackRefs.current[index] = el}
-                    placeholder="Why did you choose this option?"
-                    value={referencesFeedback[index]?.feedback_reason || ''}
-                    onChange={(e) => {
-                      handleFeedbackReasonChange(index, e.target.value);
-                      // Auto-grow functionality
-                      e.target.style.height = 'auto';
-                      e.target.style.height = e.target.scrollHeight + 'px';
-                    }}
-                    className="feedback-reason-input"
-                    rows={1}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-          <div className="overall-feedback-section">
-            <textarea
-              placeholder="Overall feedback"
-              value={overallFeedback}
-              onChange={handleOverallFeedbackChange}
-              className="overall-feedback-input"
-            ></textarea>
-            <button className="submit-feedback-button" onClick={handleSubmitFeedback}>
-              Submit Feedback
+          {/* Submit button - always show if feedbackConfig exists */}
+          {feedbackConfig && (
+            <button
+              onClick={handleSubmitFeedback}
+              className="submit-feedback-button"
+              disabled={submittingFeedback}
+            >
+              {submittingFeedback ? 'Submitting...' : (feedbackSubmitted ? 'Update Feedback' : 'Submit Feedback')}
             </button>
-            {feedbackSubmitted && (
-              <div className="feedback-notification">
-                ✓ Feedback submitted successfully
-              </div>
-            )}
-          </div>
+          )}
+
+          {/* Success notification */}
+          {feedbackSubmitted && (
+            <div className="feedback-notification">
+              ✓ Feedback saved
+            </div>
+          )}
         </div>
       )}
     </div>

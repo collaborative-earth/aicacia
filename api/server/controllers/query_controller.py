@@ -1,25 +1,20 @@
-import json
 import uuid
-from typing import List, Sequence
 
 from fastapi import APIRouter, Depends, HTTPException
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from qdrant_client import QdrantClient
 from server.auth.dependencies import get_current_user
 from server.controllers.user_controller import get_admin_user
-from server.core.ai_summary import generate_summary
-from server.core.config import settings
+from server.core.experiment_runner import ExperimentRunner
+from server.db.models.experiment import Experiment
 from server.db.models.feedback import Feedback
 from server.db.models.query import Query
-from server.db.models.sourced_documents import SourcedDocument
 from server.db.models.user import User
 from server.db.session import get_db_session
+from server.dtos.experiment import ExperimentQueryResponse
+from server.dtos.experiment_feedback import ExperimentFeedbackConfig
 from server.dtos.query import (
     QueryListResponse,
     QueryRequest,
-    QueryResponse,
     QueryWithFeedbackResponse,
-    Reference,
 )
 from sqlalchemy import func
 from sqlmodel import Session, select
@@ -28,98 +23,55 @@ query_router = APIRouter()
 
 admin_query_router = APIRouter()
 
-vectordb_client = QdrantClient(
-    url=settings.QDRANT_URL,
-    https=True,
-    api_key=settings.QDRANT_API_KEY
-)
-
-embedding_model = HuggingFaceEmbedding(model_name=settings.EMBEDDING_MODEL_NAME)
-
 
 @query_router.post("/")
 def run_user_query(
-        request: QueryRequest,
-        user: User = Depends(get_current_user),
-        db: Session = Depends(get_db_session)
-) -> QueryResponse:
-
+    request: QueryRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db_session),
+) -> ExperimentQueryResponse:
     query_id = str(uuid.uuid4())
 
-    # Embed query
-    query_embedding = embedding_model.get_text_embedding(request.question)
+    # Get active experiment
+    experiment = db.exec(
+        select(Experiment).where(Experiment.is_active == True)
+    ).first()
 
-    print("Qdrant URL:", settings.QDRANT_URL)
-    print("Qdrant Collection:", settings.QDRANT_COLLECTION)
+    if not experiment:
+        raise HTTPException(status_code=404, detail="No active experiment configured")
 
-    # Search in vector store
-    vectordb_results = vectordb_client.query_points(
-        collection_name=settings.QDRANT_COLLECTION,
-        query=query_embedding,
-        with_payload=["_node_content", "doc_id"],
-        limit=3
+    # Run all configurations in parallel
+    runner = ExperimentRunner()
+    responses = runner.run(experiment, request.question, db)
+
+    # Store query with experiment context
+    query = Query(
+        query_id=query_id,
+        question=request.question,
+        user_id=user.user_id,
+        experiment_id=experiment.experiment_id,
+        experiment_responses=[r.model_dump() for r in responses],
+        # Keep legacy fields populated from first response for backward compat
+        references=[ref.model_dump() for ref in responses[0].references]
+        if responses
+        else [],
+        summary=responses[0].summary if responses else None,
     )
-
-    if not vectordb_results.points:
-        query = Query(
-            query_id=query_id,
-            question=request.question,
-            references=[],
-            summary="No results found!",
-            user_id=user.user_id
-        )
-    else:
-        # Retrieve docs metadata
-        doc_ids = list({p.payload["doc_id"] for p in vectordb_results.points})
-        docs: Sequence[SourcedDocument] = db.exec(
-            select(SourcedDocument).where(SourcedDocument.doc_id.in_(doc_ids))).all()
-
-        references = []
-        rag_context = []
-        duplicate_chunk_counter = {}
-
-        for point in vectordb_results.points:
-            point_doc_id = uuid.UUID(point.payload["doc_id"])
-            doc = next((d for d in docs if d.doc_id == point_doc_id), None)
-            title = doc.title if doc else "Unknown"
-            url = doc.page_link if doc else "Unknown"
-            doi = doc.doi if doc else "Unknown"
-
-            if (not url or url == "Unknown") and doi and doi != "Unknown":
-                url = f"https://doi.org/{doi}"
-
-            text = json.loads(point.payload["_node_content"])["text"]
-
-            if text in duplicate_chunk_counter:
-                duplicate_chunk_counter[text] += 1
-                continue
-            else:
-                duplicate_chunk_counter[text] = 1
-
-            rag_context.append({"title": title, "url": url, "text": text})
-            references.append(
-                Reference(
-                    title=title, url=url, score=point.score, chunk=text
-                ).model_dump()
-            )
-
-        for text, count in duplicate_chunk_counter.items():
-            print(f"Duplicate chunk found: {text} with count: {count}")
-
-        summary = generate_summary(request.question, json.dumps(rag_context))
-
-        query = Query(
-            query_id=query_id,
-            question=request.question,
-            references=references,
-            summary=summary,
-            user_id=user.user_id,
-        )
 
     db.add(query)
     db.commit()
 
-    return QueryResponse(query_id=query_id, references=query.references, summary=query.summary)
+    # Parse feedback config if present
+    feedback_config = None
+    if experiment.feedback_config:
+        feedback_config = ExperimentFeedbackConfig(**experiment.feedback_config)
+
+    return ExperimentQueryResponse(
+        query_id=query_id,
+        experiment_id=str(experiment.experiment_id),
+        responses=responses,
+        feedback_config=feedback_config,
+    )
 
 
 @query_router.get("/list")
@@ -180,12 +132,23 @@ def get_query_with_feedback(
         .where(Feedback.user_id == user.user_id)
     ).first()
 
+    # Get feedback_config from experiment if query is associated with one
+    feedback_config = None
+    if query.experiment_id:
+        experiment = db.exec(
+            select(Experiment).where(Experiment.experiment_id == query.experiment_id)
+        ).first()
+        if experiment:
+            feedback_config = experiment.feedback_config
+
     return QueryWithFeedbackResponse(
         query_id=str(query.query_id),  # Convert UUID to string
         question=query.question,
         references=query.references,
         summary=query.summary,
         feedback=feedback.feedback_json if feedback else None,
+        experiment_responses=query.experiment_responses,
+        feedback_config=feedback_config,
     )
 
 
@@ -249,10 +212,31 @@ def get_user_query_with_feedback_admin(
         .where(Feedback.user_id == user_id)
     ).first()
 
+    # Get feedback_config and configurations from experiment if query is associated with one
+    feedback_config = None
+    experiment_responses = query.experiment_responses
+    if query.experiment_id:
+        experiment = db.exec(
+            select(Experiment).where(Experiment.experiment_id == query.experiment_id)
+        ).first()
+        if experiment:
+            feedback_config = experiment.feedback_config
+            # Enrich experiment_responses with configuration details
+            if experiment_responses and experiment.configurations:
+                config_map = {
+                    c["configuration_id"]: c for c in experiment.configurations
+                }
+                for response in experiment_responses:
+                    config_id = response.get("configuration_id")
+                    if config_id and config_id in config_map and "configuration" not in response:
+                        response["configuration"] = config_map[config_id]
+
     return QueryWithFeedbackResponse(
         query_id=str(query.query_id),
         question=query.question,
         references=query.references,
         summary=query.summary,
         feedback=feedback.feedback_json if feedback else None,
+        experiment_responses=experiment_responses,
+        feedback_config=feedback_config,
     )
