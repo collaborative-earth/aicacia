@@ -234,3 +234,78 @@ def beir_to_bgem3(
         json.dump(stats, f, indent=2, ensure_ascii=False)
     
     return stats
+
+def beir_to_llamaindex(
+    beir_dir: str,
+    output_path: str,
+    qgen_prefix: str = "qgen"
+) -> Dict:
+    """
+    Convert BEIR format to LlamaIndex format.
+
+    Expected BEIR structure:
+      - corpus.jsonl
+      - {qgen_prefix}-queries.jsonl
+      - {qgen_prefix}-qrels/train.tsv
+
+    Output LlamaIndex JSON structure:
+      {
+        "queries": {qid: query_text},
+        "corpus": {doc_id: doc_text},
+        "relevant_docs": {qid: [doc_id, ...]}
+      }
+
+    Args:
+        beir_dir: Directory containing BEIR files
+        output_path: Path to output LlamaIndex JSON
+        qgen_prefix: Prefix for queries/qrels files
+
+    Returns:
+        Statistics dict
+    """
+    # Load corpus
+    corpus = {}
+    corpus_path = os.path.join(beir_dir, "corpus.jsonl")
+    with open(corpus_path, "r", encoding="utf-8") as f:
+        for line in f:
+            item = json.loads(line)
+            doc_id = item["_id"]
+            text = item.get("text", "")
+            corpus[doc_id] = text
+
+    # Load queries
+    queries = {}
+    queries_path = os.path.join(beir_dir, f"{qgen_prefix}-queries.jsonl")
+    with open(queries_path, "r", encoding="utf-8") as f:
+        for line in f:
+            item = json.loads(line)
+            queries[item["_id"]] = item["text"]
+
+    # Load qrels
+    relevant_docs = {}
+    qrels_path = os.path.join(beir_dir, f"{qgen_prefix}-qrels", "train.tsv")
+    with open(qrels_path, "r", encoding="utf-8") as f:
+        next(f)  # skip header
+        for line in f:
+            qid, doc_id, *_ = line.strip().split("\t")
+            relevant_docs.setdefault(qid, []).append(doc_id)
+
+    # Assemble LlamaIndex structure
+    llamaindex_data = {
+        "queries": queries,
+        "corpus": corpus,
+        "relevant_docs": relevant_docs,
+    }
+
+    # Write output
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(llamaindex_data, f, indent=2, ensure_ascii=False)
+
+    stats = {
+        "num_queries": len(queries),
+        "num_corpus": len(corpus),
+        "num_qrels": sum(len(v) for v in relevant_docs.values()),
+    }
+
+    return stats
