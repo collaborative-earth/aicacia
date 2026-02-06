@@ -11,6 +11,8 @@ import json
 import glob
 from typing import Dict, List, Optional
 from pathlib import Path
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
 def llamaindex_to_beir(
     input_path: str,
@@ -93,11 +95,12 @@ def llamaindex_to_beir(
 def beir_to_bgem3(
     beir_dir: str,
     output_path: str,
+    beir_str  = "train",
     qgen_prefix: str = "qgen",
     sep: str = " ",
     retriever: Optional[str] = None,
     prompt: str = "Query",
-    require_hard_negatives: bool = True
+    require_hard_negatives: bool = True,
 ) -> Dict:
     """
     Convert BEIR format with hard negatives to BGE-M3 format.
@@ -135,7 +138,7 @@ def beir_to_bgem3(
     
     # Load qrels
     qrels = {}
-    qrels_path = os.path.join(beir_dir, f"{qgen_prefix}-qrels", "train.tsv")
+    qrels_path = os.path.join(beir_dir, f"{qgen_prefix}-qrels", f"{beir_str}.tsv")
     with open(qrels_path, 'r', encoding='utf-8') as f:
         next(f)  # Skip header
         for line in f:
@@ -238,7 +241,8 @@ def beir_to_bgem3(
 def beir_to_llamaindex(
     beir_dir: str,
     output_path: str,
-    qgen_prefix: str = "qgen"
+    qgen_prefix: str = "qgen",
+    beir_str:str = "train"
 ) -> Dict:
     """
     Convert BEIR format to LlamaIndex format.
@@ -283,7 +287,7 @@ def beir_to_llamaindex(
 
     # Load qrels
     relevant_docs = {}
-    qrels_path = os.path.join(beir_dir, f"{qgen_prefix}-qrels", "train.tsv")
+    qrels_path = os.path.join(beir_dir, f"{qgen_prefix}-qrels", f"{beir_str}.tsv")
     with open(qrels_path, "r", encoding="utf-8") as f:
         next(f)  # skip header
         for line in f:
@@ -309,3 +313,42 @@ def beir_to_llamaindex(
     }
 
     return stats
+
+def split_beir(dataset_path, train_ratio=0.7, seed=42):
+    """
+    Split qrels/train.tsv of a beir dataset into finetune.tsv and validation.tsv
+
+    Args:
+        dataset_path: Path to BEIR dataset folder (contains qrels/train.tsv)
+        train_ratio: Proportion for training (e.g., 0.7 = 70% train, 30% val)
+        seed: Random seed for reproducibility
+    """
+    dataset_path = Path(dataset_path)
+    qrels_path = dataset_path / "qgen-qrels" / "train.tsv"
+
+    if not qrels_path.exists():
+        print(f"Error: {qrels_path} does not exist")
+        return
+
+    # Load qrels
+    qrels_df = pd.read_csv(qrels_path, sep="\t")
+    print(f"Total data points: {len(qrels_df)}")
+
+    # Split
+    train_df, val_df = train_test_split(
+        qrels_df,
+        train_size=train_ratio,
+        random_state=seed,
+        shuffle=True
+    )
+
+    # Save splits in the same qrels folder
+    output_dir = dataset_path / "qgen-qrels"
+    train_df.to_csv(output_dir / "finetune.tsv", sep="\t", index=False)
+    val_df.to_csv(output_dir / "validation.tsv", sep="\t", index=False)
+
+    print(f"Finetune: {len(train_df)} ({len(train_df)/len(qrels_df)*100:.1f}%)")
+    print(f"Validation: {len(val_df)} ({len(val_df)/len(qrels_df)*100:.1f}%)")
+    print(f"Saved to: {output_dir}")
+
+    return train_df, val_df

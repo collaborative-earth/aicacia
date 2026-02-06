@@ -1,6 +1,6 @@
 # S3 Configuration (optional - leave empty to use pre-loaded documents/nodes)
 bucket_name: "aicacia-extracted-data"
-prefix: "aer/tei_output_2"
+prefix: "hj_andrews_bibliography_parsed/"
 # aws_key and aws_secret will be loaded from environment variables if not specified
 aws_key: null
 aws_secret: null
@@ -10,10 +10,10 @@ chunk_size: 256
 chunk_overlap: 40
 paragraph_separator: "\n\n"
 min_len: 50
-max_nodes: 10  # Set to a number to limit total nodes
+max_nodes: 5000  # Set to a number to limit total nodes
 
 # Output Configuration
-output_dir: "data/corpus"
+output_dir: "data/corpora/hj_andrews"
 auto_version: false  # Set to true to auto-increment version numbers
 
 # Filtering Configuration (optional)
@@ -22,7 +22,7 @@ valid_tags: null  # Example: ["p", "head", "div"]
 
 # Knowledge Graph Configuration
 generate_kg: true  # Set to true to generate knowledge graph
-kg_output_dir: "data/corpus/kg"
+kg_output_dir: "data/corpora/hj_andrews"
 
 # KG: Embedding Configuration
 embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
