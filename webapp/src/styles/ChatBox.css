@@ -1,21 +1,13 @@
-/* ChatBox.css - Modern responsive design */
+/* ChatBox.css - Clean modern chatbot design */
 
 .chatbox {
   width: 100%;
-  max-width: 1100px;
-  min-height: calc(100vh - 100px);
+  max-width: 800px;
+  min-height: calc(100vh - 60px);
   display: flex;
   flex-direction: column;
-  background-color: transparent;
+  background-color: #ebebeb;
   position: relative;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-@media (min-width: 769px) {
-  .chatbox {
-    margin: 20px 0;
-  }
 }
 
 .chat-welcome {
@@ -30,18 +22,18 @@
 }
 
 .chat-welcome h1 {
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 600;
   margin-bottom: 12px;
-  color: #1a472a;
+  color: #2c5f2d;
   letter-spacing: -0.5px;
 }
 
 .chat-welcome p {
-  font-size: 17px;
-  color: #4a7c59;
+  font-size: 16px;
+  color: #6b7280;
   text-align: center;
-  max-width: 600px;
+  max-width: 500px;
   line-height: 1.6;
 }
 
@@ -51,48 +43,54 @@
   }
 
   .chat-welcome h1 {
-    font-size: 28px;
+    font-size: 26px;
   }
 
   .chat-welcome p {
-    font-size: 16px;
+    font-size: 15px;
   }
 }
 
 .chat-messages {
   flex: 1 1 auto;
-  padding: 20px 0 0 0;
+  padding: 24px 0 0 0;
   display: flex;
   flex-direction: column;
 }
 
 .message-container {
   width: 100%;
-  padding: 24px 0;
+  padding: 16px 24px;
   display: flex;
   justify-content: center;
 }
 
 .message-container.user {
+  background-color: #ebebeb;
+}
+
+.message-container.user .message-content {
+  border: 1px solid #2c5f2d;
+  border-radius: 12px;
+  padding: 16px;
   background-color: #ffffff;
 }
 
 .message-container.agent {
-  background-color: #f7faf8;
+  background-color: #ebebeb;
 }
 
 .message-container.loading {
-  background-color: transparent;
-  padding: 12px 0;
+  background-color: #ebebeb;
+  padding: 12px 24px;
 }
 
 .message-content {
-  max-width: 820px;
+  max-width: 700px;
   width: 100%;
-  padding: 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .message-bubble {
@@ -103,16 +101,15 @@
 }
 
 .message-bubble.loading {
-  color: #6a9f6b;
+  color: #6b7280;
   font-style: italic;
-  text-align: center;
   font-size: 14px;
-  padding: 8px 16px;
+  padding: 8px 0;
 }
 
 /* Markdown styling */
 .message-bubble p {
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
 }
 
 .message-bubble p:last-child {
@@ -121,82 +118,80 @@
 
 .message-bubble code {
   background-color: #f3f4f6;
-  padding: 3px 6px;
-  border-radius: 5px;
-  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace;
   font-size: 13px;
   color: #1f2937;
-  border: 1px solid #e5e7eb;
 }
 
 .message-bubble pre {
-  background-color: #1f2937;
+  background-color: #1e1e1e;
   padding: 16px;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow-x: auto;
-  margin: 16px 0;
-  border: 1px solid #374151;
+  margin: 12px 0;
 }
 
 .message-bubble pre code {
   background-color: transparent;
   padding: 0;
-  border: none;
-  color: #f9fafb;
+  color: #d4d4d4;
 }
 
 .message-bubble ul,
 .message-bubble ol {
-  margin: 12px 0;
-  padding-left: 24px;
+  margin: 8px 0;
+  padding-left: 20px;
 }
 
 .message-bubble li {
-  margin: 8px 0;
+  margin: 6px 0;
 }
 
 .message-bubble a {
-  color: #4caf50;
+  color: #2c5f2d;
   text-decoration: underline;
 }
 
 .message-bubble a:hover {
-  color: #66bb6a;
+  color: #3a7a3b;
 }
 
 .feedback-buttons {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
   margin-top: 4px;
 }
 
 .thumb-button {
   background: transparent;
-  border: 1px solid transparent;
-  padding: 6px 10px;
+  border: none;
+  padding: 6px 8px;
   cursor: pointer;
-  font-size: 15px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
   opacity: 0.4;
+  color: #6b7280;
 }
 
 .thumb-button:hover {
   opacity: 1;
   background-color: #f3f4f6;
-  border-color: #e5e7eb;
 }
 
 .thumb-button.selected {
   opacity: 1;
   background-color: #ecfdf5;
-  border-color: #86efac;
+  color: #2c5f2d;
 }
 
+/* Input area */
 .input-container {
-  padding: 20px 24px 24px;
-  background-color: transparent;
+  padding: 16px 24px 24px;
+  background-color: #ebebeb;
   display: flex;
   justify-content: center;
   flex-shrink: 0;
@@ -206,24 +201,23 @@
 }
 
 .input-wrapper {
-  max-width: 820px;
+  max-width: 700px;
   width: 100%;
   position: relative;
   display: flex;
   align-items: flex-end;
-  gap: 10px;
-  background-color: #f9fafb;
-  border: 1.5px solid #d1d5db;
-  border-radius: 20px;
-  padding: 10px 14px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  gap: 12px;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 24px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   transition: all 0.2s ease;
 }
 
 .input-wrapper:focus-within {
-  background-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-color: #4ade80;
+  border-color: #2c5f2d;
+  box-shadow: 0 0 0 2px rgba(44, 95, 45, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .input-field {
@@ -237,9 +231,9 @@
   resize: none;
   max-height: 200px;
   min-height: 22px;
-  padding: 6px 0;
+  padding: 2px 0;
   overflow-y: auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: inherit;
 }
 
 .input-field::placeholder {
@@ -254,25 +248,23 @@
 .send-button {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 50%;
   border: none;
-  background-color: #22c55e;
+  background-color: #2c5f2d;
   color: white;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   flex-shrink: 0;
-  opacity: 0.4;
+  opacity: 0.5;
 }
 
 .send-button:hover:not(:disabled) {
-  background-color: #16a34a;
+  background-color: #3a7a3b;
   opacity: 1;
-  transform: scale(1.05);
 }
 
 .send-button:disabled {
@@ -283,14 +275,12 @@
 
 .input-wrapper.has-text .send-button {
   opacity: 1;
-  background-color: #22c55e;
 }
 
 .loader-text {
   display: inline-block;
   animation: pulse 1.5s ease-in-out infinite;
   font-size: 14px;
-  font-weight: 500;
 }
 
 @keyframes pulse {
@@ -304,12 +294,16 @@
 
 /* Mobile responsive */
 @media (max-width: 768px) {
-  .message-content {
-    padding: 0 16px;
+  .message-container {
+    padding: 14px 16px;
   }
 
   .input-container {
-    padding: 16px 16px 20px;
+    padding: 12px 16px 20px;
+  }
+
+  .input-wrapper {
+    padding: 10px 14px;
   }
 
   .message-bubble {

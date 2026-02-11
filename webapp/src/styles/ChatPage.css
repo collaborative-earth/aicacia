@@ -1,8 +1,10 @@
+/* ChatPage.css - Modern chatbot layout */
+
 .chat-page {
   display: flex;
   min-height: 100%;
   position: relative;
-  font-family: sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 
 /* Hamburger menu button */
@@ -12,10 +14,10 @@
   top: 76px;
   left: 16px;
   z-index: 1001;
-  width: 44px;
-  height: 44px;
-  background-color: #ffffff;
-  border: 1px solid #d1e7dd;
+  width: 40px;
+  height: 40px;
+  background-color: #2c5f2d;
+  border: none;
   border-radius: 8px;
   cursor: pointer;
   flex-direction: column;
@@ -23,34 +25,34 @@
   justify-content: center;
   gap: 5px;
   padding: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
 }
 
 .hamburger-menu:hover {
-  background-color: #f0f7f0;
-  border-color: #a5d6a7;
+  background-color: #3a7a3b;
 }
 
 .hamburger-menu span {
   display: block;
-  width: 20px;
+  width: 18px;
   height: 2px;
-  background-color: #2c5f2d;
+  background-color: #ffffff;
   border-radius: 2px;
   transition: all 0.3s ease;
 }
 
-/* Sidebar container - desktop: fixed to left */
+/* Sidebar container - dark green */
 .sidebar-container {
   position: fixed;
   left: 0;
   top: 60px;
-  width: 280px;
+  width: 260px;
   height: calc(100% - 60px);
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 100;
+  background-color: #2c5f2d;
 }
 
 /* Overlay for mobile */
@@ -58,14 +60,14 @@
   display: none;
 }
 
-/* Main chat area - desktop: account for fixed sidebar */
+/* Main chat area - light gray background */
 .chat-main {
-  width: calc(100% - 280px);
-  margin-left: 280px;
+  width: calc(100% - 260px);
+  margin-left: 260px;
   min-height: 100%;
   display: flex;
   justify-content: center;
-  padding: 20px;
+  background-color: #ebebeb;
 }
 
 /* Tablet and mobile responsive */
@@ -113,6 +115,5 @@
   .chat-main {
     margin-left: 0;
     width: 100%;
-    padding: 16px;
   }
 }

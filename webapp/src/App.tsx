@@ -15,6 +15,8 @@ function App() {
   const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
   const [userInfo, setUserInfo] = useState<{email: string, user_id: string, is_admin: boolean} | null>(null);
+  const [hasQueryHistory, setHasQueryHistory] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const verifyUser = async () => {
@@ -54,6 +56,10 @@ function App() {
     setRefreshTrigger(prev => prev + 1);
   };
 
+  const handleSidebarItemClick = () => {
+    setIsSidebarOpen(false);
+  };
+
   return (
     <Router>
       <div className="app">
@@ -70,20 +76,58 @@ function App() {
                 <Route 
                   path="/" 
                   element={
-                    <>
-                      <aside className="sidebar">
-                        <QueryHistory 
-                          onQuerySelect={handleQuerySelect} 
-                          refreshTrigger={refreshTrigger}
+                    <div className="home-page-layout">
+                      {/* Hamburger menu button for mobile */}
+                      {hasQueryHistory && (
+                        <button 
+                          className="hamburger-menu" 
+                          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                          aria-label="Toggle menu"
+                        >
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </button>
+                      )}
+
+                      {/* Overlay for mobile */}
+                      {isSidebarOpen && (
+                        <div 
+                          className="sidebar-overlay" 
+                          onClick={() => setIsSidebarOpen(false)}
                         />
-                      </aside>
-                      <main className="main-content">
+                      )}
+
+                      {/* Sidebar - only show if there's content */}
+                      {hasQueryHistory && (
+                        <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+                          <QueryHistory 
+                            onQuerySelect={handleQuerySelect} 
+                            refreshTrigger={refreshTrigger}
+                            onContentChange={setHasQueryHistory}
+                            onItemClick={handleSidebarItemClick}
+                          />
+                        </aside>
+                      )}
+
+                      {/* Hidden QueryHistory to check for content when sidebar is hidden */}
+                      {!hasQueryHistory && (
+                        <div style={{ display: 'none' }}>
+                          <QueryHistory 
+                            onQuerySelect={handleQuerySelect} 
+                            refreshTrigger={refreshTrigger}
+                            onContentChange={setHasQueryHistory}
+                          />
+                        </div>
+                      )}
+
+                      <main className={`main-content ${!hasQueryHistory ? 'full-width' : ''}`}>
                         <QuestionSection 
                           selectedQueryId={selectedQueryId} 
                           onNewQuestionSubmitted={handleNewQuestionSubmitted}
                         />
                       </main>
-                    </>
+                    </div>
                   } 
                 />
                 <Route
