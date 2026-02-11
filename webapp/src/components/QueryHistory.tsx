@@ -35,7 +35,7 @@ const QueryHistory: React.FC<QueryHistoryProps> = ({ onQuerySelect, refreshTrigg
         console.error('Failed to load queries:', error);
         setQueries([]);
         setTotalCount(0);
-        onContentChange?.(false);
+        // Don't set hasContent to false on error to avoid sidebar flicker
       } finally {
         setLoading(false);
       }
