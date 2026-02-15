@@ -18,6 +18,7 @@ class FeedbackFieldConfig(BaseModel):
     label: str  # Question text
     required: bool = True
     options: Optional[list[FeedbackOption]] = None  # For radio type
+    tooltip: Optional[str] = None  # Hover tooltip text for the field label
 
 
 class ExperimentFeedbackConfig(BaseModel):

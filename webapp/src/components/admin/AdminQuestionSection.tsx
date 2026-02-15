@@ -59,6 +59,7 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
   const [feedbackConfig, setFeedbackConfig] = useState<ExperimentFeedbackConfig | null>(null);
   const [isExperimentQuery, setIsExperimentQuery] = useState(false);
   const [expandedConfigs, setExpandedConfigs] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState(0);
 
   const toggleConfigExpanded = (configId: string) => {
     setExpandedConfigs(prev => {
@@ -99,6 +100,7 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
         setIsExperimentQuery(true);
         setResponses(data.experiment_responses);
         setFeedbackConfig(data.feedback_config || null);
+        setActiveTab(0);
         // Clear legacy fields
         setReferences([]);
         setSummary('');
@@ -148,6 +150,13 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
     if (!feedbackConfig) return fieldId;
     const field = feedbackConfig.fields.find((f: FeedbackFieldConfig) => f.field_id === fieldId);
     return field?.label || fieldId;
+  };
+
+  // Helper to get field tooltip from feedback config
+  const getFieldTooltip = (fieldId: string): string | undefined => {
+    if (!feedbackConfig) return undefined;
+    const field = feedbackConfig.fields.find((f: FeedbackFieldConfig) => f.field_id === fieldId);
+    return field?.tooltip;
   };
 
   // Helper to get option label for radio field values
@@ -202,7 +211,25 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
 
         <div className="responses-section">
           <h3>Answers</h3>
+
+          {/* Horizontal tabs */}
+          {responses.length > 1 && (
+            <div className="response-tabs">
+              {responses.map((_response, index) => (
+                <button
+                  key={index}
+                  className={`response-tab ${activeTab === index ? 'response-tab--active' : ''}`}
+                  onClick={() => setActiveTab(index)}
+                >
+                  Answer {index + 1}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Active tab content */}
           {responses.map((response, index) => {
+            if (index !== activeTab) return null;
             const responseFeedback = configFeedbacks?.[response.configuration_id];
 
             return (
@@ -210,12 +237,14 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
                 marginBottom: '20px',
                 padding: '16px',
                 border: '1px solid #e9ecef',
-                borderRadius: '8px'
+                borderRadius: responses.length > 1 ? '0 0 8px 8px' : '8px'
               }}>
                 <div className="response-header" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                  <span className="response-label" style={{ fontWeight: 'bold', fontSize: '16px' }}>
-                    Answer {index + 1}
-                  </span>
+                  {responses.length === 1 && (
+                    <span className="response-label" style={{ fontWeight: 'bold', fontSize: '16px' }}>
+                      Answer 1
+                    </span>
+                  )}
                   <button
                     onClick={() => toggleConfigExpanded(response.configuration_id)}
                     style={{
@@ -301,14 +330,25 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
                     border: '1px solid #e9ecef'
                   }}>
                     <h4 style={{ margin: '0 0 12px 0', color: '#495057' }}>User Feedback</h4>
-                    {responseFeedback.map((fieldFeedback: { field_id: string; value: number | string }, idx: number) => (
+                    {responseFeedback.map((fieldFeedback: { field_id: string; value: number | string }, idx: number) => {
+                      const tooltip = getFieldTooltip(fieldFeedback.field_id);
+                      return (
                       <div key={idx} style={{ marginBottom: '8px' }}>
-                        <strong>{getFieldLabel(fieldFeedback.field_id)}:</strong>{' '}
+                        <strong>
+                          {getFieldLabel(fieldFeedback.field_id)}
+                          {tooltip && (
+                            <span className="feedback-tooltip-wrapper">
+                              <span className="feedback-tooltip-icon">?</span>
+                              <span className="feedback-tooltip-text">{tooltip}</span>
+                            </span>
+                          )}:
+                        </strong>{' '}
                         <span style={{ color: '#333' }}>
                           {getOptionLabel(fieldFeedback.field_id, fieldFeedback.value)}
                         </span>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

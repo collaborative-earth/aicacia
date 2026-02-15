@@ -24,6 +24,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
   const [feedbackValues, setFeedbackValues] = useState<Record<string, number | string>>({});
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     if (selectedQueryId) {
@@ -47,6 +48,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
       setFeedbackConfig(res.feedback_config || null);
       setFeedbackValues({});
       setFeedbackSubmitted(false);
+      setActiveTab(0);
       onNewQuestionSubmitted();
     } catch (error) {
       console.error('Failed to ask question:', error);
@@ -76,6 +78,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
         }];
       }
       setResponses(loadedResponses);
+      setActiveTab(0);
 
       // Load feedback config if available
       if (data.feedback_config) {
@@ -120,6 +123,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
     setFeedbackConfig(null);
     setFeedbackValues({});
     setFeedbackSubmitted(false);
+    setActiveTab(0);
   };
 
   const handleFeedbackChange = (configurationId: string, fieldId: string, value: number | string) => {
@@ -174,6 +178,15 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
     <div className="question-section">
       <h2>Ask about Restoration Projects</h2>
 
+      <div className="action-buttons">
+        <button
+          className="new-question-button"
+          onClick={askForNewQuestion}
+        >
+          New Question
+        </button>
+      </div>
+
       <form className="search-form" onSubmit={handleSearch}>
         <input
           type="text"
@@ -191,14 +204,33 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
       {responses.length > 0 && (
         <div className="responses-section">
           <h3>Answers</h3>
+
+          {/* Horizontal tabs */}
+          {responses.length > 1 && (
+            <div className="response-tabs">
+              {responses.map((_response, index) => (
+                <button
+                  key={index}
+                  className={`response-tab ${activeTab === index ? 'response-tab--active' : ''}`}
+                  onClick={() => setActiveTab(index)}
+                >
+                  Answer {index + 1}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Active tab content */}
           {responses.map((response, index) => {
-            // Use index as part of key to handle duplicate configuration_ids
+            if (index !== activeTab) return null;
             const responseKey = `${index}_${response.configuration_id}`;
             return (
               <div key={responseKey} className="response-card">
-                <div className="response-header">
-                  <span className="response-label">Answer {index + 1}</span>
-                </div>
+                {responses.length === 1 && (
+                  <div className="response-header">
+                    <span className="response-label">Answer 1</span>
+                  </div>
+                )}
                 {response.summary ? (
                   <div className="response-content">
                     <ReactMarkdown>{response.summary}</ReactMarkdown>
@@ -209,13 +241,21 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
                   </div>
                 )}
 
-                {/* Feedback form for this response - always show if feedbackConfig exists */}
+                {/* Feedback form for this response */}
                 {feedbackConfig && (
                   <div className="feedback-section">
                     <h4>Provide Feedback for Answer {index + 1}</h4>
                     {feedbackConfig.fields.map((field) => (
                       <div key={`${responseKey}_${field.field_id}`} className="feedback-field">
-                        <label>{field.label}{field.required && ' *'}</label>
+                        <label>
+                          {field.label}{field.required && ' *'}
+                          {field.tooltip && (
+                            <span className="feedback-tooltip-wrapper">
+                              <span className="feedback-tooltip-icon">?</span>
+                              <span className="feedback-tooltip-text">{field.tooltip}</span>
+                            </span>
+                          )}
+                        </label>
                         {field.field_type === 'radio' && field.options && (
                           <div className="feedback-radio-group">
                             {field.options.map((option) => (
