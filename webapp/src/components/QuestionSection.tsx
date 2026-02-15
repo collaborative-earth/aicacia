@@ -178,15 +178,6 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
     <div className="question-section">
       <h2>Ask about Restoration Projects</h2>
 
-      <div className="action-buttons">
-        <button
-          className="new-question-button"
-          onClick={askForNewQuestion}
-        >
-          New Question
-        </button>
-      </div>
-
       <form className="search-form" onSubmit={handleSearch}>
         <input
           type="text"

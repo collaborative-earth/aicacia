@@ -61,7 +61,15 @@ const ChatPage: React.FC = () => {
       {isSidebarOpen && (
         <div 
           className="sidebar-overlay" 
+          role="button"
+          tabIndex={0}
           onClick={() => setIsSidebarOpen(false)}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              setIsSidebarOpen(false);
+            }
+          }}
         />
       )}
 
