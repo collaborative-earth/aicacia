@@ -150,6 +150,13 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
     return field?.label || fieldId;
   };
 
+  // Helper to get field tooltip from feedback config
+  const getFieldTooltip = (fieldId: string): string | undefined => {
+    if (!feedbackConfig) return undefined;
+    const field = feedbackConfig.fields.find((f: FeedbackFieldConfig) => f.field_id === fieldId);
+    return field?.tooltip;
+  };
+
   // Helper to get option label for radio field values
   const getOptionLabel = (fieldId: string, value: number | string): string => {
     if (!feedbackConfig) return String(value);
@@ -303,7 +310,15 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
                     <h4 style={{ margin: '0 0 12px 0', color: '#495057' }}>User Feedback</h4>
                     {responseFeedback.map((fieldFeedback: { field_id: string; value: number | string }, idx: number) => (
                       <div key={idx} style={{ marginBottom: '8px' }}>
-                        <strong>{getFieldLabel(fieldFeedback.field_id)}:</strong>{' '}
+                        <strong>
+                          {getFieldLabel(fieldFeedback.field_id)}
+                          {getFieldTooltip(fieldFeedback.field_id) && (
+                            <span className="feedback-tooltip-wrapper">
+                              <span className="feedback-tooltip-icon">?</span>
+                              <span className="feedback-tooltip-text">{getFieldTooltip(fieldFeedback.field_id)}</span>
+                            </span>
+                          )}:
+                        </strong>{' '}
                         <span style={{ color: '#333' }}>
                           {getOptionLabel(fieldFeedback.field_id, fieldFeedback.value)}
                         </span>

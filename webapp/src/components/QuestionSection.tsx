@@ -224,7 +224,15 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ selectedQueryId, onNe
                     <h4>Provide Feedback for Answer {index + 1}</h4>
                     {feedbackConfig.fields.map((field) => (
                       <div key={`${responseKey}_${field.field_id}`} className="feedback-field">
-                        <label>{field.label}{field.required && ' *'}</label>
+                        <label>
+                          {field.label}{field.required && ' *'}
+                          {field.tooltip && (
+                            <span className="feedback-tooltip-wrapper">
+                              <span className="feedback-tooltip-icon">?</span>
+                              <span className="feedback-tooltip-text">{field.tooltip}</span>
+                            </span>
+                          )}
+                        </label>
                         {field.field_type === 'radio' && field.options && (
                           <div className="feedback-radio-group">
                             {field.options.map((option) => (

@@ -106,6 +106,7 @@ export interface FeedbackFieldConfig {
   label: string;
   required: boolean;
   options?: FeedbackOption[];
+  tooltip?: string;
 }
 
 export interface ExperimentFeedbackConfig {
