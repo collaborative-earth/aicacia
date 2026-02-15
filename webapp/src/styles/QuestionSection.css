@@ -363,10 +363,41 @@
   color: #333;
 }
 
+/* Response tabs */
+.response-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 0;
+}
+
+.response-tab {
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6c757d;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.response-tab:hover {
+  color: #495057;
+}
+
+.response-tab--active {
+  color: #2c5f2d;
+  border-bottom-color: #2c5f2d;
+  font-weight: 600;
+}
+
 .response-card {
   background: #f8f9fa;
   border: 1px solid #e9ecef;
-  border-radius: 8px;
+  border-radius: 0 0 8px 8px;
   margin-bottom: 16px;
   padding: 16px;
 }
