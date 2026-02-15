@@ -48,8 +48,11 @@
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-.admin-link {
+.nav-link--active {
     background-color: rgba(255, 255, 255, 0.15);
+}
+
+.admin-link {
     font-weight: 500;
 }
 

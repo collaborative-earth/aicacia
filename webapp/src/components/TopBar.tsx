@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import logo from '../assets/aicacia_logo.png';
 import '../styles/TopBar.css';
 
@@ -21,10 +21,10 @@ const TopBar: React.FC<TopBarProps> = ({ isLoggedIn, userInfo, onLogout }) => {
       {isLoggedIn && (
         <div className="top-bar-right">
           <nav className="top-bar-nav">
-            <Link to="/" className="nav-link">Home</Link>
-            <Link to="/chat" className="nav-link">Chat</Link>
+            <NavLink to="/" end className={({ isActive }) => `nav-link${isActive ? ' nav-link--active' : ''}`}>Home</NavLink>
+            <NavLink to="/chat" className={({ isActive }) => `nav-link${isActive ? ' nav-link--active' : ''}`}>Chat</NavLink>
             {userInfo?.is_admin && (
-              <Link to="/admin/feedbacks" className="nav-link admin-link">Admin Feedbacks</Link>
+              <NavLink to="/admin/feedbacks" className={({ isActive }) => `nav-link${isActive ? ' nav-link--active' : ''}`}>Admin Feedbacks</NavLink>
             )}
           </nav>
           <button onClick={onLogout} className="logout-button">Logout</button>
