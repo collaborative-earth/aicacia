@@ -330,14 +330,16 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
                     border: '1px solid #e9ecef'
                   }}>
                     <h4 style={{ margin: '0 0 12px 0', color: '#495057' }}>User Feedback</h4>
-                    {responseFeedback.map((fieldFeedback: { field_id: string; value: number | string }, idx: number) => (
+                    {responseFeedback.map((fieldFeedback: { field_id: string; value: number | string }, idx: number) => {
+                      const tooltip = getFieldTooltip(fieldFeedback.field_id);
+                      return (
                       <div key={idx} style={{ marginBottom: '8px' }}>
                         <strong>
                           {getFieldLabel(fieldFeedback.field_id)}
-                          {getFieldTooltip(fieldFeedback.field_id) && (
+                          {tooltip && (
                             <span className="feedback-tooltip-wrapper">
                               <span className="feedback-tooltip-icon">?</span>
-                              <span className="feedback-tooltip-text">{getFieldTooltip(fieldFeedback.field_id)}</span>
+                              <span className="feedback-tooltip-text">{tooltip}</span>
                             </span>
                           )}:
                         </strong>{' '}
@@ -345,7 +347,8 @@ const AdminQuestionSection: React.FC<AdminQuestionSectionProps> = ({
                           {getOptionLabel(fieldFeedback.field_id, fieldFeedback.value)}
                         </span>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
